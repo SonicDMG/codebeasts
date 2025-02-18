@@ -101,7 +101,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col px-4">
       {/* Header */}
-      <div className="w-full flex items-center py-4">
+      <div className="w-full flex justify-center py-4">
         <img 
           src="/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png" 
           alt="CodeBeasts"
