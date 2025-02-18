@@ -38,8 +38,8 @@ export const GeneratedImage = ({ imageUrl, onDownload, onShare }: GeneratedImage
       ctx.font = '32px Arial';
       ctx.textAlign = 'center';
 
-      // Get GitHub handle from URL
-      const handle = imageUrl.split('-').pop()?.split('.')[0] || 'unknown';
+      // Get GitHub handle from the current component state
+      const handle = window.location.search.split('handle=')[1]?.split('&')[0] || 'unknown';
       const text = `Generated for @${handle}`;
 
       // Position text at bottom center
