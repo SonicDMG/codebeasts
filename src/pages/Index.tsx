@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Download, Share2 } from 'lucide-react';
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
 
 interface ProcessResponse {
   response: string;
@@ -28,6 +30,15 @@ const Index = () => {
   const [languages, setLanguages] = useState<string[]>([]);
   const { toast } = useToast();
 
+  const updateLoadingStatus = (status: string, progress: number) => {
+    NProgress.configure({ showSpinner: false });
+    NProgress.set(progress);
+    toast({
+      title: status,
+      description: "Please wait while we process your request...",
+    });
+  };
+
   const handleGenerate = async () => {
     if (!handle) {
       toast({
@@ -38,7 +49,16 @@ const Index = () => {
     }
 
     setIsGenerating(true);
+    NProgress.start();
+
     try {
+      // Initial loading states
+      updateLoadingStatus('Analyzing GitHub profile...', 0.2);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      updateLoadingStatus('Collecting repository data...', 0.3);
+      await new Promise(resolve => setTimeout(resolve, 800));
+
       // Step 1: Process the GitHub handle
       const processResponse = await fetch('http://localhost:5000/chat/process', {
         method: 'POST',
@@ -59,8 +79,12 @@ const Index = () => {
       }
 
       setLanguages(processData.languages);
+      
+      updateLoadingStatus('Generating AI response...', 0.6);
+      await new Promise(resolve => setTimeout(resolve, 800));
 
       // Step 2: Generate the image using the prompt
+      updateLoadingStatus('Creating your CodeBeast...', 0.8);
       const generateResponse = await fetch('http://localhost:5000/chat/generate-image', {
         method: 'POST',
         headers: {
@@ -82,12 +106,14 @@ const Index = () => {
       // Update the image URL (assuming the backend returns a path relative to the server)
       setGeneratedImage(`http://localhost:5000/${generateData.image_url}`);
       
+      NProgress.done();
       toast({
         title: "CodeBeast generation complete!",
         description: "Your unique beast has been created.",
       });
     } catch (error) {
       console.error('Generation error:', error);
+      NProgress.done();
       toast({
         title: "Generation failed",
         description: error instanceof Error ? error.message : "Please try again later.",
