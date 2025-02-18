@@ -1,69 +1,65 @@
-# Welcome to your Lovable project
 
-## Project info
+# CodeBeasts Generator
 
-**URL**: https://lovable.dev/projects/6a7afdad-483a-418b-bbf5-308ebb57661b
+This project includes both the frontend React application and the backend Flask API in a single repository.
 
-## How can I edit this code?
+## Project Structure
+```
+/
+├── src/               # Frontend React application
+├── api/              # Backend Flask application
+└── public/           # Static assets
+```
 
-There are several ways of editing your application.
+## Setup Instructions
 
-**Use Lovable**
+### Frontend Setup
+```bash
+# Install frontend dependencies
+npm install
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6a7afdad-483a-418b-bbf5-308ebb57661b) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Backend Setup
+```bash
+# Navigate to the api directory
+cd api
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+# Create a virtual environment
+python -m venv venv
 
-**Use GitHub Codespaces**
+# Activate the virtual environment
+# On Windows:
+venv\Scripts\activate
+# On Unix or MacOS:
+source venv/bin/activate
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Install dependencies
+pip install -r requirements.txt
 
-## What technologies are used for this project?
+# Copy the example env file and add your OpenAI API key
+cp ../.env.example .env
 
-This project is built with .
+# Start the Flask server
+python main.py
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The frontend will be available at http://localhost:8080
+The backend API will be available at http://localhost:5000
 
-## How can I deploy this project?
+## Environment Variables
 
-Simply open [Lovable](https://lovable.dev/projects/6a7afdad-483a-418b-bbf5-308ebb57661b) and click on Share -> Publish.
+Create a `.env` file in the root directory with the following variables:
+```
+OPENAI_API_KEY=your_openai_api_key_here
+```
 
-## I want to use a custom domain - is that possible?
+## API Endpoints
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+### POST /chat/process
+Processes a GitHub handle and returns user information along with a generated description.
+
+### POST /chat/generate-image
+Generates an image based on the provided description using DALL-E.
