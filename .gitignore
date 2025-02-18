@@ -26,11 +26,12 @@ venv/
 
 # Generated files
 static/temp/
+node_modules
+.vite
 
 # IDE specific files
 .idea/
 .vscode/
 *.swp
 *.swo
-.DS_Store 
-node_modules
+.DS_Store

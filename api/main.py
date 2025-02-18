@@ -1,89 +1,217 @@
+"""
+CodeBeast Generator Web Application
 
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+A Flask application that generates pixel art mascots from GitHub profile data
+using AI-powered image generation and natural language processing.
+"""
+
 import os
+import logging
+from typing import Dict, Any
+
+from flask import Flask, render_template, request, jsonify, g
 import requests
-from openai import OpenAI
+import logfire
 from dotenv import load_dotenv
+from dall_e import DallEGenerator
+from flask_cors import CORS
 
-load_dotenv()
+# Load environment variables
+load_dotenv(override=True)
 
+# Initialize logging
+logfire.configure()
+logging.basicConfig(handlers=[logfire.LogfireLoggingHandler()])
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Configuration from environment
+BASE_API_URL = os.getenv('LANGFLOW_BASE_URL')
+FLOW_ID = os.getenv('LANGFLOW_FLOW_ID')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+if not all([BASE_API_URL, FLOW_ID, OPENAI_API_KEY]):
+    raise ValueError("Missing required environment variables. Check .env file.")
+
+# Initialize Flask app
 app = Flask(__name__)
 CORS(app)
+logfire.instrument_flask(app)
+app.static_folder = 'static'
 
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+# Initialize DALL-E generator
+dalle = DallEGenerator(OPENAI_API_KEY)
+
+
+def run_flow(
+    message: str,
+    endpoint: str,
+    output_type: str = "chat",
+    input_type: str = "chat",
+    tweaks: Dict[str, Any] = None,
+    api_key: str = None
+) -> Dict[str, Any]:
+    """Execute a Langflow flow with the given parameters.
+    
+    Args:
+        message: Input message for the flow
+        endpoint: Flow endpoint or ID
+        output_type: Type of output expected
+        input_type: Type of input being sent
+        tweaks: Optional flow modifications
+        api_key: Optional API key for authentication
+    
+    Returns:
+        Dict[str, Any]: Full data dictionary from the flow execution
+        
+    Raises:
+        requests.RequestException: If API request fails
+    """
+    api_url = f"{BASE_API_URL}/api/v1/run/{endpoint}"
+
+    payload = {
+        "input_value": message,
+        "output_type": output_type,
+        "input_type": input_type,
+        "session_id": message.lower() # use the GitHub handle as the session ID
+    }
+    logger.info("Session ID: %s", payload["session_id"])
+
+    if tweaks:
+        payload["tweaks"] = tweaks
+
+    headers = {"x-api-key": api_key} if api_key else None
+
+    response = requests.post(api_url, json=payload, headers=headers, timeout=120)
+    response_data = response.json()
+
+    # Extract full response text
+    full_response = response_data['outputs'][0]['outputs'][0]['results']['message']['text']
+
+    # Parse response data
+    data = parse_langflow_response(full_response)
+
+    # Store data in app context
+    if hasattr(g, 'user_data'):
+        g.user_data = data
+
+    return data
+
+def parse_langflow_response(full_response: str) -> Dict[str, Any]:
+    """Parse the response from Langflow into structured data."""
+    parts = full_response.split('|')
+    data = {
+        'languages': [],
+        'prompt': "",
+        'github_user_name_url': "",
+        'num_repositories': 0
+    }
+
+    try:
+        # Parse languages
+        data['languages'] = [
+            lang.strip().strip("'\"")
+            for lang in parts[0].split(':')[1].strip('[]').split(',')
+            if lang.strip()
+        ]
+
+        # Parse other fields
+        data['prompt'] = parts[1].split(':', 1)[1].strip()
+        data['github_user_name_url'] = parts[2].split(':', 1)[1].strip()
+        data['num_repositories'] = int(parts[3].split(':', 1)[1].strip())
+
+    except (IndexError, ValueError) as e:
+        logger.error("Failed to parse response parts: %s", str(e))
+
+    return data
+
+@app.route('/')
+def home():
+    """Render the main application interface."""
+    return render_template('index.html')
 
 @app.route('/chat/process', methods=['POST'])
-def process_github():
-    data = request.json
-    github_handle = data.get('message')
+def process_chat():
+    """Process GitHub handle and generate AI response.
     
-    try:
-        # Fetch GitHub user data
-        github_url = f'https://api.github.com/users/{github_handle}/repos'
-        response = requests.get(github_url)
-        repos = response.json()
-        
-        if response.status_code != 200:
-            return jsonify({
-                'status': 'error',
-                'error': 'GitHub profile not found'
-            })
+    Returns:
+        JSON response containing:
+        - response: Generated text description (prompt only)
+        - languages: List of programming languages
+        - github_url: GitHub URL
+        - num_repositories: Number of repositories
+        - animal_selection: Selected animal
+        - status: Success/error status
+        - error: Error message if applicable
+    """
+    # Clear any existing user data at the start of each request
+    if hasattr(g, 'user_data'):
+        delattr(g, 'user_data')
 
-        # Process languages
-        languages = set()
-        for repo in repos:
-            if repo.get('language'):
-                languages.add(repo.get('language'))
-        
-        # Generate response using filtered data
-        prompt = f"Create a mythical creature description based on GitHub profile of {github_handle} who primarily uses {', '.join(languages)} for programming. Make it creative and fantastic, about 2-3 sentences long."
-        
-        completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
+    data = request.json
+    message = data.get('message')
+
+    try:
+        logger.info("Calling Langflow for response")
+        user_data = run_flow(
+            message=message,
+            endpoint=FLOW_ID
         )
-        
+        logger.info("Received response from Langflow")
+        logger.info("Languages found: %s", user_data.get('languages', []))
+
         return jsonify({
-            'status': 'success',
-            'response': completion.choices[0].message.content,
-            'languages': list(languages),
-            'github_url': f'https://github.com/{github_handle}',
-            'num_repositories': len(repos)
+            'response': user_data['prompt'],
+            'languages': user_data.get('languages', []),
+            'github_url': user_data.get('github_user_name_url', ''),
+            'num_repositories': user_data.get('num_repositories', 0),
+            'status': 'success'
         })
 
-    except Exception as e:
+    except requests.RequestException as e:
+        logger.error("API request error: %s", str(e))
         return jsonify({
-            'status': 'error',
-            'error': str(e)
+            'error': str(e),
+            'status': 'error'
         })
 
 @app.route('/chat/generate-image', methods=['POST'])
 def generate_image():
+    """Generate pixel art mascot from AI description.
+    
+    Returns:
+        JSON response containing:
+        - image_url: Path to generated image
+        - status: Success/error status
+        - error: Error message if applicable
+    """
     data = request.json
     prompt = data.get('prompt')
-    
+
     try:
-        response = client.images.generate(
-            model="dall-e-3",
+        logger.info("Starting DALL-E image generation")
+        image = dalle.generate_image(
             prompt=prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1,
+            size="1024x1024"
         )
-        
-        # Save the image URL
-        image_url = response.data[0].url
-        
+
+        logger.info("Saving generated image")
+        img_path = 'static/temp/generated.png'
+        image.save(img_path)
+
         return jsonify({
-            'status': 'success',
-            'image_url': image_url
+            'image_url': img_path,
+            'status': 'success'
         })
-    except Exception as e:
+
+    except (requests.RequestException, ConnectionError) as e:
+        logger.error("Image generation error: %s", str(e))
         return jsonify({
-            'status': 'error',
-            'error': str(e)
+            'error': str(e),
+            'status': 'error'
         })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.getenv('PORT', '5000'))  # Make default a string first
+    os.makedirs('static/temp', exist_ok=True)
+    app.run(host='0.0.0.0', port=port)
