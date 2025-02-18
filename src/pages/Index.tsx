@@ -6,10 +6,26 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Download, Share2 } from 'lucide-react';
 
+interface ProcessResponse {
+  response: string;
+  languages: string[];
+  github_url: string;
+  num_repositories: number;
+  status: 'success' | 'error';
+  error?: string;
+}
+
+interface GenerateImageResponse {
+  image_url: string;
+  status: 'success' | 'error';
+  error?: string;
+}
+
 const Index = () => {
   const [handle, setHandle] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState('');
+  const [languages, setLanguages] = useState<string[]>([]);
   const { toast } = useToast();
 
   const handleGenerate = async () => {
@@ -23,22 +39,48 @@ const Index = () => {
 
     setIsGenerating(true);
     try {
-      // Replace this URL with your Python backend endpoint
-      const response = await fetch('http://localhost:5000/generate', {
+      // Step 1: Process the GitHub handle
+      const processResponse = await fetch('http://localhost:5000/chat/process', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ github_handle: handle }),
+        body: JSON.stringify({ message: handle }),
       });
 
-      if (!response.ok) {
-        throw new Error('Generation failed');
+      if (!processResponse.ok) {
+        throw new Error('Processing failed');
       }
 
-      const data = await response.json();
-      // Assuming your backend returns an image URL or base64 string
-      setGeneratedImage(data.image_url);
+      const processData: ProcessResponse = await processResponse.json();
+      
+      if (processData.status === 'error') {
+        throw new Error(processData.error || 'Processing failed');
+      }
+
+      setLanguages(processData.languages);
+
+      // Step 2: Generate the image using the prompt
+      const generateResponse = await fetch('http://localhost:5000/chat/generate-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: processData.response }),
+      });
+
+      if (!generateResponse.ok) {
+        throw new Error('Image generation failed');
+      }
+
+      const generateData: GenerateImageResponse = await generateResponse.json();
+      
+      if (generateData.status === 'error') {
+        throw new Error(generateData.error || 'Image generation failed');
+      }
+
+      // Update the image URL (assuming the backend returns a path relative to the server)
+      setGeneratedImage(`http://localhost:5000/${generateData.image_url}`);
       
       toast({
         title: "CodeBeast generation complete!",
@@ -48,7 +90,7 @@ const Index = () => {
       console.error('Generation error:', error);
       toast({
         title: "Generation failed",
-        description: "Please try again later.",
+        description: error instanceof Error ? error.message : "Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -109,7 +151,7 @@ const Index = () => {
       </Card>
 
       <div className="flex flex-wrap gap-2 justify-center text-sm text-white/60">
-        {['JavaScript', 'Java', 'HTML', 'Shell', 'Python', 'Astro', 'Nunjucks'].map((tech) => (
+        {languages.map((tech) => (
           <span key={tech} className="px-3 py-1 rounded-full glass">
             {tech}
           </span>
