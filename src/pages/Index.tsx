@@ -123,6 +123,12 @@ const Index = () => {
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !isGenerating) {
+      handleGenerate();
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col px-4">
       <div className="w-full flex justify-center py-4">
@@ -141,6 +147,7 @@ const Index = () => {
                 placeholder="Enter GitHub handle to generate your beast..."
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="bg-black/40 border-white/20 text-white placeholder:text-white/50"
               />
               
