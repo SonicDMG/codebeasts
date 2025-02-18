@@ -102,9 +102,9 @@ const Index = () => {
     <div className="min-h-screen flex flex-col items-center justify-start pt-12 px-4 space-y-8">
       <div className="floating">
         <img 
-          src="https://your-codebeast-logo.png" 
+          src="/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png" 
           alt="CodeBeasts"
-          className="w-64 h-auto mb-8"
+          className="w-[400px] h-auto mb-8"
         />
       </div>
 
