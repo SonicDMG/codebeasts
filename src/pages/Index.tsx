@@ -143,7 +143,7 @@ const Index = () => {
   };
 
   const handleShare = () => {
-    const text = `Check out my CodeBeast generated from my GitHub profile! ${generatedPrompt}`;
+    const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats!`;
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
     
