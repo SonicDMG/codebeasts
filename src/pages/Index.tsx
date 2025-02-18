@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -16,6 +15,7 @@ const Index = () => {
   const [languages, setLanguages] = useState<string[]>([]);
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [repoCount, setRepoCount] = useState<number>(0);
+  const [githubUrl, setGithubUrl] = useState('');
   const { toast } = useToast();
 
   const updateLoadingStatus = (status: string, progress: number) => {
@@ -67,6 +67,7 @@ const Index = () => {
       setLanguages(processData.languages);
       setGeneratedPrompt(processData.response);
       setRepoCount(processData.num_repositories);
+      setGithubUrl(processData.github_url);
       
       updateLoadingStatus('Generating AI response...', 0.6);
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -182,6 +183,7 @@ const Index = () => {
                 repoCount={repoCount}
                 languages={languages}
                 prompt={generatedPrompt}
+                githubUrl={githubUrl}
               />
             </div>
 

@@ -5,15 +5,23 @@ interface RepositoryInfoProps {
   repoCount: number;
   languages: string[];
   prompt: string;
+  githubUrl?: string;
 }
 
-export const RepositoryInfo = ({ repoCount, languages, prompt }: RepositoryInfoProps) => {
+export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl }: RepositoryInfoProps) => {
   return (
     <div className="space-y-4">
       {repoCount > 0 && (
         <div className="flex items-center gap-2 text-white/60">
           <GitFork className="h-4 w-4" />
-          <span>{repoCount} repositories</span>
+          <a 
+            href={githubUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hover:text-white/90 transition-colors"
+          >
+            {repoCount} repositories
+          </a>
         </div>
       )}
 
