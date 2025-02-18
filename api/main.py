@@ -192,9 +192,10 @@ def generate_image():
     """
     data = request.json
     prompt = data.get('prompt')
+    model = data.get('model', 'dall_e')  # Default to DALL-E if not specified
 
     try:
-        if IMAGE_GENERATION_API == 'stability':
+        if model == 'stability':
             logger.info("Using Stability API for image generation")
             image = generate_image_stability(prompt)
         else:

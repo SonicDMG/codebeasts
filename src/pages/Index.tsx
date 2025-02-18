@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -6,6 +7,7 @@ import 'nprogress/nprogress.css';
 import { HandleInput } from '@/components/github/HandleInput';
 import { RepositoryInfo } from '@/components/github/RepositoryInfo';
 import { GeneratedImage } from '@/components/github/GeneratedImage';
+import { ModelSelector } from '@/components/github/ModelSelector';
 import type { ProcessResponse, GenerateImageResponse } from '@/types/github';
 
 const Index = () => {
@@ -17,6 +19,7 @@ const Index = () => {
   const [repoCount, setRepoCount] = useState<number>(0);
   const [githubUrl, setGithubUrl] = useState('');
   const [isFading, setIsFading] = useState(false);
+  const [model, setModel] = useState('dall_e');
   const { toast } = useToast();
 
   const resetState = () => {
@@ -57,17 +60,11 @@ const Index = () => {
     NProgress.start();
 
     try {
-      // Access the environment variable correctly
-      //console.log('Environment Variables:', process.env);
-      //console.log('API Type:', process.env.REACT_APP_IMAGE_GENERATION_API);
-      //const apiType = process.env.REACT_APP_IMAGE_GENERATION_API || 'DALL-E'; // Default to DALL-E
-      const apiType = 'stability';
-
-      updateLoadingStatus(`Analyzing GitHub profile using ${apiType} API...`, 0.1);
+      updateLoadingStatus(`Analyzing GitHub profile using ${model === 'dall_e' ? 'DALL-E' : 'Stability'} API...`, 0.1);
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       updateLoadingStatus('Collecting repository data...', 0.2);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 800));
 
       const processResponse = await fetch('http://localhost:5000/chat/process', {
         method: 'POST',
@@ -95,13 +92,16 @@ const Index = () => {
       updateLoadingStatus('Generating AI response...', 0.4);
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      updateLoadingStatus(`Creating your CodeBeast with ${apiType} API...`, 0.7);
+      updateLoadingStatus(`Creating your CodeBeast with ${model === 'dall_e' ? 'DALL-E' : 'Stability'} API...`, 0.7);
       const generateResponse = await fetch('http://localhost:5000/chat/generate-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt: processData.response }),
+        body: JSON.stringify({ 
+          prompt: processData.response,
+          model: model
+        }),
       });
 
       if (!generateResponse.ok) {
@@ -201,6 +201,12 @@ const Index = () => {
                 onHandleChange={setHandle}
                 onGenerate={handleGenerate}
                 onKeyPress={handleKeyPress}
+              />
+              
+              <ModelSelector
+                model={model}
+                onModelChange={setModel}
+                disabled={isGenerating}
               />
               
               <RepositoryInfo
