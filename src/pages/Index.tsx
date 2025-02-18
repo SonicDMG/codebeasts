@@ -190,6 +190,7 @@ const Index = () => {
             {generatedImage && (
               <GeneratedImage
                 imageUrl={generatedImage}
+                handle={handle}
                 onDownload={handleDownload}
                 onShare={handleShare}
               />

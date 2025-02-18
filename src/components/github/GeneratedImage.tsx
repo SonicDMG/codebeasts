@@ -5,11 +5,12 @@ import { useEffect, useRef } from 'react';
 
 interface GeneratedImageProps {
   imageUrl: string;
+  handle: string;
   onDownload: () => void;
   onShare: () => void;
 }
 
-export const GeneratedImage = ({ imageUrl, onDownload, onShare }: GeneratedImageProps) => {
+export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare }: GeneratedImageProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -38,8 +39,6 @@ export const GeneratedImage = ({ imageUrl, onDownload, onShare }: GeneratedImage
       ctx.font = '32px Arial';
       ctx.textAlign = 'center';
 
-      // Get GitHub handle from the current component state
-      const handle = window.location.search.split('handle=')[1]?.split('&')[0] || 'unknown';
       const text = `Generated for @${handle}`;
 
       // Position text at bottom center
@@ -50,7 +49,7 @@ export const GeneratedImage = ({ imageUrl, onDownload, onShare }: GeneratedImage
       ctx.strokeText(text, x, y);
       ctx.fillText(text, x, y);
     };
-  }, [imageUrl]);
+  }, [imageUrl, handle]);
 
   return (
     <div className="lg:w-[600px] space-y-4 animate-fade-in">
