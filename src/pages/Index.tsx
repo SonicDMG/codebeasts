@@ -62,7 +62,7 @@ const Index = () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       updateLoadingStatus('Collecting repository data...', 0.2);
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const processResponse = await fetch('http://localhost:5000/chat/process', {
         method: 'POST',
@@ -87,7 +87,7 @@ const Index = () => {
       setRepoCount(processData.num_repositories);
       setGithubUrl(processData.github_url);
       
-      updateLoadingStatus('Generating AI response...', 0.6);
+      updateLoadingStatus('Generating AI response...', 0.4);
       await new Promise(resolve => setTimeout(resolve, 800));
 
       updateLoadingStatus('Creating your CodeBeast with Dall-E...', 0.7);
