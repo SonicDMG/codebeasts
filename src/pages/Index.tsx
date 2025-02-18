@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Download, Share2 } from 'lucide-react';
+import { Download, Share2, GitFork } from 'lucide-react';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
@@ -28,6 +27,8 @@ const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState('');
   const [languages, setLanguages] = useState<string[]>([]);
+  const [generatedPrompt, setGeneratedPrompt] = useState('');
+  const [repoCount, setRepoCount] = useState<number>(0);
   const { toast } = useToast();
 
   const updateLoadingStatus = (status: string, progress: number) => {
@@ -52,14 +53,12 @@ const Index = () => {
     NProgress.start();
 
     try {
-      // Initial loading states
       updateLoadingStatus('Analyzing GitHub profile...', 0.1);
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       updateLoadingStatus('Collecting repository data...', 0.2);
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Step 1: Process the GitHub handle
       const processResponse = await fetch('http://localhost:5000/chat/process', {
         method: 'POST',
         headers: {
@@ -79,11 +78,12 @@ const Index = () => {
       }
 
       setLanguages(processData.languages);
+      setGeneratedPrompt(processData.response);
+      setRepoCount(processData.num_repositories);
       
       updateLoadingStatus('Generating AI response...', 0.6);
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Step 2: Generate the image using the prompt
       updateLoadingStatus('Creating your CodeBeast with Dall-E...', 0.7);
       const generateResponse = await fetch('http://localhost:5000/chat/generate-image', {
         method: 'POST',
@@ -103,7 +103,6 @@ const Index = () => {
         throw new Error(generateData.error || 'Image generation failed');
       }
 
-      // Update the image URL (assuming the backend returns a path relative to the server)
       setGeneratedImage(`http://localhost:5000/${generateData.image_url}`);
       
       NProgress.done();
@@ -126,7 +125,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col px-4">
-      {/* Header */}
       <div className="w-full flex justify-center py-4">
         <img 
           src="/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png" 
@@ -135,11 +133,9 @@ const Index = () => {
         />
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col items-center space-y-6 py-4">
         <Card className="glass w-full max-w-4xl p-6">
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Input Section */}
             <div className="flex-1 space-y-4">
               <Input
                 placeholder="Enter GitHub handle to generate your beast..."
@@ -156,7 +152,13 @@ const Index = () => {
                 {isGenerating ? "Generating..." : "Generate"}
               </Button>
 
-              {/* Language Tags */}
+              {repoCount > 0 && (
+                <div className="flex items-center gap-2 text-white/60">
+                  <GitFork className="h-4 w-4" />
+                  <span>{repoCount} repositories</span>
+                </div>
+              )}
+
               <div className="flex flex-wrap gap-2 mt-4">
                 {languages.map((tech) => (
                   <span key={tech} className="px-3 py-1 rounded-full glass text-sm text-white/60">
@@ -164,9 +166,16 @@ const Index = () => {
                   </span>
                 ))}
               </div>
+
+              {generatedPrompt && (
+                <div className="mt-4 p-4 rounded-lg bg-black/20 border border-white/10">
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    {generatedPrompt}
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Generated Image Section */}
             {generatedImage && (
               <div className="lg:w-[600px] space-y-4 animate-fade-in">
                 <div className="relative aspect-square w-full overflow-hidden rounded-lg">
