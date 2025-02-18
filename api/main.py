@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 from dall_e import DallEGenerator
 from stability import StabilityGenerator
 from flask_cors import CORS
+from requests.exceptions import RequestException
 
 # Load environment variables
 load_dotenv(override=True)
@@ -204,10 +205,22 @@ def generate_image():
             'status': 'success'
         })
 
-    except Exception as e:
-        logger.error("Image generation error: %s", str(e))
+    except RequestException as e:
+        logger.error("Network error during image generation: %s", str(e))
         return jsonify({
-            'error': str(e),
+            'error': 'Network error occurred. Please try again later.',
+            'status': 'error'
+        })
+    except ValueError as e:
+        logger.error("Value error during image generation: %s", str(e))
+        return jsonify({
+            'error': 'Invalid input provided. Please check your request.',
+            'status': 'error'
+        })
+    except RuntimeError as e:
+        logger.error("Runtime error during image generation: %s", str(e))
+        return jsonify({
+            'error': 'An unexpected error occurred. Please try again later.',
             'status': 'error'
         })
 
