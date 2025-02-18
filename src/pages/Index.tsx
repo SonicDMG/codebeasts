@@ -166,7 +166,7 @@ const Index = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col items-center space-y-6 py-4">
+      <div className="flex-1 flex flex-col items-center">
         <Card className="glass w-full max-w-4xl p-6">
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 space-y-4">
