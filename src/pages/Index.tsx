@@ -53,10 +53,10 @@ const Index = () => {
 
     try {
       // Initial loading states
-      updateLoadingStatus('Analyzing GitHub profile...', 0.2);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      updateLoadingStatus('Analyzing GitHub profile...', 0.1);
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      updateLoadingStatus('Collecting repository data...', 0.3);
+      updateLoadingStatus('Collecting repository data...', 0.2);
       await new Promise(resolve => setTimeout(resolve, 800));
 
       // Step 1: Process the GitHub handle
@@ -84,7 +84,7 @@ const Index = () => {
       await new Promise(resolve => setTimeout(resolve, 800));
 
       // Step 2: Generate the image using the prompt
-      updateLoadingStatus('Creating your CodeBeast...', 0.8);
+      updateLoadingStatus('Creating your CodeBeast with Dall-E...', 0.7);
       const generateResponse = await fetch('http://localhost:5000/chat/generate-image', {
         method: 'POST',
         headers: {
