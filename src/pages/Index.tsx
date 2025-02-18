@@ -22,15 +22,30 @@ const Index = () => {
     }
 
     setIsGenerating(true);
-    // Simulated API call - replace with your actual Python backend call
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setGeneratedImage('/lovable-uploads/b4edc8bd-6299-46df-af12-f42e0dd7c02d.png');
+      // Replace this URL with your Python backend endpoint
+      const response = await fetch('http://localhost:5000/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ github_handle: handle }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Generation failed');
+      }
+
+      const data = await response.json();
+      // Assuming your backend returns an image URL or base64 string
+      setGeneratedImage(data.image_url);
+      
       toast({
         title: "CodeBeast generation complete!",
         description: "Your unique beast has been created.",
       });
     } catch (error) {
+      console.error('Generation error:', error);
       toast({
         title: "Generation failed",
         description: "Please try again later.",
