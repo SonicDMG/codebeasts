@@ -100,16 +100,17 @@ class StabilityGenerator:
             # Apply pixelation effect
             pixel_size = size // pixel_size_factor
             logger.debug("Applying pixelation with pixel size: %d", pixel_size)
-            small_img = img.resize(
-                (size // pixel_size, size // pixel_size),
-                Image.Resampling.BILINEAR
-            )
-            result = small_img.resize(img.size, Image.Resampling.NEAREST)
+            #small_img = img.resize(
+            #    (size // pixel_size, size // pixel_size),
+            #     Image.Resampling.BILINEAR
+            #)
+            #result = small_img.resize(img.size, Image.Resampling.NEAREST)
 
-            return {
-                'original': img,
-                'pixelated': result
-            }
+            #return {
+            #    'original': img,
+            #     'pixelated': result
+            #}
+            return img
 
         except requests.exceptions.RequestException as e:
             logger.error("API connection error: %s", str(e), exc_info=True)

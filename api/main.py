@@ -14,6 +14,7 @@ import requests
 import logfire
 from dotenv import load_dotenv
 from dall_e import DallEGenerator
+from stability import StabilityGenerator
 from flask_cors import CORS
 
 # Load environment variables
@@ -29,7 +30,7 @@ logger.setLevel(logging.INFO)
 BASE_API_URL = os.getenv('LANGFLOW_BASE_URL')
 FLOW_ID = os.getenv('LANGFLOW_FLOW_ID')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-
+STABILITY_API_KEY = os.getenv('STABILITY_API_KEY')
 if not all([BASE_API_URL, FLOW_ID, OPENAI_API_KEY]):
     raise ValueError("Missing required environment variables. Check .env file.")
 
@@ -41,6 +42,7 @@ app.static_folder = 'static'
 
 # Initialize DALL-E generator
 dalle = DallEGenerator(OPENAI_API_KEY)
+stability = StabilityGenerator(STABILITY_API_KEY)
 
 
 def run_flow(
@@ -189,28 +191,43 @@ def generate_image():
     prompt = data.get('prompt')
 
     try:
-        logger.info("Starting DALL-E image generation")
-        image = dalle.generate_image(
-            prompt=prompt,
-            size="1024x1024"
-        )
-
-        logger.info("Saving generated image")
-        img_path = os.path.join(app.static_folder, 'temp', 'generated.png')  # Use absolute path
-        os.makedirs(os.path.dirname(img_path), exist_ok=True)  # Ensure the directory exists
-        image.save(img_path)
-
+        # Call the DALL-E version of the generate_image function
+        image = generate_image_stability(prompt)
         return jsonify({
-            'image_url': 'static/temp/generated.png',  # Return relative path for frontend
+            'image_url': image,
             'status': 'success'
         })
 
-    except (requests.RequestException, ConnectionError) as e:
+    except Exception as e:
         logger.error("Image generation error: %s", str(e))
         return jsonify({
             'error': str(e),
             'status': 'error'
         })
+
+def generate_image_dall_e(prompt: str) -> str:
+    """Generate an image using DALL-E."""
+    logger.info("Starting DALL-E image generation")
+    image = dalle.generate_image(prompt, size="1024x1024")
+
+    logger.info("Saving generated image")
+    img_path = os.path.join(app.static_folder, 'temp', 'generated_dall_e.png')
+    os.makedirs(os.path.dirname(img_path), exist_ok=True)
+    image.save(img_path)
+
+    return 'static/temp/generated_dall_e.png'  # Return relative path for frontend
+
+def generate_image_stability(prompt: str) -> str:
+    """Generate an image using Stability AI."""
+    logger.info("Starting Stability image generation")
+    image = stability.generate_image(prompt, size=1024)
+
+    logger.info("Saving generated image")
+    img_path = os.path.join(app.static_folder, 'temp', 'generated_stability.png')
+    os.makedirs(os.path.dirname(img_path), exist_ok=True)
+    image.save(img_path)
+
+    return 'static/temp/generated_stability.png'  # Return relative path for frontend
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '5000'))  # Make default a string first
