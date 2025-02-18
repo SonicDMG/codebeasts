@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -16,7 +17,17 @@ const Index = () => {
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [repoCount, setRepoCount] = useState<number>(0);
   const [githubUrl, setGithubUrl] = useState('');
+  const [isFading, setIsFading] = useState(false);
   const { toast } = useToast();
+
+  const resetState = () => {
+    setGeneratedImage('');
+    setLanguages([]);
+    setGeneratedPrompt('');
+    setRepoCount(0);
+    setGithubUrl('');
+    setIsFading(false);
+  };
 
   const updateLoadingStatus = (status: string, progress: number) => {
     NProgress.configure({ showSpinner: false });
@@ -34,6 +45,13 @@ const Index = () => {
         variant: "destructive",
       });
       return;
+    }
+
+    // If there's existing content, fade it out first
+    if (generatedImage) {
+      setIsFading(true);
+      await new Promise(resolve => setTimeout(resolve, 300)); // Wait for fade animation
+      resetState();
     }
 
     setIsGenerating(true);
@@ -106,6 +124,7 @@ const Index = () => {
         description: error instanceof Error ? error.message : "Please try again later.",
         variant: "destructive",
       });
+      resetState();
     } finally {
       setIsGenerating(false);
     }
@@ -193,6 +212,7 @@ const Index = () => {
                 handle={handle}
                 onDownload={handleDownload}
                 onShare={handleShare}
+                className={isFading ? 'animate-fade-out' : 'animate-fade-in'}
               />
             )}
           </div>

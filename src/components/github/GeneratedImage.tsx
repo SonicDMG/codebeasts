@@ -8,9 +8,10 @@ interface GeneratedImageProps {
   handle: string;
   onDownload: () => void;
   onShare: () => void;
+  className?: string;
 }
 
-export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare }: GeneratedImageProps) => {
+export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, className = '' }: GeneratedImageProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare }: Genera
   }, [imageUrl, handle]);
 
   return (
-    <div className="lg:w-[600px] space-y-4 animate-fade-in">
+    <div className={`lg:w-[600px] space-y-4 ${className}`}>
       <div className="relative aspect-square w-full overflow-hidden rounded-lg">
         <canvas
           ref={canvasRef}
