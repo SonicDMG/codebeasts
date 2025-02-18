@@ -196,11 +196,12 @@ def generate_image():
         )
 
         logger.info("Saving generated image")
-        img_path = 'static/temp/generated.png'
+        img_path = os.path.join(app.static_folder, 'temp', 'generated.png')  # Use absolute path
+        os.makedirs(os.path.dirname(img_path), exist_ok=True)  # Ensure the directory exists
         image.save(img_path)
 
         return jsonify({
-            'image_url': img_path,
+            'image_url': 'static/temp/generated.png',  # Return relative path for frontend
             'status': 'success'
         })
 
