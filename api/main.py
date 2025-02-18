@@ -34,9 +34,6 @@ STABILITY_API_KEY = os.getenv('STABILITY_API_KEY')
 if not all([BASE_API_URL, FLOW_ID, OPENAI_API_KEY]):
     raise ValueError("Missing required environment variables. Check .env file.")
 
-# Read the image generation API choice from environment variables
-IMAGE_GENERATION_API = os.getenv('REACT_APP_IMAGE_GENERATION_API', 'dall_e')  # Default to DALL-E if not set
-
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
