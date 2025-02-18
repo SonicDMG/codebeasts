@@ -34,6 +34,9 @@ STABILITY_API_KEY = os.getenv('STABILITY_API_KEY')
 if not all([BASE_API_URL, FLOW_ID, OPENAI_API_KEY]):
     raise ValueError("Missing required environment variables. Check .env file.")
 
+# Read the image generation API choice from environment variables
+IMAGE_GENERATION_API = os.getenv('REACT_APP_IMAGE_GENERATION_API', 'dall_e')  # Default to DALL-E if not set
+
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
@@ -191,8 +194,13 @@ def generate_image():
     prompt = data.get('prompt')
 
     try:
-        # Call the DALL-E version of the generate_image function
-        image = generate_image_stability(prompt)
+        if IMAGE_GENERATION_API == 'stability':
+            logger.info("Using Stability API for image generation")
+            image = generate_image_stability(prompt)
+        else:
+            logger.info("Using DALL-E API for image generation")
+            image = generate_image_dall_e(prompt)
+
         return jsonify({
             'image_url': image,
             'status': 'success'
@@ -228,6 +236,7 @@ def generate_image_stability(prompt: str) -> str:
     image.save(img_path)
 
     return 'static/temp/generated_stability.png'  # Return relative path for frontend
+
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '5000'))  # Make default a string first

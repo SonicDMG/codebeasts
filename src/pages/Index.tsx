@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -58,7 +57,13 @@ const Index = () => {
     NProgress.start();
 
     try {
-      updateLoadingStatus('Analyzing GitHub profile...', 0.1);
+      // Access the environment variable correctly
+      //console.log('Environment Variables:', process.env);
+      //console.log('API Type:', process.env.REACT_APP_IMAGE_GENERATION_API);
+      //const apiType = process.env.REACT_APP_IMAGE_GENERATION_API || 'DALL-E'; // Default to DALL-E
+      const apiType = 'stability';
+
+      updateLoadingStatus(`Analyzing GitHub profile using ${apiType} API...`, 0.1);
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       updateLoadingStatus('Collecting repository data...', 0.2);
@@ -90,7 +95,7 @@ const Index = () => {
       updateLoadingStatus('Generating AI response...', 0.4);
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      updateLoadingStatus('Creating your CodeBeast with Dall-E...', 0.7);
+      updateLoadingStatus(`Creating your CodeBeast with ${apiType} API...`, 0.7);
       const generateResponse = await fetch('http://localhost:5000/chat/generate-image', {
         method: 'POST',
         headers: {

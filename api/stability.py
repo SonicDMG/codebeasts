@@ -37,7 +37,7 @@ class StabilityGenerator:
         aspect_ratio: str = "1:1",
         seed: int = 0,
         output_format: str = "png",
-        size: int = 1024,
+        size: int = 512,
         pixel_size_factor: int = 256
     ) -> Optional[Dict[str, Image.Image]]:
         """Generate and pixelate an image based on the prompt.
