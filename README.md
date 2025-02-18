@@ -1,6 +1,10 @@
 
 # CodeBeasts Generator
 
+<div align="center">
+  <img src="/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png" alt="CodeBeasts Logo" width="300px" />
+</div>
+
 This project includes both the frontend React application and the backend Flask API in a single repository. It generates unique pixel art mascots based on GitHub profiles using AI image generation.
 
 ## Features
