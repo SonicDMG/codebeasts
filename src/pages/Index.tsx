@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -129,6 +130,43 @@ const Index = () => {
     }
   };
 
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(generatedImage);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `codebeast-${handle}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download started",
+        description: "Your CodeBeast image is being downloaded.",
+      });
+    } catch (error) {
+      toast({
+        title: "Download failed",
+        description: "There was an error downloading your image.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShare = () => {
+    const text = `Check out my CodeBeast generated from my GitHub profile! ${generatedPrompt}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    
+    toast({
+      title: "Sharing to X",
+      description: "Opening X (formerly Twitter) to share your CodeBeast.",
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col px-4">
       <div className="w-full flex justify-center py-4">
@@ -194,11 +232,11 @@ const Index = () => {
                 </div>
 
                 <div className="flex gap-4 justify-center">
-                  <Button variant="secondary" className="glass">
+                  <Button variant="secondary" className="glass" onClick={handleDownload}>
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </Button>
-                  <Button variant="secondary" className="glass">
+                  <Button variant="secondary" className="glass" onClick={handleShare}>
                     <Share2 className="mr-2 h-4 w-4" />
                     Share
                   </Button>
