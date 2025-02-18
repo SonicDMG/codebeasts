@@ -1,27 +1,13 @@
 
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Download, Share2, GitFork } from 'lucide-react';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
-
-interface ProcessResponse {
-  response: string;
-  languages: string[];
-  github_url: string;
-  num_repositories: number;
-  status: 'success' | 'error';
-  error?: string;
-}
-
-interface GenerateImageResponse {
-  image_url: string;
-  status: 'success' | 'error';
-  error?: string;
-}
+import { HandleInput } from '@/components/github/HandleInput';
+import { RepositoryInfo } from '@/components/github/RepositoryInfo';
+import { GeneratedImage } from '@/components/github/GeneratedImage';
+import type { ProcessResponse, GenerateImageResponse } from '@/types/github';
 
 const Index = () => {
   const [handle, setHandle] = useState('');
@@ -181,67 +167,27 @@ const Index = () => {
         <Card className="glass w-full max-w-4xl p-6">
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 space-y-4">
-              <Input
-                placeholder="Enter GitHub handle to generate your beast..."
-                value={handle}
-                onChange={(e) => setHandle(e.target.value)}
+              <HandleInput
+                handle={handle}
+                isGenerating={isGenerating}
+                onHandleChange={setHandle}
+                onGenerate={handleGenerate}
                 onKeyPress={handleKeyPress}
-                className="bg-black/40 border-white/20 text-white placeholder:text-white/50"
               />
               
-              <Button
-                onClick={handleGenerate}
-                disabled={isGenerating}
-                className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
-              >
-                {isGenerating ? "Generating..." : "Generate"}
-              </Button>
-
-              {repoCount > 0 && (
-                <div className="flex items-center gap-2 text-white/60">
-                  <GitFork className="h-4 w-4" />
-                  <span>{repoCount} repositories</span>
-                </div>
-              )}
-
-              <div className="flex flex-wrap gap-2 mt-4">
-                {languages.map((tech) => (
-                  <span key={tech} className="px-3 py-1 rounded-full glass text-sm text-white/60">
-                    {tech}
-                  </span>
-                ))}
-              </div>
-
-              {generatedPrompt && (
-                <div className="mt-4 p-4 rounded-lg bg-black/20 border border-white/10">
-                  <p className="text-white/80 text-sm leading-relaxed">
-                    {generatedPrompt}
-                  </p>
-                </div>
-              )}
+              <RepositoryInfo
+                repoCount={repoCount}
+                languages={languages}
+                prompt={generatedPrompt}
+              />
             </div>
 
             {generatedImage && (
-              <div className="lg:w-[600px] space-y-4 animate-fade-in">
-                <div className="relative aspect-square w-full overflow-hidden rounded-lg">
-                  <img
-                    src={generatedImage}
-                    alt="Generated CodeBeast"
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-
-                <div className="flex gap-4 justify-center">
-                  <Button variant="secondary" className="glass" onClick={handleDownload}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download
-                  </Button>
-                  <Button variant="secondary" className="glass" onClick={handleShare}>
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Share
-                  </Button>
-                </div>
-              </div>
+              <GeneratedImage
+                imageUrl={generatedImage}
+                onDownload={handleDownload}
+                onShare={handleShare}
+              />
             )}
           </div>
         </Card>
