@@ -155,12 +155,15 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col px-4">
-      <div className="w-full flex justify-center py-4">
-        <img 
-          src="/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png" 
-          alt="CodeBeasts"
-          className="w-[200px] h-auto"
-        />
+      <div className="w-full flex justify-center py-8">
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-accent/50 rounded-lg blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+          <img 
+            src="/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png" 
+            alt="CodeBeasts"
+            className="relative w-[300px] h-auto drop-shadow-[0_0_15px_rgba(155,135,245,0.3)] transition-all duration-300 group-hover:scale-105"
+          />
+        </div>
       </div>
 
       <div className="flex-1 flex flex-col items-center space-y-6 py-4">
