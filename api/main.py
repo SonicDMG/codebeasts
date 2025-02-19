@@ -137,12 +137,22 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
             logger.info("Lines after splitting by newline: %s", lines)
             
             # Extract and clean up the animal-description pairs
-            data['animal_selection'] = [
-                (animal.strip(), description.strip())
-                for line in lines
-                for animal, description in [line.split(' — ', 1)]
-                if line and ' — ' in line
-            ]
+            data['animal_selection'] = []
+            for line in lines:
+                if not line:
+                    continue
+                    
+                try:
+                    if ' — ' in line:
+                        animal, description = line.split(' — ', 1)
+                        animal = animal.strip().strip('\'')
+                        description = description.strip().strip('\'')
+                        if animal and description:
+                            data['animal_selection'].append((animal, description))
+                except ValueError as e:
+                    logger.warning("Failed to parse line '%s': %s", line, str(e))
+                    continue
+                    
             logger.info("Final parsed animal selection: %s", data['animal_selection'])
         else:
             logger.info("No animal selection part found in the response")
