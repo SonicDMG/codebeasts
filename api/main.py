@@ -125,28 +125,35 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         # Parse animal selection if it exists
         if len(parts) > 4:
             animals_part = parts[4].split(':', 1)[1].strip()
-            # Remove outer brackets and split by closing parenthesis
+            # Split the string by the pattern ".'] — ['" or similar patterns
             animal_pairs = [
-                pair.strip().strip('()')
-                for pair in animals_part.strip('[]').split(')')
-                if pair.strip() and not pair.strip() == ','
+                pair.strip()
+                for pair in animals_part.split(".'] — ['")
+                if pair.strip() and not pair.startswith('--')
             ]
             
             # Process each pair
             data['animal_selection'] = []
             for pair in animal_pairs:
-                # Remove any leading commas
-                pair = pair.lstrip(',').strip()
-                if pair:
-                    # Split by first comma to separate animal and description
+                # Clean up the pair by removing any remaining brackets or quotes
+                pair = pair.strip('[]\'". —')
+                if pair and not pair.startswith('--'):
+                    # Split by comma if it exists
                     if ',' in pair:
                         animal, description = pair.split(',', 1)
-                        data['animal_selection'].append((
-                            animal.strip().strip('"\''),
-                            description.strip().strip('"\'')
-                        ))
-                    else:
-                        data['animal_selection'].append((pair.strip().strip('"\''), ''))
+                        # Clean up and format the description
+                        description = description.strip()
+                        if description.startswith('\''):
+                            description = description[1:]
+                        if description.endswith('\''):
+                            description = description[:-1]
+                        
+                        # Only add if we have both animal and description
+                        if animal and description:
+                            data['animal_selection'].append((
+                                animal.strip(),
+                                description.strip()
+                            ))
 
     except (IndexError, ValueError) as e:
         logger.error("Failed to parse response parts: %s", str(e))
