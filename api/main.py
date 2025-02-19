@@ -125,31 +125,15 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         # Parse animal selection if it exists
         if len(parts) > 4:
             animals_part = parts[4].split(':', 1)[1].strip()
+            lines = [line.strip() for line in animals_part.split('\n')]
             
-            # Split by line breaks and process each line
-            lines = [line.strip() for line in animals_part.split('\n') if line.strip()]
-            
-            data['animal_selection'] = []
-            for line in lines:
-                # Skip lines that don't contain meaningful content
-                if not line or line == '—' or line == '.--':
-                    continue
-                
-                # Remove the prefix pattern if it exists
-                if '.] — [' in line:
-                    line = line.split('.] — [', 1)[1]
-                
-                # Remove any remaining brackets and quotes
-                line = line.strip('[]\'')
-                
-                if ' — ' in line:
-                    # Split by the dash separator
-                    animal, description = line.split(' — ', 1)
-                    animal = animal.strip().strip('\'')
-                    description = description.strip().strip('\'')
-                    
-                    if animal and description:
-                        data['animal_selection'].append((animal, description))
+            # Extract and clean up the animal-description pairs
+            data['animal_selection'] = [
+                (animal.strip(), description.strip())
+                for line in lines
+                for animal, description in [line.split(' — ', 1)]
+                if line and ' — ' in line
+            ]
 
     except (IndexError, ValueError) as e:
         logger.error("Failed to parse response parts: %s", str(e))
