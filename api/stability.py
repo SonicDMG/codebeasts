@@ -35,7 +35,7 @@ class StabilityGenerator:
         prompt: str,
         negative_prompt: str = "",
         aspect_ratio: str = "1:1",
-        seed: int = 1,
+        seed: int = 0,
         output_format: str = "png",
         model: str = "sd3-large-turbo",
         size: int = 512,
