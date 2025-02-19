@@ -1,3 +1,4 @@
+
 """
 CodeBeast Generator Web Application
 
@@ -52,31 +53,15 @@ def run_flow(
     tweaks: Dict[str, Any] = None,
     api_key: str = None
 ) -> Dict[str, Any]:
-    """Execute a Langflow flow with the given parameters.
-    
-    Args:
-        message: Input message for the flow
-        endpoint: Flow endpoint or ID
-        output_type: Type of output expected
-        input_type: Type of input being sent
-        tweaks: Optional flow modifications
-        api_key: Optional API key for authentication
-    
-    Returns:
-        Dict[str, Any]: Full data dictionary from the flow execution
-        
-    Raises:
-        requests.RequestException: If API request fails
-    """
+    """Execute a Langflow flow with the given parameters."""
     api_url = f"{BASE_API_URL}/api/v1/run/{endpoint}"
 
     payload = {
         "input_value": message,
         "output_type": output_type,
         "input_type": input_type,
-        "session_id": message.lower() # use the GitHub handle as the session ID
+        "session_id": message.lower()
     }
-    logger.info("Session ID: %s", payload["session_id"])
 
     if tweaks:
         payload["tweaks"] = tweaks
@@ -85,14 +70,9 @@ def run_flow(
 
     response = requests.post(api_url, json=payload, headers=headers, timeout=120)
     response_data = response.json()
-
-    # Extract full response text
     full_response = response_data['outputs'][0]['outputs'][0]['results']['message']['text']
-
-    # Parse response data
     data = parse_langflow_response(full_response)
 
-    # Store data in app context
     if hasattr(g, 'user_data'):
         g.user_data = data
 
@@ -100,10 +80,7 @@ def run_flow(
 
 def parse_langflow_response(full_response: str) -> Dict[str, Any]:
     """Parse the response from Langflow into structured data."""
-    logger.info("Raw response received: %s", full_response)
-    
     parts = full_response.split('|')
-    logger.info("Split parts: %s", parts)
     
     data = {
         'languages': [],
@@ -120,7 +97,6 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
             for lang in parts[0].split(':')[1].strip('[]').split(',')
             if lang.strip()
         ]
-        logger.info("Parsed languages: %s", data['languages'])
 
         # Parse other fields
         data['prompt'] = parts[1].split(':', 1)[1].strip()
@@ -129,31 +105,19 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         
         # Parse animal selection if it exists
         if len(parts) > 4:
-            logger.info("Found animal selection part: %s", parts[4])
             animals_part = parts[4].split(':', 1)[1].strip()
-            logger.info("Animal selection after splitting by colon: %s", animals_part)
-            
-            # Remove the outer brackets and split by '], ['
             animals_str = animals_part.strip('[]')
-            # Handle the case where the string is empty
             if animals_str:
                 try:
-                    # Split the string into individual animal entries
                     animal_entries = eval(animals_part)
                     data['animal_selection'] = [
                         (entry[0], entry[1]) for entry in animal_entries
                     ]
-                    logger.info("Successfully parsed animal selection: %s", data['animal_selection'])
-                except (SyntaxError, ValueError) as e:
-                    logger.error("Failed to parse animal entries: %s", str(e))
-            
-            logger.info("Final parsed animal selection: %s", data['animal_selection'])
-        else:
-            logger.info("No animal selection part found in the response")
+                except (SyntaxError, ValueError):
+                    pass
 
-    except (IndexError, ValueError) as e:
-        logger.error("Failed to parse response parts: %s", str(e))
-        logger.error("Current parsing state - data: %s", data)
+    except (IndexError, ValueError):
+        pass
 
     return data
 
@@ -165,7 +129,6 @@ def home():
 @app.route('/chat/process', methods=['POST'])
 def process_chat():
     """Process GitHub handle and generate AI response."""
-    # Clear any existing user data at the start of each request
     if hasattr(g, 'user_data'):
         delattr(g, 'user_data')
 
@@ -173,14 +136,10 @@ def process_chat():
     message = data.get('message')
 
     try:
-        logger.info("Calling Langflow for response")
         user_data = run_flow(
             message=message,
             endpoint=FLOW_ID
         )
-        logger.info("Received response from Langflow")
-        logger.info("Languages found: %s", user_data.get('languages', []))
-        logger.info("Animal selection: %s", user_data.get('animal_selection', []))
 
         return jsonify({
             'response': user_data['prompt'],
@@ -192,7 +151,6 @@ def process_chat():
         })
 
     except requests.RequestException as e:
-        logger.error("API request error: %s", str(e))
         return jsonify({
             'error': str(e),
             'status': 'error'
@@ -203,22 +161,18 @@ def generate_image():
     """Generate pixel art mascot from AI description."""
     data = request.json
     prompt = data.get('prompt')
-    model = data.get('model', 'dall_e')  # Default to DALL-E if not specified
-    github_handle = data.get('handle', 'unknown')  # Get the GitHub handle
+    model = data.get('model', 'dall_e')
+    github_handle = data.get('handle', 'unknown')
 
     try:
-        # Generate image using selected model
         if model == 'stability':
-            logger.info("Using Stability API for image generation")
             image = stability.generate_image(prompt)
         else:
-            logger.info("Using DALL-E API for image generation")
             image = dalle.generate_image(prompt)
 
         if image is None:
             raise RuntimeError("Failed to generate image")
 
-        # Save image with GitHub handle in filename
         img_filename = f'generated_{github_handle}.png'
         img_path = os.path.join(app.static_folder, 'temp', img_filename)
         os.makedirs(os.path.dirname(img_path), exist_ok=True)
@@ -230,38 +184,13 @@ def generate_image():
         })
 
     except Exception as e:
-        logger.error("Image generation error: %s", str(e))
         return jsonify({
             'error': str(e),
             'status': 'error'
         })
 
-def generate_image_dall_e(prompt: str) -> str:
-    """Generate an image using DALL-E."""
-    logger.info("Starting DALL-E image generation")
-    image = dalle.generate_image(prompt, size="1024x1024")
-
-    logger.info("Saving generated image")
-    img_path = os.path.join(app.static_folder, 'temp', 'generated_dall_e.png')
-    os.makedirs(os.path.dirname(img_path), exist_ok=True)
-    image.save(img_path)
-
-    return 'static/temp/generated_dall_e.png'  # Return relative path for frontend
-
-def generate_image_stability(prompt: str) -> str:
-    """Generate an image using Stability AI."""
-    logger.info("Starting Stability image generation")
-    image = stability.generate_image(prompt, size=512)
-
-    logger.info("Saving generated image")
-    img_path = os.path.join(app.static_folder, 'temp', 'generated_stability.png')
-    os.makedirs(os.path.dirname(img_path), exist_ok=True)
-    image.save(img_path)
-
-    return 'static/temp/generated_stability.png'  # Return relative path for frontend
-
-
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '5000'))
     os.makedirs('static/temp', exist_ok=True)
     app.run(host='0.0.0.0', port=port)
+
