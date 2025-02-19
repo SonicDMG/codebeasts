@@ -1,9 +1,8 @@
-
 """Module for handling Stability AI image generation and processing."""
 
 import io
 import logging
-from typing import Optional, Dict
+from typing import Optional
 import requests
 from PIL import Image
 import logfire
@@ -88,7 +87,7 @@ class StabilityGenerator:
                 self.host,
                 headers=headers,
                 files=files,  # Use files instead of json
-                timeout=30
+                timeout=45
             )
 
             logger.debug("Response status code: %s", response.status_code)
