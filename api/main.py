@@ -192,12 +192,16 @@ def generate_image():
     github_handle = data.get('handle', 'unknown')  # Get the GitHub handle
 
     try:
+        # Generate image using selected model
         if model == 'stability':
             logger.info("Using Stability API for image generation")
-            image = generate_image_stability(prompt)
+            image = stability.generate_image(prompt)
         else:
             logger.info("Using DALL-E API for image generation")
-            image = generate_image_dall_e(prompt)
+            image = dalle.generate_image(prompt)
+
+        if image is None:
+            raise RuntimeError("Failed to generate image")
 
         # Save image with GitHub handle in filename
         img_filename = f'generated_{github_handle}.png'
@@ -243,6 +247,6 @@ def generate_image_stability(prompt: str) -> str:
 
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', '5000'))  # Make default a string first
+    port = int(os.getenv('PORT', '5000'))
     os.makedirs('static/temp', exist_ok=True)
     app.run(host='0.0.0.0', port=port)

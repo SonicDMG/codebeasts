@@ -1,3 +1,4 @@
+
 """Module for handling Stability AI image generation and processing."""
 
 import io
@@ -39,7 +40,7 @@ class StabilityGenerator:
         output_format: str = "png",
         model: str = "sd3-large-turbo",
         size: int = 512,
-    ) -> Optional[Dict[str, Image.Image]]:
+    ) -> Optional[Image.Image]:
         """Generate and pixelate an image based on the prompt.
         
         Args:
@@ -52,7 +53,7 @@ class StabilityGenerator:
             pixel_size_factor: Factor for pixelation effect
 
         Returns:
-            dict: Contains original and pixelated images
+            PIL.Image: Generated image
         """
 
         full_prompt = (
@@ -116,4 +117,3 @@ class StabilityGenerator:
             logger.error("Unexpected error: %s", str(e), exc_info=True)
             raise RuntimeError(f"Error generating image: {str(e)}") from e
 
-        return None
