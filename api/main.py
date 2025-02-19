@@ -133,26 +133,20 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
             animals_part = parts[4].split(':', 1)[1].strip()
             logger.info("Animal selection after splitting by colon: %s", animals_part)
             
-            lines = [line.strip() for line in animals_part.split('\n')]
-            logger.info("Lines after splitting by newline: %s", lines)
-            
-            # Extract and clean up the animal-description pairs
-            data['animal_selection'] = []
-            for line in lines:
-                if not line:
-                    continue
-                    
+            # Remove the outer brackets and split by '], ['
+            animals_str = animals_part.strip('[]')
+            # Handle the case where the string is empty
+            if animals_str:
                 try:
-                    if ' — ' in line:
-                        animal, description = line.split(' — ', 1)
-                        animal = animal.strip().strip('\'')
-                        description = description.strip().strip('\'')
-                        if animal and description:
-                            data['animal_selection'].append((animal, description))
-                except ValueError as e:
-                    logger.warning("Failed to parse line '%s': %s", line, str(e))
-                    continue
-                    
+                    # Split the string into individual animal entries
+                    animal_entries = eval(animals_part)
+                    data['animal_selection'] = [
+                        (entry[0], entry[1]) for entry in animal_entries
+                    ]
+                    logger.info("Successfully parsed animal selection: %s", data['animal_selection'])
+                except (SyntaxError, ValueError) as e:
+                    logger.error("Failed to parse animal entries: %s", str(e))
+            
             logger.info("Final parsed animal selection: %s", data['animal_selection'])
         else:
             logger.info("No animal selection part found in the response")
