@@ -100,7 +100,11 @@ def run_flow(
 
 def parse_langflow_response(full_response: str) -> Dict[str, Any]:
     """Parse the response from Langflow into structured data."""
+    logger.info("Raw response received: %s", full_response)
+    
     parts = full_response.split('|')
+    logger.info("Split parts: %s", parts)
+    
     data = {
         'languages': [],
         'prompt': "",
@@ -116,6 +120,7 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
             for lang in parts[0].split(':')[1].strip('[]').split(',')
             if lang.strip()
         ]
+        logger.info("Parsed languages: %s", data['languages'])
 
         # Parse other fields
         data['prompt'] = parts[1].split(':', 1)[1].strip()
@@ -124,8 +129,12 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         
         # Parse animal selection if it exists
         if len(parts) > 4:
+            logger.info("Found animal selection part: %s", parts[4])
             animals_part = parts[4].split(':', 1)[1].strip()
+            logger.info("Animal selection after splitting by colon: %s", animals_part)
+            
             lines = [line.strip() for line in animals_part.split('\n')]
+            logger.info("Lines after splitting by newline: %s", lines)
             
             # Extract and clean up the animal-description pairs
             data['animal_selection'] = [
@@ -134,9 +143,13 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
                 for animal, description in [line.split(' — ', 1)]
                 if line and ' — ' in line
             ]
+            logger.info("Final parsed animal selection: %s", data['animal_selection'])
+        else:
+            logger.info("No animal selection part found in the response")
 
     except (IndexError, ValueError) as e:
         logger.error("Failed to parse response parts: %s", str(e))
+        logger.error("Current parsing state - data: %s", data)
 
     return data
 
