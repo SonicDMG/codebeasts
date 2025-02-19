@@ -17,7 +17,7 @@ const Index = () => {
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [repoCount, setRepoCount] = useState<number>(0);
   const [githubUrl, setGithubUrl] = useState('');
-  const [animalSelection, setAnimalSelection] = useState<string[]>([]);
+  const [animalSelection, setAnimalSelection] = useState<[string, string][]>([]);
   const [isFading, setIsFading] = useState(false);
   const [model, setModel] = useState('dall_e');
   const { toast } = useToast();
