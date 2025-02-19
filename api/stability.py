@@ -57,12 +57,12 @@ class StabilityGenerator:
         """
 
         full_prompt = (
-            "A very cute animal in detailed pixel art style, "
+            f"{prompt}. A very cute animal in detailed pixel art style, "
             "with large expressive eyes looking directly at the viewer, "
             "a playful and adorable expression, "
             "vibrant colors, and a nostalgic retro 8-bit or 16-bit video game aesthetic. "
             "The image should have pixel shading, colorful lighting, and soft dithering "
-            f"for a polished effect, {prompt}"
+            "for a polished effect"
         )
         logger.info("Processing prompt: %s", full_prompt)
 

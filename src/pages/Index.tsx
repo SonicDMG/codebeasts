@@ -61,7 +61,7 @@ const Index = () => {
     NProgress.start();
 
     try {
-      updateLoadingStatus(`Analyzing GitHub profile using ${model === 'dall_e' ? 'DALL-E' : 'Stability'} API...`, 0.1);
+      updateLoadingStatus(`Analyzing GitHub profile...`, 0.1);
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       updateLoadingStatus('Collecting repository data...', 0.2);
@@ -91,7 +91,7 @@ const Index = () => {
       setGithubUrl(processData.github_url);
       setAnimalSelection(processData.animal_selection);
       
-      updateLoadingStatus('Generating AI response...', 0.4);
+      updateLoadingStatus('Generating AI response...', 0.3);
       await new Promise(resolve => setTimeout(resolve, 800));
 
       updateLoadingStatus(`Creating your CodeBeast with ${model === 'dall_e' ? 'DALL-E' : 'Stability'} API...`, 0.7);
