@@ -20,7 +20,7 @@ const Index = () => {
   const [githubUrl, setGithubUrl] = useState('');
   const [animalSelection, setAnimalSelection] = useState<[string, string][]>([]);
   const [isFading, setIsFading] = useState(false);
-  const [model, setModel] = useState('dall_e');
+  const [model, setModel] = useState('stability');
   const { toast } = useToast();
 
   const resetState = () => {
