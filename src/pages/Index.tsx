@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -79,19 +80,16 @@ const Index = () => {
       }
 
       const processData: ProcessResponse = await processResponse.json();
-      console.log('Raw API Response:', processData);
       
       if (processData.status === 'error') {
         throw new Error(processData.error || 'Processing failed');
       }
 
-      console.log('Animal Selection from API:', processData.animal_selection);
       setLanguages(processData.languages);
       setGeneratedPrompt(processData.response);
       setRepoCount(processData.num_repositories);
       setGithubUrl(processData.github_url);
       setAnimalSelection(processData.animal_selection);
-      console.log('Animal Selection after setState:', animalSelection);
       
       updateLoadingStatus('Generating AI response...', 0.4);
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -127,7 +125,6 @@ const Index = () => {
         description: "Your unique beast has been created.",
       });
     } catch (error) {
-      console.error('Generation error:', error);
       NProgress.done();
       toast({
         title: "Generation failed",
@@ -182,8 +179,6 @@ const Index = () => {
       description: "Opening X (formerly Twitter) to share your CodeBeast.",
     });
   };
-
-  console.log('Animal Selection in render:', animalSelection);
 
   return (
     <div className="min-h-screen flex flex-col px-4">

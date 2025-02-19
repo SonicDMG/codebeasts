@@ -11,8 +11,6 @@ interface RepositoryInfoProps {
 }
 
 export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animalSelection }: RepositoryInfoProps) => {
-  console.log('RepositoryInfo received animalSelection:', animalSelection);
-  
   return (
     <div className="space-y-4">
       {repoCount > 0 && (
@@ -41,16 +39,13 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animal
         <Card className="p-4 bg-black/20 border-white/10">
           <h3 className="text-white/80 text-sm font-medium mb-2">Your CodeBeast Components</h3>
           <div className="space-y-2">
-            {animalSelection.map(([animal, description], index) => {
-              console.log('Rendering animal:', animal, 'description:', description);
-              return (
-                <div key={index} className="text-white/60 text-sm">
-                  <span className="font-medium text-white/80">{animal}</span>
-                  <span className="text-white/40"> — </span>
-                  <span className="italic">{description}</span>
-                </div>
-              );
-            })}
+            {animalSelection.map(([animal, description], index) => (
+              <div key={index} className="text-white/60 text-sm">
+                <span className="font-medium text-white/80">{animal}</span>
+                <span className="text-white/40"> — </span>
+                <span className="italic">{description}</span>
+              </div>
+            ))}
           </div>
         </Card>
       )}
