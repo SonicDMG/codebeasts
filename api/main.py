@@ -106,7 +106,7 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         'prompt': "",
         'github_user_name_url': "",
         'num_repositories': 0,
-        'animal_selection': []  # Add this field to store animal selection
+        'animal_selection': []
     }
 
     try:
@@ -122,20 +122,31 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         data['github_user_name_url'] = parts[2].split(':', 1)[1].strip()
         data['num_repositories'] = int(parts[3].split(':', 1)[1].strip())
         
-        # Parse animal selection if it exists (assuming it's in the last part)
+        # Parse animal selection if it exists
         if len(parts) > 4:
             animals_part = parts[4].split(':', 1)[1].strip()
-            # Convert string representation of tuples into actual tuples
-            # Expected format: "[(animal1, desc1), (animal2, desc2)]"
-            # Remove brackets and split by comma
+            # Remove outer brackets and split by closing parenthesis
             animal_pairs = [
-                pair.strip().strip('()') for pair in animals_part.strip('[]').split('),')
-                if pair.strip()
+                pair.strip().strip('()')
+                for pair in animals_part.strip('[]').split(')')
+                if pair.strip() and not pair.strip() == ','
             ]
-            data['animal_selection'] = [
-                tuple(pair.split(',', 1)) if ',' in pair else (pair, '')
-                for pair in animal_pairs
-            ]
+            
+            # Process each pair
+            data['animal_selection'] = []
+            for pair in animal_pairs:
+                # Remove any leading commas
+                pair = pair.lstrip(',').strip()
+                if pair:
+                    # Split by first comma to separate animal and description
+                    if ',' in pair:
+                        animal, description = pair.split(',', 1)
+                        data['animal_selection'].append((
+                            animal.strip().strip('"\''),
+                            description.strip().strip('"\'')
+                        ))
+                    else:
+                        data['animal_selection'].append((pair.strip().strip('"\''), ''))
 
     except (IndexError, ValueError) as e:
         logger.error("Failed to parse response parts: %s", str(e))
@@ -172,7 +183,7 @@ def process_chat():
             'languages': user_data.get('languages', []),
             'github_url': user_data.get('github_user_name_url', ''),
             'num_repositories': user_data.get('num_repositories', 0),
-            'animal_selection': user_data.get('animal_selection', []),  # Add this line
+            'animal_selection': user_data.get('animal_selection', []),
             'status': 'success'
         })
 
