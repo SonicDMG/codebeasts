@@ -183,6 +183,8 @@ const Index = () => {
     });
   };
 
+  console.log('Animal Selection in render:', animalSelection);
+
   return (
     <div className="min-h-screen flex flex-col px-4">
       <div className="w-full flex justify-center py-8">
@@ -221,7 +223,6 @@ const Index = () => {
                 githubUrl={githubUrl}
                 animalSelection={animalSelection}
               />
-              {console.log('Animal Selection in render:', animalSelection)}
             </div>
 
             {generatedImage && (

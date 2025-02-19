@@ -41,7 +41,6 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animal
         <Card className="p-4 bg-black/20 border-white/10">
           <h3 className="text-white/80 text-sm font-medium mb-2">Your CodeBeast Components</h3>
           <div className="space-y-2">
-            {console.log('Rendering animal selection:', animalSelection)}
             {animalSelection.map(([animal, description], index) => {
               console.log('Rendering animal:', animal, 'description:', description);
               return (
