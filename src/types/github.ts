@@ -4,7 +4,7 @@ export interface ProcessResponse {
   languages: string[];
   github_url: string;
   num_repositories: number;
-  animal_selection: string[];
+  animal_selection: [string, string][]; // Update to array of tuples [animal, description]
   status: 'success' | 'error';
   error?: string;
 }

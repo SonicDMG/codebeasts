@@ -7,7 +7,7 @@ interface RepositoryInfoProps {
   languages: string[];
   prompt: string;
   githubUrl?: string;
-  animalSelection?: string[];
+  animalSelection?: [string, string][];
 }
 
 export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animalSelection }: RepositoryInfoProps) => {
@@ -37,9 +37,15 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animal
 
       {animalSelection && animalSelection.length > 0 && (
         <Card className="p-4 bg-black/20 border-white/10">
-          <h3 className="text-white/80 text-sm font-medium mb-2">Your CodeBeast</h3>
-          <div className="text-white/60 text-sm">
-            You're getting a {animalSelection[0]}!
+          <h3 className="text-white/80 text-sm font-medium mb-2">Your CodeBeast Components</h3>
+          <div className="space-y-2">
+            {animalSelection.map(([animal, description], index) => (
+              <div key={index} className="text-white/60 text-sm">
+                <span className="font-medium text-white/80">{animal}</span>
+                <span className="text-white/40"> — </span>
+                <span className="italic">{description}</span>
+              </div>
+            ))}
           </div>
         </Card>
       )}
