@@ -60,7 +60,7 @@ const Index = () => {
     NProgress.start();
 
     try {
-      updateLoadingStatus(`Analyzing GitHub profile using...`, 0.1);
+      updateLoadingStatus(`Analyzing GitHub profile using ${model === 'dall_e' ? 'DALL-E' : 'Stability'} API...`, 0.1);
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       updateLoadingStatus('Collecting repository data...', 0.2);
@@ -100,7 +100,8 @@ const Index = () => {
         },
         body: JSON.stringify({ 
           prompt: processData.response,
-          model: model
+          model: model,
+          handle: handle
         }),
       });
 

@@ -16,7 +16,6 @@ from dotenv import load_dotenv
 from dall_e import DallEGenerator
 from stability import StabilityGenerator
 from flask_cors import CORS
-from requests.exceptions import RequestException
 
 # Load environment variables
 load_dotenv(override=True)
@@ -41,10 +40,9 @@ CORS(app)
 logfire.instrument_flask(app)
 app.static_folder = 'static'
 
-# Initialize DALL-E generator
+# Initialize generators
 dalle = DallEGenerator(OPENAI_API_KEY)
 stability = StabilityGenerator(STABILITY_API_KEY)
-
 
 def run_flow(
     message: str,
@@ -191,6 +189,7 @@ def generate_image():
     data = request.json
     prompt = data.get('prompt')
     model = data.get('model', 'dall_e')  # Default to DALL-E if not specified
+    github_handle = data.get('handle', 'unknown')  # Get the GitHub handle
 
     try:
         if model == 'stability':
@@ -200,27 +199,21 @@ def generate_image():
             logger.info("Using DALL-E API for image generation")
             image = generate_image_dall_e(prompt)
 
+        # Save image with GitHub handle in filename
+        img_filename = f'generated_{github_handle}.png'
+        img_path = os.path.join(app.static_folder, 'temp', img_filename)
+        os.makedirs(os.path.dirname(img_path), exist_ok=True)
+        image.save(img_path)
+
         return jsonify({
-            'image_url': image,
+            'image_url': f'static/temp/{img_filename}',
             'status': 'success'
         })
 
-    except RequestException as e:
-        logger.error("Network error during image generation: %s", str(e))
+    except Exception as e:
+        logger.error("Image generation error: %s", str(e))
         return jsonify({
-            'error': 'Network error occurred. Please try again later.',
-            'status': 'error'
-        })
-    except ValueError as e:
-        logger.error("Value error during image generation: %s", str(e))
-        return jsonify({
-            'error': 'Invalid input provided. Please check your request.',
-            'status': 'error'
-        })
-    except RuntimeError as e:
-        logger.error("Runtime error during image generation: %s", str(e))
-        return jsonify({
-            'error': 'An unexpected error occurred. Please try again later.',
+            'error': str(e),
             'status': 'error'
         })
 
