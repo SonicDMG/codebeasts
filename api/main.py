@@ -125,35 +125,30 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         # Parse animal selection if it exists
         if len(parts) > 4:
             animals_part = parts[4].split(':', 1)[1].strip()
-            # Split the string by the pattern ".'] — ['" or similar patterns
-            animal_pairs = [
-                pair.strip()
-                for pair in animals_part.split(".'] — ['")
-                if pair.strip() and not pair.startswith('--')
-            ]
+            # Split into individual lines and process each
+            lines = animals_part.split(".')'][1:]  # Skip the first part before the first ".')"
             
-            # Process each pair
             data['animal_selection'] = []
-            for pair in animal_pairs:
-                # Clean up the pair by removing any remaining brackets or quotes
-                pair = pair.strip('[]\'". —')
-                if pair and not pair.startswith('--'):
-                    # Split by comma if it exists
-                    if ',' in pair:
-                        animal, description = pair.split(',', 1)
-                        # Clean up and format the description
-                        description = description.strip()
-                        if description.startswith('\''):
-                            description = description[1:]
-                        if description.endswith('\''):
-                            description = description[:-1]
-                        
-                        # Only add if we have both animal and description
-                        if animal and description:
-                            data['animal_selection'].append((
-                                animal.strip(),
-                                description.strip()
-                            ))
+            for line in lines:
+                # Skip empty lines or lines with just dashes
+                if not line.strip() or line.strip() == '—':
+                    continue
+                    
+                # Clean up the line
+                line = line.strip()
+                if line.startswith('— ['):
+                    line = line[3:]  # Remove "— ["
+                
+                # Remove any remaining brackets and quotes
+                line = line.strip('[]\'')
+                
+                if ',' in line:
+                    animal, description = line.split(',', 1)
+                    animal = animal.strip().strip('\'')
+                    description = description.strip().strip('\'')
+                    
+                    if animal and description:
+                        data['animal_selection'].append((animal, description))
 
     except (IndexError, ValueError) as e:
         logger.error("Failed to parse response parts: %s", str(e))
