@@ -1,5 +1,6 @@
 
 import { GitFork } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 interface RepositoryInfoProps {
   repoCount: number;
@@ -9,6 +10,13 @@ interface RepositoryInfoProps {
 }
 
 export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl }: RepositoryInfoProps) => {
+  // Extract animal name from the prompt
+  const getAnimalFromPrompt = (prompt: string): string => {
+    // Regular expression to match "an X" or "a X" pattern
+    const match = prompt.match(/(?:an?|the)\s+([^\s,]+(?:\s+[^\s,]+)*)\s+(?:with|in|that)/i);
+    return match ? match[1] : 'mysterious creature';
+  };
+
   return (
     <div className="space-y-4">
       {repoCount > 0 && (
@@ -34,11 +42,12 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl }: Repo
       </div>
 
       {prompt && (
-        <div className="p-4 rounded-lg bg-black/20 border border-white/10">
-          <p className="text-white/80 text-sm leading-relaxed">
-            {prompt}
-          </p>
-        </div>
+        <Card className="p-4 bg-black/20 border-white/10">
+          <h3 className="text-white/80 text-sm font-medium mb-2">Your CodeBeast</h3>
+          <div className="text-white/60 text-sm">
+            You're getting a {getAnimalFromPrompt(prompt)}!
+          </div>
+        </Card>
       )}
     </div>
   );
