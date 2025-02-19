@@ -61,7 +61,7 @@ class StabilityGenerator:
             "a playful and adorable expression, "
             "vibrant colors, and a nostalgic retro 8-bit or 16-bit video game aesthetic. "
             "The image should have pixel shading, colorful lighting, and soft dithering "
-            "for a polished effect"
+            "for a polished effect."
         )
         logger.info("Processing prompt: %s", full_prompt)
 

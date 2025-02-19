@@ -52,12 +52,6 @@ class DallEGenerator:
             ConnectionError: If DALL-E API request fails
             RuntimeError: For unexpected errors during generation
         """
-        # Construct prompt with style guidelines
-        negative_prompt = (
-            "avoid any text in the image, "
-            "avoid any objects that are not animals, "
-            "avoid any animals in the background. "
-        )
 
         full_prompt = (
             f"{prompt}. A very cute animal in detailed pixel art style, "
@@ -65,7 +59,7 @@ class DallEGenerator:
             "a playful and adorable expression, "
             "vibrant colors, and a nostalgic retro 8-bit or 16-bit video game aesthetic. "
             "The image should have pixel shading, colorful lighting, and soft dithering "
-            f"for a polished effect, {negative_prompt}"
+            "for a polished effect."
         )
 
         logger.info("Processing prompt: %s", full_prompt)
