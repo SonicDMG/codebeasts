@@ -105,7 +105,8 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         'languages': [],
         'prompt': "",
         'github_user_name_url': "",
-        'num_repositories': 0
+        'num_repositories': 0,
+        'animal_selection': []  # Add this field to store animal selection
     }
 
     try:
@@ -120,6 +121,21 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         data['prompt'] = parts[1].split(':', 1)[1].strip()
         data['github_user_name_url'] = parts[2].split(':', 1)[1].strip()
         data['num_repositories'] = int(parts[3].split(':', 1)[1].strip())
+        
+        # Parse animal selection if it exists (assuming it's in the last part)
+        if len(parts) > 4:
+            animals_part = parts[4].split(':', 1)[1].strip()
+            # Convert string representation of tuples into actual tuples
+            # Expected format: "[(animal1, desc1), (animal2, desc2)]"
+            # Remove brackets and split by comma
+            animal_pairs = [
+                pair.strip().strip('()') for pair in animals_part.strip('[]').split('),')
+                if pair.strip()
+            ]
+            data['animal_selection'] = [
+                tuple(pair.split(',', 1)) if ',' in pair else (pair, '')
+                for pair in animal_pairs
+            ]
 
     except (IndexError, ValueError) as e:
         logger.error("Failed to parse response parts: %s", str(e))
@@ -133,18 +149,7 @@ def home():
 
 @app.route('/chat/process', methods=['POST'])
 def process_chat():
-    """Process GitHub handle and generate AI response.
-    
-    Returns:
-        JSON response containing:
-        - response: Generated text description (prompt only)
-        - languages: List of programming languages
-        - github_url: GitHub URL
-        - num_repositories: Number of repositories
-        - animal_selection: Selected animal
-        - status: Success/error status
-        - error: Error message if applicable
-    """
+    """Process GitHub handle and generate AI response."""
     # Clear any existing user data at the start of each request
     if hasattr(g, 'user_data'):
         delattr(g, 'user_data')
@@ -160,12 +165,14 @@ def process_chat():
         )
         logger.info("Received response from Langflow")
         logger.info("Languages found: %s", user_data.get('languages', []))
+        logger.info("Animal selection: %s", user_data.get('animal_selection', []))
 
         return jsonify({
             'response': user_data['prompt'],
             'languages': user_data.get('languages', []),
             'github_url': user_data.get('github_user_name_url', ''),
             'num_repositories': user_data.get('num_repositories', 0),
+            'animal_selection': user_data.get('animal_selection', []),  # Add this line
             'status': 'success'
         })
 
@@ -178,14 +185,7 @@ def process_chat():
 
 @app.route('/chat/generate-image', methods=['POST'])
 def generate_image():
-    """Generate pixel art mascot from AI description.
-    
-    Returns:
-        JSON response containing:
-        - image_url: Path to generated image
-        - status: Success/error status
-        - error: Error message if applicable
-    """
+    """Generate pixel art mascot from AI description."""
     data = request.json
     prompt = data.get('prompt')
     model = data.get('model', 'dall_e')  # Default to DALL-E if not specified
