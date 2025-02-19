@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -18,6 +17,7 @@ const Index = () => {
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [repoCount, setRepoCount] = useState<number>(0);
   const [githubUrl, setGithubUrl] = useState('');
+  const [animalSelection, setAnimalSelection] = useState<string[]>([]);
   const [isFading, setIsFading] = useState(false);
   const [model, setModel] = useState('dall_e');
   const { toast } = useToast();
@@ -28,6 +28,7 @@ const Index = () => {
     setGeneratedPrompt('');
     setRepoCount(0);
     setGithubUrl('');
+    setAnimalSelection([]);
     setIsFading(false);
   };
 
@@ -49,10 +50,9 @@ const Index = () => {
       return;
     }
 
-    // If there's existing content, fade it out first
     if (generatedImage) {
       setIsFading(true);
-      await new Promise(resolve => setTimeout(resolve, 300)); // Wait for fade animation
+      await new Promise(resolve => setTimeout(resolve, 300));
       resetState();
     }
 
@@ -88,6 +88,7 @@ const Index = () => {
       setGeneratedPrompt(processData.response);
       setRepoCount(processData.num_repositories);
       setGithubUrl(processData.github_url);
+      setAnimalSelection(processData.animal_selection);
       
       updateLoadingStatus('Generating AI response...', 0.4);
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -215,6 +216,7 @@ const Index = () => {
                 languages={languages}
                 prompt={generatedPrompt}
                 githubUrl={githubUrl}
+                animalSelection={animalSelection}
               />
             </div>
 

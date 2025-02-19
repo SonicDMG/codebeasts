@@ -4,6 +4,7 @@ export interface ProcessResponse {
   languages: string[];
   github_url: string;
   num_repositories: number;
+  animal_selection: string[];
   status: 'success' | 'error';
   error?: string;
 }
