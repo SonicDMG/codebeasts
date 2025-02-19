@@ -125,25 +125,26 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         # Parse animal selection if it exists
         if len(parts) > 4:
             animals_part = parts[4].split(':', 1)[1].strip()
-            # Split into individual lines and process each
-            lines = animals_part.split(".')'][1:]  # Skip the first part before the first ".')"
+            
+            # Split by line breaks and process each line
+            lines = [line.strip() for line in animals_part.split('\n') if line.strip()]
             
             data['animal_selection'] = []
             for line in lines:
-                # Skip empty lines or lines with just dashes
-                if not line.strip() or line.strip() == '—':
+                # Skip lines that don't contain meaningful content
+                if not line or line == '—' or line == '.--':
                     continue
-                    
-                # Clean up the line
-                line = line.strip()
-                if line.startswith('— ['):
-                    line = line[3:]  # Remove "— ["
+                
+                # Remove the prefix pattern if it exists
+                if '.] — [' in line:
+                    line = line.split('.] — [', 1)[1]
                 
                 # Remove any remaining brackets and quotes
                 line = line.strip('[]\'')
                 
-                if ',' in line:
-                    animal, description = line.split(',', 1)
+                if ' — ' in line:
+                    # Split by the dash separator
+                    animal, description = line.split(' — ', 1)
                     animal = animal.strip().strip('\'')
                     description = description.strip().strip('\'')
                     
