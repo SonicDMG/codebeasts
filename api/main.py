@@ -239,7 +239,7 @@ def generate_image_dall_e(prompt: str) -> str:
 def generate_image_stability(prompt: str) -> str:
     """Generate an image using Stability AI."""
     logger.info("Starting Stability image generation")
-    image = stability.generate_image(prompt, size=1024)
+    image = stability.generate_image(prompt, size=512)
 
     logger.info("Saving generated image")
     img_path = os.path.join(app.static_folder, 'temp', 'generated_stability.png')

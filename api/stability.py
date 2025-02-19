@@ -22,7 +22,7 @@ class StabilityGenerator:
             api_key: Stability AI API key
         """
         self.api_key = api_key
-        self.host = "https://api.stability.ai/v2beta/stable-image/generate/core"
+        self.host = "https://api.stability.ai/v2beta/stable-image/generate/sd3"
         self.headers = {
             "authorization": f"Bearer {self.api_key}",
             "accept": "image/*",
@@ -35,10 +35,10 @@ class StabilityGenerator:
         prompt: str,
         negative_prompt: str = "",
         aspect_ratio: str = "1:1",
-        seed: int = 0,
+        seed: int = 1,
         output_format: str = "png",
+        model: str = "sd3-large-turbo",
         size: int = 512,
-        pixel_size_factor: int = 256
     ) -> Optional[Dict[str, Image.Image]]:
         """Generate and pixelate an image based on the prompt.
         
@@ -54,7 +54,15 @@ class StabilityGenerator:
         Returns:
             dict: Contains original and pixelated images
         """
-        full_prompt = f"{prompt}, chibi-style animal with large, expressive eyes, pixel art style, vibrant colors"
+
+        full_prompt = (
+            "A very cute animal in detailed pixel art style, "
+            "with large expressive eyes looking directly at the viewer, "
+            "a playful and adorable expression, "
+            "vibrant colors, and a nostalgic retro 8-bit or 16-bit video game aesthetic. "
+            "The image should have pixel shading, colorful lighting, and soft dithering "
+            f"for a polished effect, {prompt}"
+        )
         logger.info("Processing prompt: %s", full_prompt)
 
         # Create multipart form data
@@ -63,7 +71,9 @@ class StabilityGenerator:
             'negative_prompt': (None, negative_prompt),
             'aspect_ratio': (None, aspect_ratio),
             'seed': (None, str(seed)),
-            'output_format': (None, output_format)
+            'output_format': (None, output_format),
+            'size': (None, size),
+            'model': (None, model)
         }
 
         headers = {
@@ -97,19 +107,6 @@ class StabilityGenerator:
             img = Image.open(io.BytesIO(response.content))
             logger.debug("Image size: %s, mode: %s", img.size, img.mode)
 
-            # Apply pixelation effect
-            pixel_size = size // pixel_size_factor
-            logger.debug("Applying pixelation with pixel size: %d", pixel_size)
-            #small_img = img.resize(
-            #    (size // pixel_size, size // pixel_size),
-            #     Image.Resampling.BILINEAR
-            #)
-            #result = small_img.resize(img.size, Image.Resampling.NEAREST)
-
-            #return {
-            #    'original': img,
-            #     'pixelated': result
-            #}
             return img
 
         except requests.exceptions.RequestException as e:
