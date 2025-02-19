@@ -20,20 +20,21 @@ export const ModelSelector = ({ model, onModelChange, disabled }: ModelSelectorP
         disabled={disabled}
       >
         <div className="flex items-center space-x-2">
-          <RadioGroupItem value="dall_e" id="dall_e" />
-          <Label htmlFor="dall_e" className="flex items-center gap-1">
-            <Sparkles className="h-4 w-4" />
-            DALL-E
-          </Label>
-        </div>
-        <div className="flex items-center space-x-2">
           <RadioGroupItem value="stability" id="stability" />
           <Label htmlFor="stability" className="flex items-center gap-1">
             <Zap className="h-4 w-4" />
             Stability
           </Label>
         </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="dall_e" id="dall_e" />
+          <Label htmlFor="dall_e" className="flex items-center gap-1">
+            <Sparkles className="h-4 w-4" />
+            DALL-E
+          </Label>
+        </div>
       </RadioGroup>
     </div>
   );
 };
+
