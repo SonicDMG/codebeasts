@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -34,7 +35,13 @@ const Index = () => {
   };
 
   const updateLoadingStatus = (status: string, progress: number) => {
-    NProgress.configure({ showSpinner: false });
+    NProgress.configure({ 
+      showSpinner: false,
+      trickle: true,
+      trickleSpeed: 200,
+      minimum: 0.08,
+      barSelector: '[role="bar"]',
+    });
     NProgress.set(progress);
     toast({
       title: status,
