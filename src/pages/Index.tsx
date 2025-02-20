@@ -187,7 +187,7 @@ const Index = () => {
         href="https://langflow.org" 
         target="_blank" 
         rel="noopener noreferrer" 
-        className="absolute top-2 right-4 text-sm text-muted-foreground hover:text-primary transition-colors"
+        className="fixed top-2 right-4 text-sm text-muted-foreground hover:text-primary transition-colors z-50"
       >
         powered by Langflow
       </a>
