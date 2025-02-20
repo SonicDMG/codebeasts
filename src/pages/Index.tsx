@@ -8,6 +8,7 @@ import { HandleInput } from '@/components/github/HandleInput';
 import { RepositoryInfo } from '@/components/github/RepositoryInfo';
 import { GeneratedImage } from '@/components/github/GeneratedImage';
 import { ModelSelector } from '@/components/github/ModelSelector';
+import { API_BASE_URL } from '@/config/api';
 import type { ProcessResponse, GenerateImageResponse } from '@/types/github';
 
 const Index = () => {
@@ -67,7 +68,7 @@ const Index = () => {
       updateLoadingStatus('Collecting repository data...', 0.2);
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      const processResponse = await fetch('http://localhost:5000/chat/process', {
+      const processResponse = await fetch(`${API_BASE_URL}/chat/process`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +96,7 @@ const Index = () => {
       await new Promise(resolve => setTimeout(resolve, 800));
 
       updateLoadingStatus(`Creating your CodeBeast with ${model === 'dall_e' ? 'DALL-E' : 'Stability'} API...`, 0.7);
-      const generateResponse = await fetch('http://localhost:5000/chat/generate-image', {
+      const generateResponse = await fetch(`${API_BASE_URL}/chat/generate-image`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,7 +118,7 @@ const Index = () => {
         throw new Error(generateData.error || 'Image generation failed');
       }
 
-      setGeneratedImage(`http://localhost:5000/${generateData.image_url}`);
+      setGeneratedImage(`${API_BASE_URL}/${generateData.image_url}`);
       
       NProgress.done();
       toast({
