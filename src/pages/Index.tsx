@@ -15,7 +15,7 @@ import type { ProcessResponse, GenerateImageResponse } from '@/types/github';
 NProgress.configure({ 
   showSpinner: false,
   trickle: true,
-  trickleSpeed: 1500,
+  trickleSpeed: 200,
   minimum: 0.08,
   barSelector: '[role="bar"]',
 });
@@ -71,10 +71,10 @@ const Index = () => {
 
     try {
       updateLoadingStatus(`Analyzing GitHub profile...`, 0.15);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       updateLoadingStatus('Collecting repository data...', 0.25);
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 400)); // Reduced from 800ms to 400ms
 
       const processResponse = await fetch(`${API_BASE_URL}/chat/process`, {
         method: 'POST',
@@ -94,16 +94,17 @@ const Index = () => {
         throw new Error(processData.error || 'Processing failed');
       }
 
+      updateLoadingStatus('Generating AI response...', 0.35);
+
       setLanguages(processData.languages);
       setGeneratedPrompt(processData.response);
       setRepoCount(processData.num_repositories);
       setGithubUrl(processData.github_url);
       setAnimalSelection(processData.animal_selection);
       
-      updateLoadingStatus('Generating AI response...', 0.35);
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      updateLoadingStatus(`Creating your CodeBeast with ${model === 'dall_e' ? 'DALL-E' : 'Stability'} API...`, 0.5);
+      updateLoadingStatus(`Creating your CodeBeast with ${model === 'dall_e' ? 'DALL-E' : 'Stability'} API...`, 0.45);
       const generateResponse = await fetch(`${API_BASE_URL}/chat/generate-image`, {
         method: 'POST',
         headers: {
@@ -126,7 +127,7 @@ const Index = () => {
         throw new Error(generateData.error || 'Image generation failed');
       }
 
-      updateLoadingStatus('Generating your CodeBeast...', 0.55);
+      updateLoadingStatus('Generating your CodeBeast...', 0.6);
       
       // Create a promise that resolves when the image is loaded
       const imageLoadPromise = new Promise((resolve, reject) => {
