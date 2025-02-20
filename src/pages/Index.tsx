@@ -182,7 +182,16 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col px-4">
+    <div className="min-h-screen flex flex-col px-4 relative">
+      <a 
+        href="https://langflow.org" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="absolute top-2 right-4 text-sm text-muted-foreground hover:text-primary transition-colors"
+      >
+        powered by Langflow
+      </a>
+
       <div className="text-center space-y-2 mb-2">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-fade-in">
           Transform Your Code Into a Beast! 🐉
