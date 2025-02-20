@@ -52,6 +52,24 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
     };
   }, [imageUrl, handle]);
 
+  const handleDownload = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Get the canvas data as a URL
+    const dataUrl = canvas.toDataURL('image/png');
+    
+    // Create a temporary link element
+    const link = document.createElement('a');
+    link.download = `codebeast-${handle}.png`;
+    link.href = dataUrl;
+    
+    // Trigger the download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className={`lg:w-[600px] space-y-4 ${className}`}>
       <div className="relative aspect-square w-full overflow-hidden rounded-lg">
@@ -62,7 +80,7 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
       </div>
 
       <div className="flex gap-4 justify-center">
-        <Button variant="secondary" className="glass" onClick={onDownload}>
+        <Button variant="secondary" className="glass" onClick={handleDownload}>
           <Download className="mr-2 h-4 w-4" />
           Download
         </Button>
@@ -74,3 +92,4 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
     </div>
   );
 };
+

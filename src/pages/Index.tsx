@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -225,7 +224,12 @@ const Index = () => {
               <GeneratedImage
                 imageUrl={generatedImage}
                 handle={handle}
-                onDownload={handleDownload}
+                onDownload={() => {
+                  toast({
+                    title: "Download started",
+                    description: "Your CodeBeast image is being downloaded.",
+                  });
+                }}
                 onShare={handleShare}
                 className={isFading ? 'animate-fade-out' : 'animate-fade-in'}
               />
