@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
 import NProgress from 'nprogress';
@@ -9,6 +9,15 @@ import { GeneratedImage } from '@/components/github/GeneratedImage';
 import { ModelSelector } from '@/components/github/ModelSelector';
 import { API_BASE_URL } from '@/config/api';
 import type { ProcessResponse, GenerateImageResponse } from '@/types/github';
+
+// Configure NProgress globally
+NProgress.configure({ 
+  showSpinner: false,
+  trickle: true,
+  trickleSpeed: 200,
+  minimum: 0.08,
+  barSelector: '[role="bar"]',
+});
 
 const Index = () => {
   const [handle, setHandle] = useState('');
@@ -34,13 +43,6 @@ const Index = () => {
   };
 
   const updateLoadingStatus = (status: string, progress: number) => {
-    NProgress.configure({ 
-      showSpinner: false,
-      trickle: true,
-      trickleSpeed: 200,
-      minimum: 0.08,
-      barSelector: '[role="bar"]',
-    });
     NProgress.set(progress);
     toast({
       title: status,
