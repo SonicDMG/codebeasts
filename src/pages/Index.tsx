@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -69,10 +70,10 @@ const Index = () => {
     NProgress.start();
 
     try {
-      updateLoadingStatus(`Analyzing GitHub profile...`, 0.1);
+      updateLoadingStatus(`Analyzing GitHub profile...`, 0.15);
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      updateLoadingStatus('Collecting repository data...', 0.2);
+      updateLoadingStatus('Collecting repository data...', 0.25);
       await new Promise(resolve => setTimeout(resolve, 800));
 
       const processResponse = await fetch(`${API_BASE_URL}/chat/process`, {
@@ -99,10 +100,10 @@ const Index = () => {
       setGithubUrl(processData.github_url);
       setAnimalSelection(processData.animal_selection);
       
-      updateLoadingStatus('Generating AI response...', 0.3);
+      updateLoadingStatus('Generating AI response...', 0.35);
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      updateLoadingStatus(`Creating your CodeBeast with ${model === 'dall_e' ? 'DALL-E' : 'Stability'} API...`, 0.7);
+      updateLoadingStatus(`Creating your CodeBeast with ${model === 'dall_e' ? 'DALL-E' : 'Stability'} API...`, 0.5);
       const generateResponse = await fetch(`${API_BASE_URL}/chat/generate-image`, {
         method: 'POST',
         headers: {
