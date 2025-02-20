@@ -74,7 +74,7 @@ const Index = () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       updateLoadingStatus('Collecting repository data...', 0.25);
-      await new Promise(resolve => setTimeout(resolve, 400)); // Reduced from 800ms to 400ms
+      await new Promise(resolve => setTimeout(resolve, 400));
 
       const processResponse = await fetch(`${API_BASE_URL}/chat/process`, {
         method: 'POST',
@@ -93,6 +93,9 @@ const Index = () => {
       if (processData.status === 'error') {
         throw new Error(processData.error || 'Processing failed');
       }
+
+      updateLoadingStatus('Pulling coding information from repos...', 0.3);
+      await new Promise(resolve => setTimeout(resolve, 400));
 
       updateLoadingStatus('Generating AI response...', 0.35);
 
