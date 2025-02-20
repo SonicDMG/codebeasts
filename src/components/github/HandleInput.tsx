@@ -31,12 +31,12 @@ export const HandleInput = ({
       <Button
         onClick={onGenerate}
         disabled={isGenerating}
-        className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
+        className="w-full bg-primary hover:bg-primary/90 text-white font-semibold flex items-center justify-center gap-2"
       >
         {isGenerating ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Generating...
+            <Loader2 className="h-5 w-5 animate-spin text-white" />
+            <span>Generating...</span>
           </>
         ) : (
           "Generate"
