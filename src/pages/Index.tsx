@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -183,78 +182,80 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col px-4 relative">
-      <a 
-        href="https://langflow.org" 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        className="fixed top-2 right-4 text-sm text-muted-foreground hover:text-primary transition-colors z-50"
-      >
-        powered by Langflow
-      </a>
+      <div className="flex flex-col pt-8 md:pt-2">
+        <a 
+          href="https://langflow.org" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="self-end text-sm text-muted-foreground hover:text-primary transition-colors z-50"
+        >
+          powered by Langflow
+        </a>
 
-      <div className="text-center space-y-2 mb-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-fade-in">
-          Transform Your Code Into a Beast! 🐉
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          Turn your GitHub profile into a unique AI-generated creature that reflects your coding prowess
-        </p>
-      </div>
-
-      <div className="w-full flex justify-center py-4">
-        <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-accent/50 rounded-lg blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
-          <img 
-            src="/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png" 
-            alt="CodeBeasts"
-            className="relative w-[300px] h-auto drop-shadow-[0_0_15px_rgba(155,135,245,0.3)] transition-all duration-300 group-hover:scale-105"
-          />
+        <div className="text-center space-y-2 mt-4 md:mt-0 mb-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-fade-in">
+            Transform Your Code Into a Beast! 🐉
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Turn your GitHub profile into a unique AI-generated creature that reflects your coding prowess
+          </p>
         </div>
-      </div>
 
-      <div className="flex-1 flex flex-col items-center">
-        <Card className="glass w-full max-w-4xl p-6">
-          <div className="flex flex-col lg:flex-row gap-6">
-            <div className="flex-1 space-y-4">
-              <HandleInput
-                handle={handle}
-                isGenerating={isGenerating}
-                onHandleChange={setHandle}
-                onGenerate={handleGenerate}
-                onKeyPress={handleKeyPress}
-              />
-              
-              <ModelSelector
-                model={model}
-                onModelChange={setModel}
-                disabled={isGenerating}
-              />
-              
-              <RepositoryInfo
-                repoCount={repoCount}
-                languages={languages}
-                prompt={generatedPrompt}
-                githubUrl={githubUrl}
-                animalSelection={animalSelection}
-              />
-            </div>
-
-            {generatedImage && (
-              <GeneratedImage
-                imageUrl={generatedImage}
-                handle={handle}
-                onDownload={() => {
-                  toast({
-                    title: "Download started",
-                    description: "Your CodeBeast image is being downloaded.",
-                  });
-                }}
-                onShare={handleShare}
-                className={isFading ? 'animate-fade-out' : 'animate-fade-in'}
-              />
-            )}
+        <div className="w-full flex justify-center py-4">
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-accent/50 rounded-lg blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+            <img 
+              src="/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png" 
+              alt="CodeBeasts"
+              className="relative w-[300px] h-auto drop-shadow-[0_0_15px_rgba(155,135,245,0.3)] transition-all duration-300 group-hover:scale-105"
+            />
           </div>
-        </Card>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center">
+          <Card className="glass w-full max-w-4xl p-6">
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex-1 space-y-4">
+                <HandleInput
+                  handle={handle}
+                  isGenerating={isGenerating}
+                  onHandleChange={setHandle}
+                  onGenerate={handleGenerate}
+                  onKeyPress={handleKeyPress}
+                />
+                
+                <ModelSelector
+                  model={model}
+                  onModelChange={setModel}
+                  disabled={isGenerating}
+                />
+                
+                <RepositoryInfo
+                  repoCount={repoCount}
+                  languages={languages}
+                  prompt={generatedPrompt}
+                  githubUrl={githubUrl}
+                  animalSelection={animalSelection}
+                />
+              </div>
+
+              {generatedImage && (
+                <GeneratedImage
+                  imageUrl={generatedImage}
+                  handle={handle}
+                  onDownload={() => {
+                    toast({
+                      title: "Download started",
+                      description: "Your CodeBeast image is being downloaded.",
+                    });
+                  }}
+                  onShare={handleShare}
+                  className={isFading ? 'animate-fade-out' : 'animate-fade-in'}
+                />
+              )}
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );
