@@ -15,7 +15,7 @@ import type { ProcessResponse, GenerateImageResponse } from '@/types/github';
 NProgress.configure({ 
   showSpinner: false,
   trickle: true,
-  trickleSpeed: 200,
+  trickleSpeed: 1500,
   minimum: 0.08,
   barSelector: '[role="bar"]',
 });
