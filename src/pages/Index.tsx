@@ -11,6 +11,13 @@ import { ModelSelector } from '@/components/github/ModelSelector';
 import { API_BASE_URL } from '@/config/api';
 import type { ProcessResponse, GenerateImageResponse } from '@/types/github';
 
+// Override NProgress default styles
+const styles = document.createElement('style');
+styles.textContent = `
+  #nprogress .spinner { display: none !important; }
+`;
+document.head.appendChild(styles);
+
 const Index = () => {
   const [handle, setHandle] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
