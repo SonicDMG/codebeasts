@@ -1,6 +1,7 @@
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface HandleInputProps {
   handle: string;
@@ -32,7 +33,14 @@ export const HandleInput = ({
         disabled={isGenerating}
         className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
       >
-        {isGenerating ? "Generating..." : "Generate"}
+        {isGenerating ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Generating...
+          </>
+        ) : (
+          "Generate"
+        )}
       </Button>
     </div>
   );
