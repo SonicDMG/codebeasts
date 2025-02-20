@@ -126,6 +126,20 @@ const Index = () => {
         throw new Error(generateData.error || 'Image generation failed');
       }
 
+      updateLoadingStatus('Loading your CodeBeast...', 0.75);
+      
+      // Create a promise that resolves when the image is loaded
+      const imageLoadPromise = new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = `${API_BASE_URL}/${generateData.image_url}`;
+      });
+
+      // Wait for the image to load
+      await imageLoadPromise;
+      
+      // Set the image URL only after it's loaded
       setGeneratedImage(`${API_BASE_URL}/${generateData.image_url}`);
       
       NProgress.done();
