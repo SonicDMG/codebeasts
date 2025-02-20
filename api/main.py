@@ -10,7 +10,7 @@ import os
 import logging
 from typing import Dict, Any
 
-from flask import Flask, render_template, request, jsonify, g
+from flask import Flask, request, jsonify, g
 import requests
 import logfire
 from dotenv import load_dotenv
@@ -123,8 +123,11 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
 
 @app.route('/')
 def home():
-    """Render the main application interface."""
-    return render_template('index.html')
+    """Return API status."""
+    return jsonify({
+        'status': 'online',
+        'message': 'CodeBeast Generator API is running'
+    })
 
 @app.route('/chat/process', methods=['POST'])
 def process_chat():
@@ -193,4 +196,3 @@ if __name__ == '__main__':
     port = int(os.getenv('PORT', '5000'))
     os.makedirs('static/temp', exist_ok=True)
     app.run(host='0.0.0.0', port=port)
-
