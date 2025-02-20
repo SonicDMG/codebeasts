@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Download, Share2 } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface GeneratedImageProps {
   imageUrl: string;
@@ -13,6 +13,7 @@ interface GeneratedImageProps {
 
 export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, className = '' }: GeneratedImageProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [initialHandle] = useState(handle); // Store the initial handle when component mounts
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -40,7 +41,7 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
       ctx.font = '32px Arial';
       ctx.textAlign = 'center';
 
-      const text = `Generated for @${handle}`;
+      const text = `Generated for @${initialHandle}`; // Use the initial handle instead of the current one
 
       // Position text at bottom center
       const x = canvas.width / 2;
@@ -50,7 +51,7 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
       ctx.strokeText(text, x, y);
       ctx.fillText(text, x, y);
     };
-  }, [imageUrl, handle]);
+  }, [imageUrl, initialHandle]); // Only depend on imageUrl and initialHandle, not the current handle
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
@@ -61,7 +62,7 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
     
     // Create a temporary link element
     const link = document.createElement('a');
-    link.download = `codebeast-${handle}.png`;
+    link.download = `codebeast-${initialHandle}.png`; // Use initialHandle for filename too
     link.href = dataUrl;
     
     // Trigger the download
@@ -92,4 +93,3 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
     </div>
   );
 };
-
