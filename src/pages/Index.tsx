@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -182,6 +183,15 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col px-4">
+      <div className="text-center space-y-2 mb-6">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-fade-in">
+          Transform Your Code Into a Beast! 🐉
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          Turn your GitHub profile into a unique AI-generated creature that reflects your coding prowess
+        </p>
+      </div>
+
       <div className="w-full flex justify-center py-8">
         <div className="relative group">
           <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-accent/50 rounded-lg blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
