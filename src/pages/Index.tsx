@@ -103,7 +103,7 @@ const Index = () => {
       updateLoadingStatus('Generating AI response...', 0.35);
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      updateLoadingStatus(`Creating your CodeBeast with ${model === 'dall_e' ? 'DALL-E' : 'Stability'} API...`, 0.5);
+      updateLoadingStatus(`Creating your CodeBeast with ${model === 'dall_e' ? 'DALL-E' : 'Stability'} API...`, 0.45);
       const generateResponse = await fetch(`${API_BASE_URL}/chat/generate-image`, {
         method: 'POST',
         headers: {
@@ -126,7 +126,7 @@ const Index = () => {
         throw new Error(generateData.error || 'Image generation failed');
       }
 
-      updateLoadingStatus('Loading your CodeBeast...', 0.75);
+      updateLoadingStatus('Generating your CodeBeast...', 0.6);
       
       // Create a promise that resolves when the image is loaded
       const imageLoadPromise = new Promise((resolve, reject) => {
@@ -138,6 +138,8 @@ const Index = () => {
 
       // Wait for the image to load
       await imageLoadPromise;
+      
+      updateLoadingStatus('Finalizing your CodeBeast...', 0.9);
       
       // Set the image URL only after it's loaded
       setGeneratedImage(`${API_BASE_URL}/${generateData.image_url}`);
