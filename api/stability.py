@@ -37,7 +37,7 @@ class StabilityGenerator:
         aspect_ratio: str = "1:1",
         seed: int = 0,
         output_format: str = "png",
-        model: str = "sd3-large-turbo",
+        model: str = "sd3-medium",
         size: int = 512,
     ) -> Optional[Image.Image]:
         """Generate and pixelate an image based on the prompt.
