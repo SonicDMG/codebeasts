@@ -13,7 +13,7 @@ interface GeneratedImageProps {
 
 export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, className = '' }: GeneratedImageProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [initialHandle] = useState(handle); // Store the initial handle when component mounts
+  const [initialHandle] = useState(handle);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -27,61 +27,36 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
     img.src = imageUrl;
 
     img.onload = () => {
-      // Set canvas dimensions to match image
       canvas.width = img.width;
       canvas.height = img.height;
-
-      // Draw the image
       ctx.drawImage(img, 0, 0);
 
-      // Configure text style
       ctx.fillStyle = 'white';
       ctx.strokeStyle = 'black';
       ctx.lineWidth = 4;
       ctx.font = '32px Arial';
       ctx.textAlign = 'center';
 
-      const text = `Generated for @${initialHandle}`; // Use the initial handle instead of the current one
-
-      // Position text at bottom center
+      const text = `Generated for @${initialHandle}`;
       const x = canvas.width / 2;
       const y = canvas.height - 30;
 
-      // Draw text with stroke for better visibility
       ctx.strokeText(text, x, y);
       ctx.fillText(text, x, y);
     };
-  }, [imageUrl, initialHandle]); // Only depend on imageUrl and initialHandle, not the current handle
-
-  const handleDownload = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    // Get the canvas data as a URL
-    const dataUrl = canvas.toDataURL('image/png');
-    
-    // Create a temporary link element
-    const link = document.createElement('a');
-    link.download = `codebeast-${initialHandle}.png`; // Use initialHandle for filename too
-    link.href = dataUrl;
-    
-    // Trigger the download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  }, [imageUrl, initialHandle]);
 
   return (
-    <div className={`lg:w-[600px] space-y-4 ${className}`}>
-      <div className="relative aspect-square w-full overflow-hidden rounded-lg">
+    <div className={`space-y-4 w-full ${className}`}>
+      <div className="relative w-full aspect-square overflow-hidden rounded-lg">
         <canvas
           ref={canvasRef}
-          className="object-cover w-full h-full"
+          className="w-full h-full object-contain"
         />
       </div>
 
       <div className="flex gap-4 justify-center">
-        <Button variant="secondary" className="glass" onClick={handleDownload}>
+        <Button variant="secondary" className="glass" onClick={onDownload}>
           <Download className="mr-2 h-4 w-4" />
           Download
         </Button>
