@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { ModelSelector } from '@/components/github/ModelSelector';
 import { API_BASE_URL } from '@/config/api';
 import type { ProcessResponse, GenerateImageResponse } from '@/types/github';
 
+// Configure NProgress globally
 NProgress.configure({ 
   showSpinner: false,
   trickle: true,
@@ -130,6 +132,7 @@ const Index = () => {
 
       updateLoadingStatus('Generating your CodeBeast...', 0.75);
       
+      // Create a promise that resolves when the image is loaded
       const imageLoadPromise = new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = resolve;
@@ -137,10 +140,12 @@ const Index = () => {
         img.src = `${API_BASE_URL}/${generateData.image_url}`;
       });
 
+      // Wait for the image to load
       await imageLoadPromise;
       
       updateLoadingStatus('Finalizing your CodeBeast...', 0.9);
       
+      // Set the image URL only after it's loaded
       setGeneratedImage(`${API_BASE_URL}/${generateData.image_url}`);
       
       NProgress.done();
@@ -205,8 +210,8 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col px-4 relative max-w-[2000px] mx-auto w-full">
-      <div className="flex flex-col pt-8 md:pt-2 w-full">
+    <div className="min-h-screen flex flex-col px-4 relative">
+      <div className="flex flex-col pt-8 md:pt-2">
         <a 
           href="https://langflow.org" 
           target="_blank" 
@@ -216,7 +221,7 @@ const Index = () => {
           powered by Langflow
         </a>
 
-        <div className="text-center space-y-2 mt-4 md:mt-0 mb-2 max-w-3xl mx-auto">
+        <div className="text-center space-y-2 mt-4 md:mt-0 mb-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-fade-in">
             Transform Your Code Into a Beast! 🐉
           </h1>
@@ -236,10 +241,10 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col items-center w-full">
-          <Card className="glass w-full max-w-[1400px] p-4 sm:p-6 mx-auto">
-            <div className="flex flex-col lg:flex-row gap-6 w-full">
-              <div className="flex-1 space-y-4 min-w-[280px] max-w-[800px] mx-auto lg:mx-0">
+        <div className="flex-1 flex flex-col items-center">
+          <Card className="glass w-full max-w-4xl p-6">
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex-1 space-y-4">
                 <HandleInput
                   handle={handle}
                   isGenerating={isGenerating}
@@ -264,15 +269,18 @@ const Index = () => {
               </div>
 
               {generatedImage && (
-                <div className="lg:flex-1 flex justify-center items-start">
-                  <GeneratedImage
-                    imageUrl={generatedImage}
-                    handle={handle}
-                    onDownload={handleDownload}
-                    onShare={handleShare}
-                    className={`${isFading ? 'animate-fade-out' : 'animate-fade-in'} max-w-[800px] w-full`}
-                  />
-                </div>
+                <GeneratedImage
+                  imageUrl={generatedImage}
+                  handle={handle}
+                  onDownload={() => {
+                    toast({
+                      title: "Download started",
+                      description: "Your CodeBeast image is being downloaded.",
+                    });
+                  }}
+                  onShare={handleShare}
+                  className={isFading ? 'animate-fade-out' : 'animate-fade-in'}
+                />
               )}
             </div>
           </Card>
