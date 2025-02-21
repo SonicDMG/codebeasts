@@ -1,11 +1,13 @@
 
-# CodeBeasts Generator
+# CodeBeasts AI Generator
 
 <div align="center">
-  <img src="/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png" alt="CodeBeasts Logo" width="300px" />
+  <img src="public/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png" alt="CodeBeasts Logo" width="300px" />
 </div>
 
 Turn your GitHub profile into a unique AI-generated creature! This project analyzes your GitHub activity and programming languages to create a personalized pixel art mascot using AI image generation.
+
+Agentic AI powered by [Langflow](https://langflow.org)
 
 ## Live Demo
 Visit [CodeBeasts](https://codebeasts.lovable.app/) to try it out!
@@ -13,7 +15,7 @@ Visit [CodeBeasts](https://codebeasts.lovable.app/) to try it out!
 ## Features
 - GitHub profile analysis
 - Programming language detection
-- AI-powered image generation using Stability AI
+- AI-powered image generation using Stability AI and Dall-E
 - Downloadable and shareable mascot images
 - Real-time progress updates
 - Pixel art style mascots with unique personalities
@@ -21,7 +23,7 @@ Visit [CodeBeasts](https://codebeasts.lovable.app/) to try it out!
 ## Project Structure
 ```
 /
-├── src/               # Frontend React application
+├── src/              # Frontend React application
 ├── api/              # Backend Flask application
 └── public/           # Static assets
 ```
@@ -69,42 +71,32 @@ The backend API will be available at http://localhost:5000
 
 Create a `.env` file in the root directory with the following variables:
 ```
-STABILITY_API_KEY=your_stability_api_key_here
-```
+# API Configuration
+LANGFLOW_BASE_URL=your_langflow_base_url_here
+LANGFLOW_FLOW_ID=your_langflow_flow_id_or_endpoint_namehere
 
-## API Endpoints
+# Image Generation API Configuration
+OPENAI_API_KEY=your_openai_api_key_here (for Dall-E)
+STABILITY_API_KEY=your_stability_api_key_here (for Stability AI)
 
-### POST /chat/process
-Processes a GitHub handle and returns user information along with a generated description.
-
-#### Request
-```json
-{
-  "message": "github_username"
-}
-```
-
-### POST /chat/generate-image
-Generates an image based on the provided description using Stability AI.
-
-#### Request
-```json
-{
-  "prompt": "description_text",
-  "model": "stability"
-}
+# Vite Configuration
+VITE_API_URL=http://localhost:5000
 ```
 
 ## Image Generation Model
 
-The application uses Stability AI's latest model for image generation:
+The application uses both Dall-E and Stability AI's latest model for image generation:
 
-- **Stability AI SD 3**
+- **Stability AI SD3**
+  - Uses Stability AI's latest model for image generation
   - Advanced model optimized for pixel art generation
   - Creates unique, personalized mascots
   - Requires STABILITY_API_KEY
+  
+- **Dall-E 3**
+  - Uses OpenAI's Dall-E model for image generation
+  - Requires OPENAI_API_KEY
 
 ## Contributing
 
 Feel free to open issues and submit pull requests to help improve CodeBeasts!
-
