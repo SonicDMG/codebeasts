@@ -22,7 +22,7 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animal
             rel="noopener noreferrer"
             className="hover:text-white/90 transition-colors"
           >
-            {repoCount} repositories
+            {repoCount} public repositories
           </a>
         </div>
       )}
