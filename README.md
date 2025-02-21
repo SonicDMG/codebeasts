@@ -5,14 +5,18 @@
   <img src="/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png" alt="CodeBeasts Logo" width="300px" />
 </div>
 
-This project includes both the frontend React application and the backend Flask API in a single repository. It generates unique pixel art mascots based on GitHub profiles using AI image generation.
+Turn your GitHub profile into a unique AI-generated creature! This project analyzes your GitHub activity and programming languages to create a personalized pixel art mascot using AI image generation.
+
+## Live Demo
+Visit [CodeBeasts](https://codebeasts.lovable.app/) to try it out!
 
 ## Features
 - GitHub profile analysis
 - Programming language detection
-- AI-powered image generation using DALL-E or Stability AI
+- AI-powered image generation using Stability AI
 - Downloadable and shareable mascot images
 - Real-time progress updates
+- Pixel art style mascots with unique personalities
 
 ## Project Structure
 ```
@@ -51,16 +55,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Copy the example env file
-cp ../.env.example .env
+cp .env.example .env
 
 # Update the .env file with your API keys and settings
 # You'll need:
-# - OpenAI API key for DALL-E
 # - Stability API key for Stability AI
-# - Langflow configuration (if using)
-
-# Start the Flask server
-python main.py
 ```
 
 The frontend will be available at http://localhost:8080
@@ -70,10 +69,7 @@ The backend API will be available at http://localhost:5000
 
 Create a `.env` file in the root directory with the following variables:
 ```
-OPENAI_API_KEY=your_openai_api_key_here
 STABILITY_API_KEY=your_stability_api_key_here
-LANGFLOW_BASE_URL=your_langflow_base_url_here
-LANGFLOW_FLOW_ID=your_langflow_flow_id_here
 ```
 
 ## API Endpoints
@@ -89,26 +85,26 @@ Processes a GitHub handle and returns user information along with a generated de
 ```
 
 ### POST /chat/generate-image
-Generates an image based on the provided description using either DALL-E or Stability AI.
+Generates an image based on the provided description using Stability AI.
 
 #### Request
 ```json
 {
   "prompt": "description_text",
-  "model": "dall_e" // or "stability"
+  "model": "stability"
 }
 ```
 
-## Image Generation Models
+## Image Generation Model
 
-The application supports two AI image generation models:
+The application uses Stability AI's latest model for image generation:
 
-1. **DALL-E** (Default)
-   - OpenAI's DALL-E model for creative and detailed pixel art
-   - Requires OPENAI_API_KEY
+- **Stability AI SD 3**
+  - Advanced model optimized for pixel art generation
+  - Creates unique, personalized mascots
+  - Requires STABILITY_API_KEY
 
-2. **Stability AI**
-   - Alternative model with different artistic style
-   - Requires STABILITY_API_KEY
+## Contributing
 
-Users can switch between models in the interface before generating images.
+Feel free to open issues and submit pull requests to help improve CodeBeasts!
+
