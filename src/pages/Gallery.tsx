@@ -58,23 +58,31 @@ const Gallery = () => {
         {codeBeasts.map((beast) => {
           console.log('Gallery: Rendering beast:', beast);
           return (
-            <Card key={beast.username} className="overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
-              <CardContent className="p-1">
-                <div className="aspect-square overflow-hidden rounded-lg mb-1">
-                  <img
-                    src={`${API_BASE_URL}${beast.imageUrl}`}
-                    alt={`CodeBeast for ${beast.username}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      console.error('Gallery: Image failed to load:', target.src);
-                      target.src = '/placeholder.svg';
-                    }}
-                  />
-                </div>
-                <p className="text-white/80 text-center text-xs font-medium truncate">@{beast.username}</p>
-              </CardContent>
-            </Card>
+            <a 
+              href={`https://github.com/${beast.username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              key={beast.username}
+              className="block hover:scale-105 transition-transform"
+            >
+              <Card className="overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
+                <CardContent className="p-1">
+                  <div className="aspect-square overflow-hidden rounded-lg mb-1">
+                    <img
+                      src={`${API_BASE_URL}${beast.imageUrl}`}
+                      alt={`CodeBeast for ${beast.username}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        console.error('Gallery: Image failed to load:', target.src);
+                        target.src = '/placeholder.svg';
+                      }}
+                    />
+                  </div>
+                  <p className="text-white/80 text-center text-xs font-medium truncate">@{beast.username}</p>
+                </CardContent>
+              </Card>
+            </a>
           );
         })}
       </div>
