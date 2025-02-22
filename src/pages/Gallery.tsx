@@ -87,10 +87,10 @@ const Gallery = () => {
             <div key={beast.username} className="group relative block">
               <button
                 onClick={() => handleDownload(beast.imageUrl, beast.username)}
-                className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-2 right-2 p-1.5 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-black/90"
                 title="Download CodeBeast"
               >
-                <Download className="w-3.5 h-3.5 text-white" />
+                <Download className="w-4 h-4 text-white" />
               </button>
               
               <a 
