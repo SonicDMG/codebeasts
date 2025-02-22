@@ -42,7 +42,7 @@ const Gallery = () => {
         </div>
         
         <div className="flex flex-col items-center gap-2">
-          <p className="text-white/80 text-lg font-medium">Don't have a CodeBeast yet?</p>
+          <p className="text-white/80 text-2xl font-medium">Don't have a CodeBeast yet?</p>
           <Link to="/">
             <Button 
               variant="outline" 
