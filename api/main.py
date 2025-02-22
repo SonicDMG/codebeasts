@@ -1,4 +1,3 @@
-
 """
 CodeBeast Generator Web Application
 
@@ -10,7 +9,7 @@ import os
 import logging
 from typing import Dict, Any
 
-from flask import Flask, request, jsonify, g
+from flask import Flask, request, jsonify, g, send_from_directory
 import requests
 import logfire
 from dotenv import load_dotenv
@@ -191,6 +190,30 @@ def generate_image():
             'error': str(e),
             'status': 'error'
         })
+
+@app.route('/api/static/temp')
+def get_codebeasts():
+    """Fetch all generated CodeBeasts from the static/temp directory."""
+    try:
+        temp_dir = os.path.join(app.static_folder, 'temp')
+        if not os.path.exists(temp_dir):
+            return jsonify([])
+
+        codebeasts = []
+        for filename in os.listdir(temp_dir):
+            if filename.startswith('generated_') and filename.endswith('.png'):
+                username = filename[10:-4]  # Remove 'generated_' prefix and '.png' suffix
+                codebeasts.append({
+                    'username': username,
+                    'imageUrl': f'/static/temp/{filename}'
+                })
+
+        logger.info(f"Found {len(codebeasts)} CodeBeasts in the gallery")
+        return jsonify(codebeasts)
+
+    except Exception as e:
+        logger.error(f"Error fetching CodeBeasts: {str(e)}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '5000'))
