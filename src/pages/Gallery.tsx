@@ -41,7 +41,7 @@ const Gallery = () => {
           <h1 className="text-4xl font-bold text-white">CodeBeasts Gallery</h1>
         </div>
         
-        <div className="self-start flex flex-col items-start gap-2">
+        <div className="flex flex-col items-center gap-2">
           <p className="text-white/80 text-lg font-medium">Don't have a CodeBeast yet?</p>
           <Link to="/">
             <Button 
