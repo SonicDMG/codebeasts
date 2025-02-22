@@ -200,7 +200,7 @@ const Index = () => {
   };
 
   const handleShare = () => {
-    // Create the share text with the direct image URL, Langflow credit, link to generate, and relevant hashtags
+    // Create the share text with Langflow credit and link to generate, image URL will be attached separately
     const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nGenerate your own: https://codebeast.lovable.dev 🚀\n\n#AIart #AgenticAI #AI #CodeArt`;
     const imageUrl = encodeURIComponent(generatedImage);
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${imageUrl}`;
