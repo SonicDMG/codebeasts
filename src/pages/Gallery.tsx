@@ -41,22 +41,25 @@ const Gallery = () => {
           <h1 className="text-4xl font-bold text-white">CodeBeasts Gallery</h1>
         </div>
         
-        <Link to="/" className="self-start">
-          <Button 
-            variant="outline" 
-            className="bg-black/20 border-white/10 hover:border-white/20 text-white gap-2"
-          >
-            <Sparkles className="w-4 h-4" />
-            Generate Your Own CodeBeast
-          </Button>
-        </Link>
+        <div className="self-start flex flex-col items-start gap-2">
+          <p className="text-white/80 text-lg font-medium">Don't have a CodeBeast yet?</p>
+          <Link to="/">
+            <Button 
+              variant="outline" 
+              className="bg-black/20 border-white/10 hover:border-white/20 hover:bg-black/30 text-white gap-2 text-lg font-semibold"
+            >
+              <Sparkles className="w-5 h-5" />
+              Generate Your Own Now!
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {codeBeasts.length > 0 ? (
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2">
           {codeBeasts.map((beast) => (
-            <Link 
-              to={`https://github.com/${beast.username}`}
+            <a 
+              href={`https://github.com/${beast.username}`}
               target="_blank"
               rel="noopener noreferrer"
               key={beast.username}
@@ -78,7 +81,7 @@ const Gallery = () => {
                   <p className="text-white/80 text-center text-xs font-medium truncate">@{beast.username}</p>
                 </CardContent>
               </Card>
-            </Link>
+            </a>
           ))}
         </div>
       ) : (
