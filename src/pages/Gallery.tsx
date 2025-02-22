@@ -40,40 +40,44 @@ const Gallery = () => {
         <h1 className="text-4xl font-bold text-white">CodeBeasts Gallery</h1>
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2">
-        {codeBeasts.map((beast) => (
-          <a 
-            href={`https://github.com/${beast.username}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            key={beast.username}
-            className="block hover:scale-105 transition-transform"
-          >
-            <Card className="overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
-              <CardContent className="p-1">
-                <div className="aspect-square overflow-hidden rounded-lg mb-1">
-                  <img
-                    src={`${API_BASE_URL}${beast.imageUrl}`}
-                    alt={`CodeBeast for ${beast.username}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/placeholder.svg';
-                    }}
-                  />
-                </div>
-                <p className="text-white/80 text-center text-xs font-medium truncate">@{beast.username}</p>
-              </CardContent>
-            </Card>
-          </a>
-        ))}
-      </div>
-
-      {codeBeasts.length === 0 && (
+      {codeBeasts.length > 0 ? (
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2">
+          {codeBeasts.map((beast) => (
+            <a 
+              href={`https://github.com/${beast.username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              key={beast.username}
+              className="block hover:scale-105 transition-transform"
+            >
+              <Card className="overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
+                <CardContent className="p-1">
+                  <div className="aspect-square overflow-hidden rounded-lg mb-1">
+                    <img
+                      src={`${API_BASE_URL}${beast.imageUrl}`}
+                      alt={`CodeBeast for ${beast.username}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/placeholder.svg';
+                      }}
+                    />
+                  </div>
+                  <p className="text-white/80 text-center text-xs font-medium truncate">@{beast.username}</p>
+                </CardContent>
+              </Card>
+            </a>
+          ))}
+        </div>
+      ) : (
         <div className="text-center text-white/60 py-12">
-          <p className="text-lg">No CodeBeasts have been generated yet.</p>
-          <Link to="/" className="text-primary hover:text-primary/80 mt-4 inline-block">
-            Generate your CodeBeast
+          <p className="text-lg mb-4">No CodeBeasts have been generated yet.</p>
+          <p className="text-sm mb-6">Be the first to create your unique AI-generated creature!</p>
+          <Link 
+            to="/" 
+            className="inline-flex items-center px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Generate Your CodeBeast
           </Link>
         </div>
       )}

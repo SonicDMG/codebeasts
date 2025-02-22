@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 import { HandleInput } from '@/components/github/HandleInput';
@@ -212,14 +213,22 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col px-4 relative">
       <div className="flex flex-col pt-8 md:pt-2">
-        <a 
-          href="https://langflow.org" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="self-end text-sm text-muted-foreground hover:text-primary transition-colors z-50"
-        >
-          powered by Langflow
-        </a>
+        <div className="flex justify-between items-center">
+          <a 
+            href="https://langflow.org" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            powered by Langflow
+          </a>
+          <Link
+            to="/gallery"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            View Gallery
+          </Link>
+        </div>
 
         <div className="text-center space-y-2 mt-4 md:mt-0 mb-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-fade-in">
