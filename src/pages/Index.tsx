@@ -200,9 +200,12 @@ const Index = () => {
   };
 
   const handleShare = () => {
-    const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats!`;
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    // Create the share text with the direct image URL and Langflow credit
+    const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by Langflow!`;
+    const imageUrl = encodeURIComponent(generatedImage);
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${imageUrl}`;
+    
+    window.open(twitterUrl, '_blank', 'noopener,noreferrer');
     
     toast({
       title: "Sharing to X",
