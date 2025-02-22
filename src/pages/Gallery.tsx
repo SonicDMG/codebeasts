@@ -11,7 +11,7 @@ interface CodeBeast {
   imageUrl: string;
 }
 
-const Leaderboard = () => {
+const Gallery = () => {
   const [codeBeasts, setCodeBeasts] = useState<CodeBeast[]>([]);
 
   useEffect(() => {
@@ -70,4 +70,4 @@ const Leaderboard = () => {
   );
 };
 
-export default Leaderboard;
+export default Gallery;
