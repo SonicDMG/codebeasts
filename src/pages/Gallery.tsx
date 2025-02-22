@@ -15,16 +15,33 @@ const Gallery = () => {
   const [codeBeasts, setCodeBeasts] = useState<CodeBeast[]>([]);
 
   useEffect(() => {
+    console.log('Gallery: Starting to fetch CodeBeasts from:', `${API_BASE_URL}/api/static/temp`);
+    
     fetch(`${API_BASE_URL}/api/static/temp`)
-      .then(response => response.json())
-      .catch(() => {
+      .then(response => {
+        console.log('Gallery: Received response:', {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+        return response.json();
+      })
+      .then(data => {
+        console.log('Gallery: Parsed response data:', data);
+        setCodeBeasts(data);
+      })
+      .catch((error) => {
+        console.error('Gallery: Error fetching CodeBeasts:', error);
         // Fallback data in case the API isn't available
         const fallbackData: CodeBeast[] = [
           { username: 'example-user', imageUrl: '/static/temp/generated_example-user.png' },
         ];
+        console.log('Gallery: Using fallback data:', fallbackData);
         setCodeBeasts(fallbackData);
       });
   }, []);
+
+  console.log('Gallery: Current codeBeasts state:', codeBeasts);
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
@@ -38,24 +55,28 @@ const Gallery = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {codeBeasts.map((beast) => (
-          <Card key={beast.username} className="overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
-            <CardContent className="p-4">
-              <div className="aspect-square overflow-hidden rounded-lg mb-4">
-                <img
-                  src={`${API_BASE_URL}${beast.imageUrl}`}
-                  alt={`CodeBeast for ${beast.username}`}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/placeholder.svg';
-                  }}
-                />
-              </div>
-              <p className="text-white/80 text-center font-medium">@{beast.username}</p>
-            </CardContent>
-          </Card>
-        ))}
+        {codeBeasts.map((beast) => {
+          console.log('Gallery: Rendering beast:', beast);
+          return (
+            <Card key={beast.username} className="overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
+              <CardContent className="p-4">
+                <div className="aspect-square overflow-hidden rounded-lg mb-4">
+                  <img
+                    src={`${API_BASE_URL}${beast.imageUrl}`}
+                    alt={`CodeBeast for ${beast.username}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      console.error('Gallery: Image failed to load:', target.src);
+                      target.src = '/placeholder.svg';
+                    }}
+                  />
+                </div>
+                <p className="text-white/80 text-center font-medium">@{beast.username}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {codeBeasts.length === 0 && (
