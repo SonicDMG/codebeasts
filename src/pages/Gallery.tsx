@@ -100,9 +100,9 @@ const Gallery = () => {
       </div>
 
       {codeBeasts.length > 0 ? (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2">
+        <div className="grid auto-rows-fr gap-2 grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12">
           {codeBeasts.map((beast) => (
-            <div key={beast.username} className="group relative block">
+            <div key={beast.username} className="group relative block w-full">
               <button
                 onClick={() => handleDownload(beast.imageUrl, beast.username)}
                 className="absolute top-2 right-2 p-1.5 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-black/90"
@@ -115,10 +115,10 @@ const Gallery = () => {
                 href={`https://github.com/${beast.username}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block hover:scale-105 transition-transform"
+                className="block h-full hover:scale-105 transition-transform"
               >
-                <Card className="overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
-                  <CardContent className="p-1">
+                <Card className="h-full overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
+                  <CardContent className="h-full p-1">
                     <div className="aspect-square overflow-hidden rounded-lg mb-1">
                       <img
                         src={`${API_BASE_URL}${beast.imageUrl}`}
