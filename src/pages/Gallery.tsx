@@ -85,6 +85,14 @@ const Gallery = () => {
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2">
           {codeBeasts.map((beast) => (
             <div key={beast.username} className="group relative block">
+              <button
+                onClick={() => handleDownload(beast.imageUrl, beast.username)}
+                className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Download CodeBeast"
+              >
+                <Download className="w-3.5 h-3.5 text-white" />
+              </button>
+              
               <a 
                 href={`https://github.com/${beast.username}`}
                 target="_blank"
@@ -104,19 +112,7 @@ const Gallery = () => {
                         }}
                       />
                     </div>
-                    <div className="flex items-center justify-between px-1">
-                      <p className="text-white/80 text-xs font-medium truncate">@{beast.username}</p>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleDownload(beast.imageUrl, beast.username);
-                        }}
-                        className="text-white/60 hover:text-white/90 transition-colors"
-                        title="Download CodeBeast"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <p className="text-white/80 text-center text-xs font-medium truncate">@{beast.username}</p>
                   </CardContent>
                 </Card>
               </a>
