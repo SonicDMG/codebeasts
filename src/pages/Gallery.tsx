@@ -55,8 +55,8 @@ const Gallery = () => {
       {codeBeasts.length > 0 ? (
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2">
           {codeBeasts.map((beast) => (
-            <a 
-              href={`https://github.com/${beast.username}`}
+            <Link 
+              to={`https://github.com/${beast.username}`}
               target="_blank"
               rel="noopener noreferrer"
               key={beast.username}
@@ -78,7 +78,7 @@ const Gallery = () => {
                   <p className="text-white/80 text-center text-xs font-medium truncate">@{beast.username}</p>
                 </CardContent>
               </Card>
-            </a>
+            </Link>
           ))}
         </div>
       ) : (
