@@ -215,6 +215,11 @@ def get_codebeasts():
         logger.error(f"Error fetching CodeBeasts: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
+@app.route('/static/temp/<path:filename>')
+def serve_static(filename):
+    """Serve static files from the temp directory."""
+    return send_from_directory(os.path.join(app.static_folder, 'temp'), filename)
+
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '5000'))
     os.makedirs('static/temp', exist_ok=True)
