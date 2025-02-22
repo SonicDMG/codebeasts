@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { API_BASE_URL } from '@/config/api';
 
 interface CodeBeast {
@@ -31,13 +31,25 @@ const Gallery = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
-      <div className="mb-8 flex items-center gap-4">
-        <Link to="/">
-          <Button variant="ghost" size="icon" className="text-white/60 hover:text-white">
-            <ArrowLeft className="h-6 w-6" />
+      <div className="flex flex-col gap-6 mb-8">
+        <div className="flex items-center gap-4">
+          <Link to="/">
+            <Button variant="ghost" size="icon" className="text-white/60 hover:text-white">
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+          </Link>
+          <h1 className="text-4xl font-bold text-white">CodeBeasts Gallery</h1>
+        </div>
+        
+        <Link to="/" className="self-start">
+          <Button 
+            variant="outline" 
+            className="bg-black/20 border-white/10 hover:border-white/20 text-white gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            Generate Your Own CodeBeast
           </Button>
         </Link>
-        <h1 className="text-4xl font-bold text-white">CodeBeasts Gallery</h1>
       </div>
 
       {codeBeasts.length > 0 ? (
