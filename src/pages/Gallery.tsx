@@ -15,33 +15,19 @@ const Gallery = () => {
   const [codeBeasts, setCodeBeasts] = useState<CodeBeast[]>([]);
 
   useEffect(() => {
-    console.log('Gallery: Starting to fetch CodeBeasts from:', `${API_BASE_URL}/api/static/temp`);
-    
     fetch(`${API_BASE_URL}/api/static/temp`)
-      .then(response => {
-        console.log('Gallery: Received response:', {
-          status: response.status,
-          statusText: response.statusText,
-          headers: Object.fromEntries(response.headers.entries())
-        });
-        return response.json();
-      })
+      .then(response => response.json())
       .then(data => {
-        console.log('Gallery: Parsed response data:', data);
         setCodeBeasts(data);
       })
-      .catch((error) => {
-        console.error('Gallery: Error fetching CodeBeasts:', error);
+      .catch(() => {
         // Fallback data in case the API isn't available
         const fallbackData: CodeBeast[] = [
           { username: 'example-user', imageUrl: '/static/temp/generated_example-user.png' },
         ];
-        console.log('Gallery: Using fallback data:', fallbackData);
         setCodeBeasts(fallbackData);
       });
   }, []);
-
-  console.log('Gallery: Current codeBeasts state:', codeBeasts);
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
@@ -55,36 +41,32 @@ const Gallery = () => {
       </div>
 
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2">
-        {codeBeasts.map((beast) => {
-          console.log('Gallery: Rendering beast:', beast);
-          return (
-            <a 
-              href={`https://github.com/${beast.username}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              key={beast.username}
-              className="block hover:scale-105 transition-transform"
-            >
-              <Card className="overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
-                <CardContent className="p-1">
-                  <div className="aspect-square overflow-hidden rounded-lg mb-1">
-                    <img
-                      src={`${API_BASE_URL}${beast.imageUrl}`}
-                      alt={`CodeBeast for ${beast.username}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        console.error('Gallery: Image failed to load:', target.src);
-                        target.src = '/placeholder.svg';
-                      }}
-                    />
-                  </div>
-                  <p className="text-white/80 text-center text-xs font-medium truncate">@{beast.username}</p>
-                </CardContent>
-              </Card>
-            </a>
-          );
-        })}
+        {codeBeasts.map((beast) => (
+          <a 
+            href={`https://github.com/${beast.username}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            key={beast.username}
+            className="block hover:scale-105 transition-transform"
+          >
+            <Card className="overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
+              <CardContent className="p-1">
+                <div className="aspect-square overflow-hidden rounded-lg mb-1">
+                  <img
+                    src={`${API_BASE_URL}${beast.imageUrl}`}
+                    alt={`CodeBeast for ${beast.username}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/placeholder.svg';
+                    }}
+                  />
+                </div>
+                <p className="text-white/80 text-center text-xs font-medium truncate">@{beast.username}</p>
+              </CardContent>
+            </Card>
+          </a>
+        ))}
       </div>
 
       {codeBeasts.length === 0 && (
