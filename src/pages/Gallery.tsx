@@ -84,45 +84,42 @@ const Gallery = () => {
       {codeBeasts.length > 0 ? (
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2">
           {codeBeasts.map((beast) => (
-            <div 
-              key={beast.username}
-              className="group relative block hover:scale-105 transition-transform"
-            >
-              <Card className="overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
-                <CardContent className="p-1">
-                  <div className="aspect-square overflow-hidden rounded-lg mb-1">
-                    <img
-                      src={`${API_BASE_URL}${beast.imageUrl}`}
-                      alt={`CodeBeast for ${beast.username}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/placeholder.svg';
-                      }}
-                    />
-                  </div>
-                  <p className="text-white/80 text-center text-xs font-medium truncate">@{beast.username}</p>
-                </CardContent>
-              </Card>
-              
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="flex gap-2">
-                  <a 
-                    href={`https://github.com/${beast.username}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-colors"
-                  >
-                    @{beast.username}
-                  </a>
-                  <button
-                    onClick={() => handleDownload(beast.imageUrl, beast.username)}
-                    className="bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+            <div key={beast.username} className="group relative block">
+              <a 
+                href={`https://github.com/${beast.username}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block hover:scale-105 transition-transform"
+              >
+                <Card className="overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
+                  <CardContent className="p-1">
+                    <div className="aspect-square overflow-hidden rounded-lg mb-1">
+                      <img
+                        src={`${API_BASE_URL}${beast.imageUrl}`}
+                        alt={`CodeBeast for ${beast.username}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder.svg';
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between px-1">
+                      <p className="text-white/80 text-xs font-medium truncate">@{beast.username}</p>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDownload(beast.imageUrl, beast.username);
+                        }}
+                        className="text-white/60 hover:text-white/90 transition-colors"
+                        title="Download CodeBeast"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </a>
             </div>
           ))}
         </div>
