@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Download, Sparkles } from 'lucide-react';
 import { API_BASE_URL } from '@/config/api';
+import { toast } from '@/components/ui/use-toast';
 
 interface CodeBeast {
   username: string;
@@ -28,6 +29,31 @@ const Gallery = () => {
         setCodeBeasts(fallbackData);
       });
   }, []);
+
+  const handleDownload = async (imageUrl: string, username: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}${imageUrl}`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `codebeast-${username}.png`;
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+      toast({
+        description: "CodeBeast downloaded successfully!",
+        duration: 2000,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: "Failed to download CodeBeast.",
+        duration: 2000,
+      });
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
@@ -58,12 +84,9 @@ const Gallery = () => {
       {codeBeasts.length > 0 ? (
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2">
           {codeBeasts.map((beast) => (
-            <a 
-              href={`https://github.com/${beast.username}`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <div 
               key={beast.username}
-              className="block hover:scale-105 transition-transform"
+              className="group relative block hover:scale-105 transition-transform"
             >
               <Card className="overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
                 <CardContent className="p-1">
@@ -81,7 +104,26 @@ const Gallery = () => {
                   <p className="text-white/80 text-center text-xs font-medium truncate">@{beast.username}</p>
                 </CardContent>
               </Card>
-            </a>
+              
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-2">
+                  <a 
+                    href={`https://github.com/${beast.username}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-colors"
+                  >
+                    @{beast.username}
+                  </a>
+                  <button
+                    onClick={() => handleDownload(beast.imageUrl, beast.username)}
+                    className="bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       ) : (
