@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Download, Sparkles } from 'lucide-react';
+import { ArrowLeft, Download, RefreshCw, Sparkles } from 'lucide-react';
 import { API_BASE_URL } from '@/config/api';
 import { toast } from '@/components/ui/use-toast';
 
@@ -14,20 +14,27 @@ interface CodeBeast {
 
 const Gallery = () => {
   const [codeBeasts, setCodeBeasts] = useState<CodeBeast[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchCodeBeasts = async () => {
+    setIsRefreshing(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/static/temp`);
+      const data = await response.json();
+      setCodeBeasts(data);
+    } catch {
+      // Fallback data in case the API isn't available
+      const fallbackData: CodeBeast[] = [
+        { username: 'example-user', imageUrl: '/static/temp/generated_example-user.png' },
+      ];
+      setCodeBeasts(fallbackData);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/static/temp`)
-      .then(response => response.json())
-      .then(data => {
-        setCodeBeasts(data);
-      })
-      .catch(() => {
-        // Fallback data in case the API isn't available
-        const fallbackData: CodeBeast[] = [
-          { username: 'example-user', imageUrl: '/static/temp/generated_example-user.png' },
-        ];
-        setCodeBeasts(fallbackData);
-      });
+    fetchCodeBeasts();
   }, []);
 
   const handleDownload = async (imageUrl: string, username: string) => {
@@ -58,13 +65,24 @@ const Gallery = () => {
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
       <div className="flex flex-col gap-6 mb-8">
-        <div className="flex items-center gap-4">
-          <Link to="/">
-            <Button variant="ghost" size="icon" className="text-white/60 hover:text-white">
-              <ArrowLeft className="h-6 w-6" />
-            </Button>
-          </Link>
-          <h1 className="text-4xl font-bold text-white">CodeBeasts Gallery</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/">
+              <Button variant="ghost" size="icon" className="text-white/60 hover:text-white">
+                <ArrowLeft className="h-6 w-6" />
+              </Button>
+            </Link>
+            <h1 className="text-4xl font-bold text-white">CodeBeasts Gallery</h1>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={fetchCodeBeasts}
+            disabled={isRefreshing}
+            className="text-white/60 hover:text-white"
+          >
+            <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
         
         <div className="flex flex-col items-center gap-2">
