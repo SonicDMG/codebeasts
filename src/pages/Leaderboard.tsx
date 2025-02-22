@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { API_BASE_URL } from '@/config/api';
 
 interface CodeBeast {
   username: string;
@@ -14,9 +15,7 @@ const Leaderboard = () => {
   const [codeBeasts, setCodeBeasts] = useState<CodeBeast[]>([]);
 
   useEffect(() => {
-    // In a real app, we'd fetch this from an API
-    // For now, we'll simulate this with some example data
-    fetch('/api/static/temp')
+    fetch(`${API_BASE_URL}/api/static/temp`)
       .then(response => response.json())
       .catch(() => {
         // Fallback data in case the API isn't available
@@ -44,7 +43,7 @@ const Leaderboard = () => {
             <CardContent className="p-4">
               <div className="aspect-square overflow-hidden rounded-lg mb-4">
                 <img
-                  src={beast.imageUrl}
+                  src={`${API_BASE_URL}${beast.imageUrl}`}
                   alt={`CodeBeast for ${beast.username}`}
                   className="w-full h-full object-cover"
                   onError={(e) => {
