@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
@@ -200,11 +201,6 @@ const Index = () => {
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
     
     window.open(twitterUrl, '_blank', 'noopener,noreferrer');
-    
-    toast({
-      title: "Image Downloaded",
-      description: "Your CodeBeast has been downloaded. Please attach it to your tweet for the best sharing experience!",
-    });
   };
 
   return (
@@ -278,12 +274,7 @@ const Index = () => {
                 <GeneratedImage
                   imageUrl={generatedImage}
                   handle={handle}
-                  onDownload={() => {
-                    toast({
-                      title: "Download started",
-                      description: "Your CodeBeast image is being downloaded.",
-                    });
-                  }}
+                  onDownload={handleDownload}
                   onShare={handleShare}
                   className={isFading ? 'animate-fade-out' : 'animate-fade-in'}
                 />
