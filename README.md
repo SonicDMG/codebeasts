@@ -23,6 +23,10 @@ We've included the `Cute_Animal_Generator.json` file which contains the Langflow
 3. Upload the `Cute_Animal_Generator.json` file
 4. You'll now have access to the complete AI workflow that powers CodeBeasts!
 
+<div align="center">
+  <img src="public/codebeasts_langflow_flow.png" alt="CodeBeasts Langflow Workflow" width="800px" />
+</div>
+
 This workflow demonstrates how to create an agentic AI system that generates personalized mascots based on GitHub profiles.
 
 ## Features
