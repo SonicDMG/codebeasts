@@ -72,7 +72,7 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
   };
 
   return (
-    <div className={`lg:w-[600px] space-y-4 ${className}`}>
+    <div className={`lg:w-[600px] space-y-6 pb-6 ${className}`}>
       <div className="relative aspect-square w-full overflow-hidden rounded-lg">
         <canvas
           ref={canvasRef}
@@ -80,12 +80,12 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
         />
       </div>
 
-      <div className="flex gap-4 justify-center">
-        <Button variant="secondary" className="glass" onClick={handleDownload}>
+      <div className="flex gap-4 justify-center px-4">
+        <Button variant="secondary" className="glass w-full sm:w-auto" onClick={handleDownload}>
           <Download className="mr-2 h-4 w-4" />
           Download
         </Button>
-        <Button variant="secondary" className="glass" onClick={onShare}>
+        <Button variant="secondary" className="glass w-full sm:w-auto" onClick={onShare}>
           <Share2 className="mr-2 h-4 w-4" />
           Share
         </Button>
