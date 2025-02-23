@@ -13,9 +13,10 @@ Agentic AI powered by [Langflow](https://langflow.new)
 Visit [CodeBeasts](https://codebeasts.lovable.app/) to try it out!
 
 ## Source Code
-Check out the [CodeBeasts GitHub repository](https://github.com/langflow/codebeasts) to see how it works and contribute!
+Check out the [CodeBeasts GitHub repository](https://github.com/SonicDMG/codebeasts) to see how it works and contribute!
 
 ## Features
+- Agentic AI using Langflow
 - GitHub profile analysis
 - Programming language detection
 - AI-powered image generation using Stability AI and Dall-E
