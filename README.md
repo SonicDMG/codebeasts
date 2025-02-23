@@ -13,7 +13,17 @@ Agentic AI powered by [Langflow](https://langflow.new)
 Visit [CodeBeasts](https://codebeasts.lovable.app/) to try it out!
 
 ## Source Code
-Check out the [CodeBeasts GitHub repository](https://github.com/SonicDMG/codebeasts) to see how it works and contribute!
+Check out the [CodeBeasts GitHub repository](https://github.com/langflow/codebeasts) to see how it works and contribute!
+
+## Langflow AI Workflow
+We've included the `Cute_Animal_Generator.json` file which contains the Langflow AI workflow used in this project. To use it:
+
+1. Visit [Langflow](https://langflow.new)
+2. Click on "Import Flow"
+3. Upload the `Cute_Animal_Generator.json` file
+4. You'll now have access to the complete AI workflow that powers CodeBeasts!
+
+This workflow demonstrates how to create an agentic AI system that generates personalized mascots based on GitHub profiles.
 
 ## Features
 - Agentic AI using Langflow
