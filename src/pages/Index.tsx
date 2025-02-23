@@ -208,7 +208,7 @@ const Index = () => {
       <div className="flex flex-col pt-8 md:pt-2">
         <div className="flex justify-between items-center">
           <a 
-            href="https://langflow.org" 
+            href="https://langflow.new" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="text-sm text-muted-foreground hover:text-primary transition-colors"
