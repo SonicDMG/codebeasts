@@ -7,7 +7,7 @@
 
 Turn your GitHub profile into a unique AI-generated creature! This project analyzes your GitHub activity and programming languages to create a personalized pixel art mascot using AI image generation.
 
-Agentic AI powered by [Langflow](https://langflow.org)
+Agentic AI powered by [Langflow](https://langflow.new)
 
 ## Live Demo
 Visit [CodeBeasts](https://codebeasts.lovable.app/) to try it out!
