@@ -133,21 +133,30 @@ const Gallery = () => {
                     
                     {/* Mobile-only action buttons */}
                     <div className="flex justify-center gap-2 mt-2 md:hidden">
-                      <button
+                      <Button
+                        variant="secondary"
+                        size="icon"
                         onClick={() => handleDownload(beast.imageUrl, beast.username)}
-                        className="p-1.5 bg-black/40 rounded-full hover:bg-black/60 transition-colors"
+                        className="glass h-8 w-8"
                         title="Download CodeBeast"
                       >
-                        <Download className="w-4 h-4 text-white" />
-                      </button>
-                      <a
-                        href={`https://github.com/${beast.username}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 bg-black/40 rounded-full hover:bg-black/60 transition-colors"
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="glass h-8 w-8"
+                        asChild
                       >
-                        <ExternalLink className="w-4 h-4 text-white" />
-                      </a>
+                        <a
+                          href={`https://github.com/${beast.username}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="View GitHub Profile"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
