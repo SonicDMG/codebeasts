@@ -18,8 +18,8 @@ Check out the [CodeBeasts GitHub repository](https://github.com/langflow/codebea
 ## Langflow
 We've included the `Cute_Animal_Generator.json` file which contains the Langflow AI workflow used in this project. To use it:
 
-1. Visit [Langflow](https://langflow.new)
-2. Click on "Import Flow"
+1. Visit [Langflow](https://github.com/langflow-ai/langflow) and follow the instructions to install
+2. Click on "Upload a Flow"
 3. Upload the `Cute_Animal_Generator.json` file
 4. You'll now have access to the complete AI workflow that powers CodeBeasts!
 
@@ -27,7 +27,7 @@ We've included the `Cute_Animal_Generator.json` file which contains the Langflow
   <img src="public/codebeasts_langflow_flow.png" alt="CodeBeasts Langflow Workflow" width="800px" />
 </div>
 
-This workflow demonstrates how to create an agentic AI system that generates personalized mascots based on GitHub profiles.
+This workflow demonstrates how to create an agentic AI system with tool use that generates personalized mascots based on GitHub profiles and stores the results in a database.
 
 ## Features
 - Agentic AI using Langflow
