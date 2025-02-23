@@ -100,9 +100,9 @@ const Gallery = () => {
       </div>
 
       {codeBeasts.length > 0 ? (
-        <div className="grid auto-rows-fr gap-2 grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12">
+        <div className="grid gap-4 grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 auto-rows-fr">
           {codeBeasts.map((beast) => (
-            <div key={beast.username} className="group relative block w-full">
+            <div key={beast.username} className="group relative aspect-[1/1.2]">
               <button
                 onClick={() => handleDownload(beast.imageUrl, beast.username)}
                 className="absolute top-2 right-2 p-1.5 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-black/90"
@@ -118,8 +118,8 @@ const Gallery = () => {
                 className="block h-full hover:scale-105 transition-transform"
               >
                 <Card className="h-full overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
-                  <CardContent className="h-full p-1">
-                    <div className="aspect-square overflow-hidden rounded-lg mb-1">
+                  <CardContent className="h-full p-2">
+                    <div className="aspect-square overflow-hidden rounded-lg mb-2">
                       <img
                         src={`${API_BASE_URL}${beast.imageUrl}`}
                         alt={`CodeBeast for ${beast.username}`}
@@ -130,7 +130,7 @@ const Gallery = () => {
                         }}
                       />
                     </div>
-                    <p className="text-white/80 text-center text-xs font-medium truncate">@{beast.username}</p>
+                    <p className="text-white/80 text-center text-sm font-medium truncate">@{beast.username}</p>
                   </CardContent>
                 </Card>
               </a>
