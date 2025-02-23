@@ -10,7 +10,7 @@ Turn your GitHub profile into a unique AI-generated creature! This project analy
 Agentic AI powered by [Langflow](https://langflow.new)
 
 ## Live Demo
-Visit [CodeBeasts](https://codebeasts.lovable.app/) to try it out!
+Visit <a href="https://codebeasts.lovable.app/" target="_blank">CodeBeasts</a> to try it out!
 
 ## Langflow
 We've included the `Cute_Animal_Generator.json` file which contains the Langflow AI workflow used in this project. To use it:
