@@ -7,7 +7,24 @@
 
 Turn your GitHub profile into a unique AI-generated creature! This project analyzes your GitHub activity and programming languages to create a personalized pixel art mascot using AI image generation.
 
-Agentic AI powered by [Langflow](https://langflow.new)
+## Technical Overview
+CodeBeasts is a full-stack application built with modern technologies:
+
+### Frontend
+- Built with [Lovable](https://lovable.dev), a powerful AI-powered web application editor
+- React + [Vite](https://vitejs.dev/) for lightning-fast development
+- [Tailwind CSS](https://tailwindcss.com/) for responsive, utility-first styling
+- [Shadcn UI](https://ui.shadcn.com/) for beautiful, accessible components
+- [Tanstack Query](https://tanstack.com/query/latest) for efficient data fetching
+- TypeScript for type-safe development
+
+### Backend
+- [Flask](https://flask.palletsprojects.com/) Python web framework
+- Advanced logging with [Logfire](https://logfire.dev/) for production-grade monitoring
+- Integration with multiple AI providers:
+  - [Stability AI](https://stability.ai/) for image generation
+  - [OpenAI](https://openai.com/) (DALL-E) as an alternative image generator
+- Agentic AI powered by [Langflow](https://langflow.new)
 
 ## Live Demo
 Visit <a href="https://codebeasts.lovable.app/" target="_blank">CodeBeasts</a> to try it out!
@@ -113,5 +130,4 @@ The application uses both Dall-E and Stability AI's latest model for image gener
   - Requires OPENAI_API_KEY
 
 ## Contributing
-
 Feel free to open issues and submit pull requests to help improve CodeBeasts!
