@@ -207,14 +207,24 @@ const Index = () => {
     <div className="min-h-screen flex flex-col px-4 relative">
       <div className="flex flex-col pt-8 md:pt-2">
         <div className="flex justify-between items-center">
-          <a 
-            href="https://langflow.new" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            powered by Langflow
-          </a>
+          <div className="flex items-center gap-4">
+            <a 
+              href="https://langflow.new" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              powered by Langflow
+            </a>
+            <a 
+              href="https://github.com/logfire-ai/codebeasts" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              GitHub
+            </a>
+          </div>
           <Link
             to="/gallery"
             className="text-sm text-muted-foreground hover:text-primary transition-colors"
