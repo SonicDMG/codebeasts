@@ -200,17 +200,18 @@ const Index = () => {
   };
 
   const handleShare = () => {
-    const imageUrl = generatedImage;
-    // Put the image URL first in the text, followed by the rest of the content
-    const text = `${imageUrl}\n\nCheck out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nGenerate your own: https://codebeast.lovable.dev 🚀\n\n#AIart #AgenticAI #AI #CodeArt`;
+    // Download the image first
+    handleDownload();
+    
+    const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nGenerate your own: https://codebeast.lovable.dev 🚀\n\n#AIart #AgenticAI #AI #CodeArt`;
     
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
     
     window.open(twitterUrl, '_blank', 'noopener,noreferrer');
     
     toast({
-      title: "Sharing to X",
-      description: "Opening X (formerly Twitter) to share your CodeBeast.",
+      title: "Image Downloaded",
+      description: "Your CodeBeast has been downloaded. Please attach it to your tweet for the best sharing experience!",
     });
   };
 
