@@ -217,7 +217,7 @@ const Index = () => {
               powered by Langflow
             </a>
             <a 
-              href="https://github.com/logfire-ai/codebeasts" 
+              href="https://github.com/SonicDMG/codebeasts" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
