@@ -12,9 +12,6 @@ Agentic AI powered by [Langflow](https://langflow.new)
 ## Live Demo
 Visit [CodeBeasts](https://codebeasts.lovable.app/) to try it out!
 
-## Source Code
-Check out the [CodeBeasts GitHub repository](https://github.com/langflow/codebeasts) to see how it works and contribute!
-
 ## Langflow
 We've included the `Cute_Animal_Generator.json` file which contains the Langflow AI workflow used in this project. To use it:
 
