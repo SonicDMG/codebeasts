@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -12,7 +11,6 @@ import { ModelSelector } from '@/components/github/ModelSelector';
 import { API_BASE_URL } from '@/config/api';
 import type { ProcessResponse, GenerateImageResponse } from '@/types/github';
 
-// Configure NProgress globally
 NProgress.configure({ 
   showSpinner: false,
   trickle: true,
@@ -133,7 +131,6 @@ const Index = () => {
 
       updateLoadingStatus('Generating your CodeBeast...', 0.75);
       
-      // Create a promise that resolves when the image is loaded
       const imageLoadPromise = new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = resolve;
@@ -141,12 +138,10 @@ const Index = () => {
         img.src = `${API_BASE_URL}/${generateData.image_url}`;
       });
 
-      // Wait for the image to load
       await imageLoadPromise;
       
       updateLoadingStatus('Finalizing your CodeBeast...', 0.9);
       
-      // Set the image URL only after it's loaded
       setGeneratedImage(`${API_BASE_URL}/${generateData.image_url}`);
       
       NProgress.done();
@@ -200,10 +195,7 @@ const Index = () => {
   };
 
   const handleShare = () => {
-    // Download the image first
-    handleDownload();
-    
-    const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nGenerate your own: https://codebeast.lovable.dev 🚀\n\n#AIart #AgenticAI #AI #CodeArt`;
+    const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nGenerate your own: https://codebeast.lovable.dev 🚀\n\n${generatedImage}\n\n#AIart #AgenticAI #AI #CodeArt`;
     
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
     
