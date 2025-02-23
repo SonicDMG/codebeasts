@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,7 +22,6 @@ const Gallery = () => {
       const data = await response.json();
       setCodeBeasts(data);
     } catch {
-      // Fallback data in case the API isn't available
       const fallbackData: CodeBeast[] = [
         { username: 'example-user', imageUrl: '/static/temp/generated_example-user.png' },
       ];
@@ -102,11 +100,10 @@ const Gallery = () => {
       {codeBeasts.length > 0 ? (
         <div className="grid gap-4 grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 auto-rows-fr">
           {codeBeasts.map((beast) => (
-            <div key={beast.username} className="group relative aspect-[1/1.2]">
+            <div key={beast.username} className="group relative aspect-[1/1.4]">
               <Card className="h-full overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
                 <CardContent className="h-full p-2 flex flex-col">
                   <div className="relative flex-1">
-                    {/* Desktop-only download button (hidden on mobile) */}
                     <button
                       onClick={() => handleDownload(beast.imageUrl, beast.username)}
                       className="absolute top-2 right-2 p-1.5 bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-black/90 hidden md:block"
@@ -128,10 +125,9 @@ const Gallery = () => {
                     </div>
                   </div>
 
-                  <div className="mt-2">
+                  <div className="mt-2 pb-1">
                     <p className="text-white/80 text-center text-sm font-medium truncate">@{beast.username}</p>
                     
-                    {/* Mobile-only action buttons */}
                     <div className="flex justify-center gap-2 mt-2 md:hidden">
                       <Button
                         variant="secondary"
@@ -162,7 +158,6 @@ const Gallery = () => {
                 </CardContent>
               </Card>
 
-              {/* Desktop-only GitHub link wrapper */}
               <a 
                 href={`https://github.com/${beast.username}`}
                 target="_blank"
