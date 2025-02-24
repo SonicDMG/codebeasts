@@ -6,6 +6,7 @@ import Index from '@/pages/Index';
 import Gallery from '@/pages/Gallery';
 import DirectImage from '@/pages/DirectImage';
 import NotFound from '@/pages/NotFound';
+import { useSearchParams } from 'react-router-dom';
 import './App.css';
 
 // Create a client
@@ -18,21 +19,23 @@ const queryClient = new QueryClient({
   },
 });
 
+// Root component to handle the conditional rendering
+const RootComponent = () => {
+  const [searchParams] = useSearchParams();
+  const username = searchParams.get('u');
+  
+  if (username) {
+    return <DirectImage />;
+  }
+  return <Index />;
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
-          <Route path="/" element={
-            ({ location }) => {
-              const searchParams = new URLSearchParams(location.search);
-              const username = searchParams.get('u');
-              if (username) {
-                return <DirectImage />;
-              }
-              return <Index />;
-            }
-          } />
+          <Route path="/" element={<RootComponent />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/direct/:username" element={<DirectImage />} />
           <Route path="*" element={<NotFound />} />
