@@ -1,35 +1,37 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
-import { Toaster } from '@/components/ui/toaster'
-import Index from './pages/Index'
-import Gallery from './pages/Gallery'
-import NotFound from './pages/NotFound'
-import DirectImage from './pages/DirectImage'
 
-const RouteHandler = () => {
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const hasUserParam = searchParams.has('u');
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/toaster';
+import Index from '@/pages/Index';
+import Gallery from '@/pages/Gallery';
+import DirectImage from '@/pages/DirectImage';
+import NotFound from '@/pages/NotFound';
+import './App.css';
 
-  // If we're at the root path and have a 'u' parameter, show DirectImage
-  if (location.pathname === '/' && hasUserParam) {
-    return <DirectImage />;
-  }
-
-  // Otherwise show the Index component
-  return <Index />;
-};
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<RouteHandler />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
-    </Router>
-  )
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/direct/:username" element={<DirectImage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+      </Router>
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;
