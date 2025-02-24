@@ -1,3 +1,4 @@
+
 """
 CodeBeast Generator Web Application
 
@@ -8,7 +9,7 @@ using AI-powered image generation and natural language processing.
 import os
 import logging
 
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 import logfire
 
@@ -36,8 +37,16 @@ app.static_folder = 'static'
 app.dalle = DallEGenerator(OPENAI_API_KEY)
 app.stability = StabilityGenerator(STABILITY_API_KEY)
 
-# Register routes
+# Register API routes
 register_routes(app)
+
+# Handle SPA routes by serving index.html
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=PORT)
