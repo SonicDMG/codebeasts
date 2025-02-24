@@ -23,7 +23,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
-          <Route path="/" element={<DirectImage />} /> {/* This will handle /?u= format */}
+          <Route path="/" element={<Index />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/direct/:username" element={<DirectImage />} />
           <Route path="*" element={<NotFound />} />
