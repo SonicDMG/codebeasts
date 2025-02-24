@@ -11,8 +11,9 @@ const DirectImage = () => {
 
   useEffect(() => {
     if (handle) {
+      const timestamp = Date.now(); // Add timestamp for cache busting
       // First try with original case
-      const originalCaseImagePath = `${API_BASE_URL}/static/temp/generated_${handle}.png`;
+      const originalCaseImagePath = `${API_BASE_URL}/static/temp/generated_${handle}.png?t=${timestamp}`;
       
       fetch(originalCaseImagePath)
         .then(response => {
@@ -20,13 +21,13 @@ const DirectImage = () => {
             setImageUrl(originalCaseImagePath);
           } else {
             // If original case fails, try lowercase
-            const lowercaseImagePath = `${API_BASE_URL}/static/temp/generated_${handle.toLowerCase()}.png`;
+            const lowercaseImagePath = `${API_BASE_URL}/static/temp/generated_${handle.toLowerCase()}.png?t=${timestamp}`;
             return fetch(lowercaseImagePath);
           }
         })
         .then(response => {
           if (response?.ok) {
-            setImageUrl(`${API_BASE_URL}/static/temp/generated_${handle.toLowerCase()}.png`);
+            setImageUrl(`${API_BASE_URL}/static/temp/generated_${handle.toLowerCase()}.png?t=${timestamp}`);
           } else {
             console.error('Image not found in either case');
           }
