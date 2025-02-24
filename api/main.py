@@ -9,7 +9,7 @@ import os
 import logging
 from typing import Dict, Any
 
-from flask import Flask, request, jsonify, g, send_from_directory
+from flask import Flask, request, jsonify, g, send_from_directory, send_file
 import requests
 import logfire
 from dotenv import load_dotenv
@@ -217,8 +217,12 @@ def get_codebeasts():
 
 @app.route('/static/temp/<path:filename>')
 def serve_static(filename):
-    """Serve static files from the temp directory."""
-    return send_from_directory(os.path.join(app.static_folder, 'temp'), filename)
+    """Serve static files from the temp directory with proper headers."""
+    response = send_from_directory(os.path.join(app.static_folder, 'temp'), filename)
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', '5000'))
