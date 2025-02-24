@@ -20,7 +20,9 @@ const Gallery = () => {
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
     console.log('Fetching CodeBeasts...');
-    const response = await fetch(`${API_BASE_URL}/api/static/temp`);
+    const response = await fetch(`${API_BASE_URL}/api/static/temp`, {
+      cache: 'no-store' // Ensure we don't use browser cache
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch CodeBeasts');
     }
@@ -33,6 +35,9 @@ const Gallery = () => {
     queryKey: ['codebeasts'],
     queryFn: fetchCodeBeasts,
     refetchInterval: 10000, // Refetch every 10 seconds
+    staleTime: 0, // Consider data stale immediately
+    cacheTime: 0, // Don't cache the data
+    refetchOnMount: true, // Always refetch on mount
   });
 
   useEffect(() => {
