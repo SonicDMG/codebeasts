@@ -1,0 +1,31 @@
+
+services:
+  # Flask API service
+  - type: web
+    name: codebeasts-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python api/main.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: STABILITY_API_KEY
+        sync: false
+      - key: PORT
+        value: 10000
+
+  # Frontend static site
+  - type: web
+    name: codebeasts-web
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        sync: false
