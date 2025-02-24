@@ -84,7 +84,7 @@ export const shareOnTwitter = (imageUrl: string) => {
     }
   });
 
-  const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nGenerate your own: https://codebeasts.onrender.com\n\n#AIart #AgenticAI #AI #CodeArt`;
+  const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nGenerate your own: https://codebeasts.onrender.com\n\n${absoluteImageUrl}\n\n#AIart #AgenticAI #AI #CodeArt`;
   
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
   
