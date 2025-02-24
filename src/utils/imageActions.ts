@@ -31,27 +31,27 @@ export const shareOnTwitter = (imageUrl: string) => {
   const metaTitle = document.querySelector('meta[property="og:title"]');
   const metaDescription = document.querySelector('meta[property="og:description"]');
   
-  // Set static image URL
-  const staticImageUrl = `${window.location.origin}/codebeasts_screen.png`;
+  // Set app logo image URL
+  const appLogoUrl = `${window.location.origin}/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png`;
   
-  // Always update the image URL to the static app image
+  // Always update the image URL to the app logo
   if (metaImage) {
-    metaImage.setAttribute('content', staticImageUrl);
+    metaImage.setAttribute('content', appLogoUrl);
   } else {
     const meta = document.createElement('meta');
     meta.setAttribute('property', 'og:image');
-    meta.setAttribute('content', staticImageUrl);
+    meta.setAttribute('content', appLogoUrl);
     document.head.appendChild(meta);
   }
 
   // Update Twitter-specific meta tags
   let twitterImage = document.querySelector('meta[name="twitter:image"]');
   if (twitterImage) {
-    twitterImage.setAttribute('content', staticImageUrl);
+    twitterImage.setAttribute('content', appLogoUrl);
   } else {
     twitterImage = document.createElement('meta');
     twitterImage.setAttribute('name', 'twitter:image');
-    twitterImage.setAttribute('content', staticImageUrl);
+    twitterImage.setAttribute('content', appLogoUrl);
     document.head.appendChild(twitterImage);
   }
 
