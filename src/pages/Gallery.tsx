@@ -36,8 +36,10 @@ const Gallery = () => {
     queryFn: fetchCodeBeasts,
     refetchInterval: 10000, // Refetch every 10 seconds
     staleTime: 0, // Consider data stale immediately
-    cacheTime: 0, // Don't cache the data
+    gcTime: 0, // Don't keep unused data in garbage collection
     refetchOnMount: true, // Always refetch on mount
+    refetchOnWindowFocus: true, // Refetch when window gains focus
+    refetchOnReconnect: true // Refetch when reconnecting
   });
 
   useEffect(() => {
