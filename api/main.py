@@ -23,6 +23,9 @@ logging.basicConfig(handlers=[logfire.LogfireLoggingHandler()])
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+# Create static directory
+os.makedirs('static/temp', exist_ok=True)
+
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
@@ -37,5 +40,4 @@ app.stability = StabilityGenerator(STABILITY_API_KEY)
 register_routes(app)
 
 if __name__ == '__main__':
-    os.makedirs('static/temp', exist_ok=True)
     app.run(host='0.0.0.0', port=PORT)

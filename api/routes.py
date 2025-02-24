@@ -1,7 +1,7 @@
-
 """Module containing all API routes and handlers."""
 
 import os
+import requests
 from flask import request, jsonify, g, send_from_directory
 import logging
 from config import FLOW_ID
