@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,27 +18,24 @@ const Gallery = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
-    console.log('Fetching CodeBeasts...');
     const response = await fetch(`${API_BASE_URL}/api/static/temp`, {
-      cache: 'no-store' // Ensure we don't use browser cache
+      cache: 'no-store'
     });
     if (!response.ok) {
       throw new Error('Failed to fetch CodeBeasts');
     }
-    const data = await response.json();
-    console.log('Fetched CodeBeasts:', data);
-    return data;
+    return await response.json();
   };
 
   const { data: codeBeasts = [], refetch } = useQuery({
     queryKey: ['codebeasts'],
     queryFn: fetchCodeBeasts,
-    refetchInterval: 10000, // Refetch every 10 seconds
-    staleTime: 0, // Consider data stale immediately
-    gcTime: 0, // Don't keep unused data in garbage collection
-    refetchOnMount: true, // Always refetch on mount
-    refetchOnWindowFocus: true, // Refetch when window gains focus
-    refetchOnReconnect: true // Refetch when reconnecting
+    refetchInterval: 10000,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true
   });
 
   useEffect(() => {
@@ -50,13 +46,9 @@ const Gallery = () => {
       });
 
       if (newOrUpdatedBeasts.length > 0) {
-        console.log('New or updated CodeBeasts detected:', newOrUpdatedBeasts);
-        
-        // Separate new and updated beasts
         const newBeasts = newOrUpdatedBeasts.filter(beast => !previousBeasts.current.has(beast.username));
         const updatedBeasts = newOrUpdatedBeasts.filter(beast => previousBeasts.current.has(beast.username));
         
-        // Show different toast messages for new vs updated beasts
         if (newBeasts.length > 0) {
           const usernames = newBeasts.map(beast => beast.username);
           toast({
@@ -76,7 +68,6 @@ const Gallery = () => {
         }
       }
 
-      // Update the previous beasts map
       const newBeastsMap = new Map(codeBeasts.map(beast => [beast.username, beast.imageUrl]));
       previousBeasts.current = newBeastsMap;
     }
