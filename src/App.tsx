@@ -1,23 +1,38 @@
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from '@/components/ui/sonner'
+import Index from './pages/Index'
+import Gallery from './pages/Gallery'
+import NotFound from './pages/NotFound'
+import DirectImage from './pages/DirectImage'
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Toaster } from '@/components/ui/toaster';
-import Index from '@/pages/Index';
-import Gallery from '@/pages/Gallery';
-import NotFound from '@/pages/NotFound';
-import DirectImage from '@/pages/DirectImage';
-import './App.css';
+const RouteHandler = () => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const hasUserParam = searchParams.has('u');
+
+  // If we're at the root path and have a 'u' parameter, show DirectImage
+  if (location.pathname === '/' && hasUserParam) {
+    return <DirectImage />;
+  }
+
+  // Otherwise show the Index component
+  return <Index />;
+};
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <Router>
+        <Routes>
+          <Route path="/" element={<RouteHandler />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
       <Toaster />
-    </Router>
-  );
+    </ThemeProvider>
+  )
 }
 
-export default App;
+export default App
