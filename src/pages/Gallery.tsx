@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Download, RefreshCw, Sparkles, ExternalLink } from 'lucide-react';
 import { API_BASE_URL } from '@/config/api';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
 
 interface CodeBeast {
   username: string;
@@ -12,28 +14,50 @@ interface CodeBeast {
 }
 
 const Gallery = () => {
-  const [codeBeasts, setCodeBeasts] = useState<CodeBeast[]>([]);
+  const { toast } = useToast();
+  const previousBeasts = useRef<string[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const fetchCodeBeasts = async () => {
-    setIsRefreshing(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/static/temp`);
-      const data = await response.json();
-      setCodeBeasts(data);
-    } catch {
-      const fallbackData: CodeBeast[] = [
-        { username: 'example-user', imageUrl: '/static/temp/generated_example-user.png' },
-      ];
-      setCodeBeasts(fallbackData);
-    } finally {
-      setIsRefreshing(false);
+  const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
+    const response = await fetch(`${API_BASE_URL}/api/static/temp`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch CodeBeasts');
     }
+    return response.json();
   };
 
+  const { data: codeBeasts = [], refetch } = useQuery({
+    queryKey: ['codebeasts'],
+    queryFn: fetchCodeBeasts,
+    refetchInterval: 10000, // Refetch every 10 seconds
+  });
+
   useEffect(() => {
-    fetchCodeBeasts();
-  }, []);
+    if (codeBeasts.length > 0) {
+      const currentUsernames = codeBeasts.map(beast => beast.username);
+      const previousUsernames = previousBeasts.current;
+      
+      const newBeasts = currentUsernames.filter(
+        username => !previousUsernames.includes(username)
+      );
+
+      if (newBeasts.length > 0) {
+        toast({
+          title: "New CodeBeast" + (newBeasts.length > 1 ? "s" : "") + " Generated!",
+          description: `Welcome ${newBeasts.join(", ")} to the gallery!`,
+          duration: 5000,
+        });
+      }
+
+      previousBeasts.current = currentUsernames;
+    }
+  }, [codeBeasts, toast]);
+
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setIsRefreshing(false);
+  };
 
   const handleDownload = async (imageUrl: string, username: string) => {
     try {
@@ -75,7 +99,7 @@ const Gallery = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={fetchCodeBeasts}
+            onClick={handleManualRefresh}
             disabled={isRefreshing}
             className="text-white/60 hover:text-white"
           >
