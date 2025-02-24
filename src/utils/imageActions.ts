@@ -26,6 +26,11 @@ export const downloadImage = async (imageUrl: string, handle: string, toast: any
 };
 
 export const shareOnTwitter = (imageUrl: string) => {
+  // Convert relative URL to absolute URL if needed
+  const absoluteImageUrl = imageUrl.startsWith('http') 
+    ? imageUrl 
+    : `${window.location.origin}${imageUrl}`;
+
   // Update the meta tags for Twitter card
   const metaImage = document.querySelector('meta[property="og:image"]');
   const metaTitle = document.querySelector('meta[property="og:title"]');
@@ -33,22 +38,22 @@ export const shareOnTwitter = (imageUrl: string) => {
   
   // Always update the image URL to the current generated beast
   if (metaImage) {
-    metaImage.setAttribute('content', imageUrl);
+    metaImage.setAttribute('content', absoluteImageUrl);
   } else {
     const meta = document.createElement('meta');
     meta.setAttribute('property', 'og:image');
-    meta.setAttribute('content', imageUrl);
+    meta.setAttribute('content', absoluteImageUrl);
     document.head.appendChild(meta);
   }
 
   // Update Twitter-specific meta tags
   let twitterImage = document.querySelector('meta[name="twitter:image"]');
   if (twitterImage) {
-    twitterImage.setAttribute('content', imageUrl);
+    twitterImage.setAttribute('content', absoluteImageUrl);
   } else {
     twitterImage = document.createElement('meta');
     twitterImage.setAttribute('name', 'twitter:image');
-    twitterImage.setAttribute('content', imageUrl);
+    twitterImage.setAttribute('content', absoluteImageUrl);
     document.head.appendChild(twitterImage);
   }
 
