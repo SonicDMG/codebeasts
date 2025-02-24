@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -196,7 +195,7 @@ const Index = () => {
   };
 
   const handleShare = () => {
-    const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nGenerate your own: https://codebeast.lovable.dev 🚀\n\n${generatedImage}\n\n#AIart #AgenticAI #AI #CodeArt`;
+    const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nGenerate your own: https://codebeasts.onrender.com 🚀\n\n${generatedImage}\n\n#AIart #AgenticAI #AI #CodeArt`;
     
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
     
