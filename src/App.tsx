@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
-import { ThemeProvider } from '@/components/theme-provider'
-import { Toaster } from '@/components/ui/sonner'
+import { Toaster } from '@/components/ui/toaster'
 import Index from './pages/Index'
 import Gallery from './pages/Gallery'
 import NotFound from './pages/NotFound'
@@ -22,16 +21,14 @@ const RouteHandler = () => {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <Router>
-        <Routes>
-          <Route path="/" element={<RouteHandler />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
+    <Router>
+      <Routes>
+        <Route path="/" element={<RouteHandler />} />
+        <Route path="/gallery" element={<Gallery />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
       <Toaster />
-    </ThemeProvider>
+    </Router>
   )
 }
 
