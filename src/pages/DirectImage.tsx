@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useSearchParams, useParams, Navigate } from 'react-router-dom';
+import { useSearchParams, useParams } from 'react-router-dom';
 import { API_BASE_URL } from '@/config/api';
 import { Card } from '@/components/ui/card';
 
@@ -11,11 +11,6 @@ const DirectImage = () => {
   
   // Check both URL formats
   const handle = searchParams.get('u') || params.username;
-
-  // If we get the old URL format (?u=), redirect to the new format (/direct/username)
-  if (searchParams.get('u')) {
-    return <Navigate to={`/direct/${searchParams.get('u')}`} replace />;
-  }
 
   useEffect(() => {
     if (handle) {
