@@ -26,6 +26,10 @@ export const downloadImage = async (imageUrl: string, handle: string, toast: any
 };
 
 export const shareOnTwitter = (imageUrl: string) => {
+  // Extract handle from the image URL
+  const handleMatch = imageUrl.match(/generated_([^.]+)\.png$/);
+  const handle = handleMatch ? handleMatch[1] : '';
+  
   // Update the meta tags for Twitter card
   const metaImage = document.querySelector('meta[property="og:image"]');
   const metaTitle = document.querySelector('meta[property="og:title"]');
@@ -82,7 +86,8 @@ export const shareOnTwitter = (imageUrl: string) => {
     }
   });
 
-  const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nHere's my CodeBeast: ${window.location.origin}${imageUrl}\n\nGenerate your own: https://codebeasts.onrender.com\n\n#AIart #AgenticAI #AI #CodeArt`;
+  const directImageUrl = `https://codebeasts.onrender.com/?u=${handle}`;
+  const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nHere's my CodeBeast: ${directImageUrl}\n\nGenerate your own: https://codebeasts.onrender.com\n\n#AIart #AgenticAI #AI #CodeArt`;
   
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
   
