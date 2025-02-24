@@ -39,11 +39,6 @@ app.stability = StabilityGenerator(STABILITY_API_KEY)
 # Register API routes
 register_routes(app)
 
-# Serve static files
-@app.route('/static/<path:path>')
-def serve_static(path):
-    return send_from_directory('static', path)
-
 # Handle all other routes by serving index.html
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
