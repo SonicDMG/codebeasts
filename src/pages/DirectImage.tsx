@@ -11,15 +11,24 @@ const DirectImage = () => {
 
   useEffect(() => {
     if (handle) {
-      const generatedImagePath = `${API_BASE_URL}/static/temp/generated_${handle.toLowerCase()}.png`;
+      // First try with original case
+      const originalCaseImagePath = `${API_BASE_URL}/static/temp/generated_${handle}.png`;
       
-      // Check if the image exists
-      fetch(generatedImagePath)
+      fetch(originalCaseImagePath)
         .then(response => {
           if (response.ok) {
-            setImageUrl(generatedImagePath);
+            setImageUrl(originalCaseImagePath);
           } else {
-            console.error('Image not found');
+            // If original case fails, try lowercase
+            const lowercaseImagePath = `${API_BASE_URL}/static/temp/generated_${handle.toLowerCase()}.png`;
+            return fetch(lowercaseImagePath);
+          }
+        })
+        .then(response => {
+          if (response?.ok) {
+            setImageUrl(`${API_BASE_URL}/static/temp/generated_${handle.toLowerCase()}.png`);
+          } else {
+            console.error('Image not found in either case');
           }
         })
         .catch(error => {
