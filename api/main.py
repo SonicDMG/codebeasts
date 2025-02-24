@@ -28,10 +28,9 @@ logger.setLevel(logging.INFO)
 os.makedirs('static/temp', exist_ok=True)
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)
 logfire.instrument_flask(app)
-app.static_folder = 'static'
 
 # Initialize generators
 app.dalle = DallEGenerator(OPENAI_API_KEY)
@@ -40,13 +39,16 @@ app.stability = StabilityGenerator(STABILITY_API_KEY)
 # Register API routes
 register_routes(app)
 
-# Handle SPA routes by serving index.html
+# Serve static files
+@app.route('/static/<path:path>')
+def serve_static(path):
+    return send_from_directory('static', path)
+
+# Handle all other routes by serving index.html
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    if path and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory('static', 'index.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=PORT)
