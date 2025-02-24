@@ -100,11 +100,11 @@ def register_routes(app):
                         'imageUrl': f'/static/temp/{filename}'
                     })
 
-            logger.info(f"Found {len(codebeasts)} CodeBeasts in the gallery")
+            logger.info("Found %d CodeBeasts in the gallery", len(codebeasts))
             return jsonify(codebeasts)
 
         except Exception as e:
-            logger.error(f"Error fetching CodeBeasts: {str(e)}", exc_info=True)
+            logger.error("Error fetching CodeBeasts: %s", str(e), exc_info=True)
             return jsonify({'error': str(e)}), 500
 
     @app.route('/static/temp/<path:filename>')

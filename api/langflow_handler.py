@@ -38,7 +38,7 @@ def run_flow(
         full_response = response_data['outputs'][0]['outputs'][0]['results']['message']['text']
         return parse_langflow_response(full_response)
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error calling Langflow API: {str(e)}", exc_info=True)
+        logger.error("Error calling Langflow API: %s", str(e), exc_info=True)
         raise
 
 def parse_langflow_response(full_response: str) -> Dict[str, Any]:
@@ -101,6 +101,6 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
                         logger.warning("Failed to parse animal selection", exc_info=True)
 
     except Exception as e:
-        logger.error(f"Error parsing Langflow response: {str(e)}", exc_info=True)
+        logger.error("Error parsing Langflow response: %s", str(e), exc_info=True)
 
     return data
