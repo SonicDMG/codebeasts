@@ -55,7 +55,7 @@ const DirectImage = () => {
       {imageUrl ? (
         <div className="max-w-2xl w-full">
           <Card className="p-6 space-y-4">
-            <h1 className="text-2xl font-bold text-center">CodeBeast for @{handle}</h1>
+            <h1 className="text-2xl font-bold text-center break-words">CodeBeast for @{handle}</h1>
             <div className="relative aspect-square w-full overflow-hidden rounded-lg">
               <img
                 src={imageUrl}
@@ -75,7 +75,7 @@ const DirectImage = () => {
         </div>
       ) : (
         <Card className="p-6">
-          <h1 className="text-2xl font-bold text-center">No CodeBeast found for @{handle}</h1>
+          <h1 className="text-2xl font-bold text-center break-words">No CodeBeast found for @{handle}</h1>
           <p className="text-center mt-2">
             <a 
               href="/"
