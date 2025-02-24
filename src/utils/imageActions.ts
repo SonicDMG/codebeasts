@@ -26,34 +26,32 @@ export const downloadImage = async (imageUrl: string, handle: string, toast: any
 };
 
 export const shareOnTwitter = (imageUrl: string) => {
-  // Convert relative URL to absolute URL if needed
-  const absoluteImageUrl = imageUrl.startsWith('http') 
-    ? imageUrl 
-    : `${window.location.origin}${imageUrl}`;
-
   // Update the meta tags for Twitter card
   const metaImage = document.querySelector('meta[property="og:image"]');
   const metaTitle = document.querySelector('meta[property="og:title"]');
   const metaDescription = document.querySelector('meta[property="og:description"]');
   
-  // Always update the image URL to the current generated beast
+  // Set static image URL
+  const staticImageUrl = `${window.location.origin}/codebeasts_screen.png`;
+  
+  // Always update the image URL to the static app image
   if (metaImage) {
-    metaImage.setAttribute('content', absoluteImageUrl);
+    metaImage.setAttribute('content', staticImageUrl);
   } else {
     const meta = document.createElement('meta');
     meta.setAttribute('property', 'og:image');
-    meta.setAttribute('content', absoluteImageUrl);
+    meta.setAttribute('content', staticImageUrl);
     document.head.appendChild(meta);
   }
 
   // Update Twitter-specific meta tags
   let twitterImage = document.querySelector('meta[name="twitter:image"]');
   if (twitterImage) {
-    twitterImage.setAttribute('content', absoluteImageUrl);
+    twitterImage.setAttribute('content', staticImageUrl);
   } else {
     twitterImage = document.createElement('meta');
     twitterImage.setAttribute('name', 'twitter:image');
-    twitterImage.setAttribute('content', absoluteImageUrl);
+    twitterImage.setAttribute('content', staticImageUrl);
     document.head.appendChild(twitterImage);
   }
 
@@ -84,7 +82,7 @@ export const shareOnTwitter = (imageUrl: string) => {
     }
   });
 
-  const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nGenerate your own: https://codebeasts.onrender.com\n\n${absoluteImageUrl}\n\n#AIart #AgenticAI #AI #CodeArt`;
+  const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nGenerate your own: https://codebeasts.onrender.com\n\n#AIart #AgenticAI #AI #CodeArt`;
   
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
   
