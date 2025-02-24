@@ -1,11 +1,12 @@
 """Module containing all API routes and handlers."""
 
 import os
+import logging
 import requests
 from flask import request, jsonify, g, send_from_directory
-import logging
-from config import FLOW_ID
 from langflow_handler import run_flow
+from requests.exceptions import RequestException
+from config import FLOW_ID
 
 logger = logging.getLogger(__name__)
 
@@ -77,9 +78,22 @@ def register_routes(app):
                 'status': 'success'
             })
 
-        except Exception as e:
+        except RequestException as e:
+            logger.error("Network error during image generation: %s", str(e))
             return jsonify({
-                'error': str(e),
+                'error': 'Network error occurred. Please try again later.',
+                'status': 'error'
+            })
+        except ValueError as e:
+            logger.error("Value error during image generation: %s", str(e))
+            return jsonify({
+                'error': 'Invalid input provided. Please check your request.',
+                'status': 'error'
+            })
+        except RuntimeError as e:
+            logger.error("Runtime error during image generation: %s", str(e))
+            return jsonify({
+                'error': 'An unexpected error occurred. Please try again later.',
                 'status': 'error'
             })
 
@@ -103,9 +117,9 @@ def register_routes(app):
             logger.info("Found %d CodeBeasts in the gallery", len(codebeasts))
             return jsonify(codebeasts)
 
-        except Exception as e:
-            logger.error("Error fetching CodeBeasts: %s", str(e), exc_info=True)
-            return jsonify({'error': str(e)}), 500
+        except OSError as e:
+            logger.error("File system error fetching CodeBeasts: %s", str(e), exc_info=True)
+            return jsonify({'error': 'Error accessing the file system. Please try again later.'}), 500
 
     @app.route('/static/temp/<path:filename>')
     def serve_static(filename):
