@@ -15,7 +15,7 @@ interface CodeBeast {
 
 const Gallery = () => {
   const { toast } = useToast();
-  const previousBeasts = useRef<CodeBeast[]>([]);
+  const previousBeasts = useRef<Map<string, string>>(new Map());
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
@@ -37,26 +37,41 @@ const Gallery = () => {
 
   useEffect(() => {
     if (codeBeasts.length > 0) {
-      const currentBeasts = new Set(codeBeasts.map(beast => `${beast.username}:${beast.imageUrl}`));
-      const previousBeastsSet = new Set(previousBeasts.current.map(beast => `${beast.username}:${beast.imageUrl}`));
-      
-      // Check for new or updated beasts
-      const newOrUpdated = codeBeasts.filter(current => {
-        const key = `${current.username}:${current.imageUrl}`;
-        return !previousBeastsSet.has(key);
+      const newOrUpdatedBeasts = codeBeasts.filter(beast => {
+        const previousImageUrl = previousBeasts.current.get(beast.username);
+        return !previousImageUrl || previousImageUrl !== beast.imageUrl;
       });
 
-      if (newOrUpdated.length > 0) {
-        console.log('New or updated CodeBeasts detected:', newOrUpdated);
-        const usernames = newOrUpdated.map(beast => beast.username);
-        toast({
-          title: "New CodeBeast" + (usernames.length > 1 ? "s" : "") + " Generated!",
-          description: `Welcome ${usernames.join(", ")} to the gallery!`,
-          duration: 5000,
-        });
+      if (newOrUpdatedBeasts.length > 0) {
+        console.log('New or updated CodeBeasts detected:', newOrUpdatedBeasts);
+        
+        // Separate new and updated beasts
+        const newBeasts = newOrUpdatedBeasts.filter(beast => !previousBeasts.current.has(beast.username));
+        const updatedBeasts = newOrUpdatedBeasts.filter(beast => previousBeasts.current.has(beast.username));
+        
+        // Show different toast messages for new vs updated beasts
+        if (newBeasts.length > 0) {
+          const usernames = newBeasts.map(beast => beast.username);
+          toast({
+            title: "New CodeBeast" + (usernames.length > 1 ? "s" : "") + " Generated!",
+            description: `Welcome ${usernames.join(", ")} to the gallery!`,
+            duration: 5000,
+          });
+        }
+        
+        if (updatedBeasts.length > 0) {
+          const usernames = updatedBeasts.map(beast => beast.username);
+          toast({
+            title: "CodeBeast" + (usernames.length > 1 ? "s" : "") + " Updated!",
+            description: `${usernames.join(", ")} generated new images!`,
+            duration: 5000,
+          });
+        }
       }
 
-      previousBeasts.current = codeBeasts;
+      // Update the previous beasts map
+      const newBeastsMap = new Map(codeBeasts.map(beast => [beast.username, beast.imageUrl]));
+      previousBeasts.current = newBeastsMap;
     }
   }, [codeBeasts, toast]);
 
