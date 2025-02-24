@@ -1,18 +1,25 @@
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams, Navigate } from 'react-router-dom';
 import { API_BASE_URL } from '@/config/api';
 import { Card } from '@/components/ui/card';
 
 const DirectImage = () => {
   const [searchParams] = useSearchParams();
+  const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const handle = searchParams.get('u');
+  
+  // Check both URL formats
+  const handle = searchParams.get('u') || params.username;
+
+  // If we get the old URL format (?u=), redirect to the new format (/direct/username)
+  if (searchParams.get('u')) {
+    return <Navigate to={`/direct/${searchParams.get('u')}`} replace />;
+  }
 
   useEffect(() => {
     if (handle) {
-      const timestamp = Date.now(); // Add timestamp for cache busting
-      // First try with original case
+      const timestamp = Date.now();
       const originalCaseImagePath = `${API_BASE_URL}/static/temp/generated_${handle}.png?t=${timestamp}`;
       
       fetch(originalCaseImagePath)
@@ -20,7 +27,6 @@ const DirectImage = () => {
           if (response.ok) {
             setImageUrl(originalCaseImagePath);
           } else {
-            // If original case fails, try lowercase
             const lowercaseImagePath = `${API_BASE_URL}/static/temp/generated_${handle.toLowerCase()}.png?t=${timestamp}`;
             return fetch(lowercaseImagePath);
           }
@@ -43,7 +49,7 @@ const DirectImage = () => {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="p-6">
           <h1 className="text-2xl font-bold text-center">No GitHub handle provided</h1>
-          <p className="text-center mt-2">Please use the URL format: ?u=githubhandle</p>
+          <p className="text-center mt-2">Please use the URL format: /direct/githubhandle</p>
         </Card>
       </div>
     );
