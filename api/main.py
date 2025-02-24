@@ -1,4 +1,3 @@
-
 """
 CodeBeast Generator Web Application
 
@@ -8,14 +7,15 @@ using AI-powered image generation and natural language processing.
 
 import os
 import logging
-import logfire
+
 from flask import Flask
 from flask_cors import CORS
-from config import PORT
+import logfire
+
 from dall_e import DallEGenerator
 from stability import StabilityGenerator
 from routes import register_routes
-from config import OPENAI_API_KEY, STABILITY_API_KEY
+from config import OPENAI_API_KEY, STABILITY_API_KEY, PORT
 
 # Initialize logging
 logfire.configure()

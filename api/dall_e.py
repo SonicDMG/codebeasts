@@ -94,4 +94,3 @@ class DallEGenerator:
         except Exception as e:
             logger.error("Unexpected error: %s", str(e), exc_info=True)
             raise RuntimeError(f"Error generating image: {str(e)}") from e
-

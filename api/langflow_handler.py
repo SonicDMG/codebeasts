@@ -1,9 +1,9 @@
-
 """Module for handling Langflow API interactions."""
 
 import logging
-import requests
 from typing import Dict, Any
+import ast  # Import ast for safe evaluation
+import requests
 from config import BASE_API_URL
 
 logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ def run_flow(
 def parse_langflow_response(full_response: str) -> Dict[str, Any]:
     """Parse the response from Langflow into structured data."""
     parts = full_response.split('|')
-    
+
     data = {
         'languages': [],
         'prompt': "",
@@ -90,17 +90,17 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
                 animals_str = animals_part[1].strip().strip('[]')
                 if animals_str:
                     try:
-                        animal_entries = eval(animals_str)
+                        animal_entries = ast.literal_eval(animals_str)  # Use ast.literal_eval
                         if isinstance(animal_entries, list):
                             data['animal_selection'] = [
-                                (entry[0], entry[1]) 
-                                for entry in animal_entries 
+                                (entry[0], entry[1])
+                                for entry in animal_entries
                                 if isinstance(entry, (list, tuple)) and len(entry) == 2
                             ]
                     except (SyntaxError, ValueError, TypeError):
                         logger.warning("Failed to parse animal selection", exc_info=True)
 
-    except Exception as e:
+    except (SyntaxError, ValueError, TypeError) as e:
         logger.error("Error parsing Langflow response: %s", str(e), exc_info=True)
 
     return data

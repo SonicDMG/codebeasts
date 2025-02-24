@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def register_routes(app):
     """Register all routes with the Flask app."""
-    
+
     @app.route('/')
     def home():
         """Return API status."""
@@ -119,7 +119,9 @@ def register_routes(app):
 
         except OSError as e:
             logger.error("File system error fetching CodeBeasts: %s", str(e), exc_info=True)
-            return jsonify({'error': 'Error accessing the file system. Please try again later.'}), 500
+            return jsonify({
+                'error': 'Error accessing the file system. Please try again later.'
+            }), 500
 
     @app.route('/static/temp/<path:filename>')
     def serve_static(filename):
