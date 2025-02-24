@@ -8,11 +8,11 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: mode === 'production' ? 3000 : 8080,
+    port: 8080,
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: mode !== 'production',
     minify: mode === 'production',
     target: 'esnext',
   },
