@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import Index from '@/pages/Index';
@@ -23,7 +23,16 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={
+            ({ location }) => {
+              const searchParams = new URLSearchParams(location.search);
+              const username = searchParams.get('u');
+              if (username) {
+                return <DirectImage />;
+              }
+              return <Index />;
+            }
+          } />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/direct/:username" element={<DirectImage />} />
           <Route path="*" element={<NotFound />} />
