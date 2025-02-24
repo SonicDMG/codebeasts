@@ -15,15 +15,18 @@ interface CodeBeast {
 
 const Gallery = () => {
   const { toast } = useToast();
-  const previousBeasts = useRef<string[]>([]);
+  const previousBeasts = useRef<CodeBeast[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
+    console.log('Fetching CodeBeasts...');
     const response = await fetch(`${API_BASE_URL}/api/static/temp`);
     if (!response.ok) {
       throw new Error('Failed to fetch CodeBeasts');
     }
-    return response.json();
+    const data = await response.json();
+    console.log('Fetched CodeBeasts:', data);
+    return data;
   };
 
   const { data: codeBeasts = [], refetch } = useQuery({
@@ -34,22 +37,26 @@ const Gallery = () => {
 
   useEffect(() => {
     if (codeBeasts.length > 0) {
-      const currentUsernames = codeBeasts.map(beast => beast.username);
-      const previousUsernames = previousBeasts.current;
+      const currentBeasts = new Set(codeBeasts.map(beast => `${beast.username}:${beast.imageUrl}`));
+      const previousBeastsSet = new Set(previousBeasts.current.map(beast => `${beast.username}:${beast.imageUrl}`));
       
-      const newBeasts = currentUsernames.filter(
-        username => !previousUsernames.includes(username)
-      );
+      // Check for new or updated beasts
+      const newOrUpdated = codeBeasts.filter(current => {
+        const key = `${current.username}:${current.imageUrl}`;
+        return !previousBeastsSet.has(key);
+      });
 
-      if (newBeasts.length > 0) {
+      if (newOrUpdated.length > 0) {
+        console.log('New or updated CodeBeasts detected:', newOrUpdated);
+        const usernames = newOrUpdated.map(beast => beast.username);
         toast({
-          title: "New CodeBeast" + (newBeasts.length > 1 ? "s" : "") + " Generated!",
-          description: `Welcome ${newBeasts.join(", ")} to the gallery!`,
+          title: "New CodeBeast" + (usernames.length > 1 ? "s" : "") + " Generated!",
+          description: `Welcome ${usernames.join(", ")} to the gallery!`,
           duration: 5000,
         });
       }
 
-      previousBeasts.current = currentUsernames;
+      previousBeasts.current = codeBeasts;
     }
   }, [codeBeasts, toast]);
 
