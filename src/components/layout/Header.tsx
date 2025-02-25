@@ -1,4 +1,6 @@
 
+import { Link } from 'react-router-dom';
+
 export const Header = () => {
   return (
     <div className="flex justify-between items-center mb-2">
