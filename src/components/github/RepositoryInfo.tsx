@@ -47,9 +47,9 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animal
           <div className="space-y-2">
             {animalSelection.map((entry, index) => (
               <div key={index} className="text-white/60 text-sm">
-                <span className="font-medium text-white/80">{entry[1]}</span>
+                <span className="font-medium text-white/80">{entry[0]}</span>
                 <span className="text-white/40"> — </span>
-                <span className="italic">{entry[2]}</span>
+                <span className="italic">{entry[1]}</span>
               </div>
             ))}
           </div>
