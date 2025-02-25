@@ -48,24 +48,34 @@ def clean_animal_string(animals_str: str) -> str:
     """Clean and format the animal selection string for parsing."""
     # Remove outer brackets if present
     animals_str = animals_str.strip('[]')
+    logger.info("Cleaning animal string: %s", animals_str)
     
-    # Split into individual entries
-    entries = re.findall(r'\[(.*?)\]', animals_str)
+    # First try to find complete pairs using regex
+    pairs = re.findall(r'\[([^]]+)\]', animals_str)
+    logger.info("Found pairs: %s", pairs)
     
-    if not entries:
-        # If no bracketed entries found, try splitting by comma
-        entries = [e.strip() for e in animals_str.split(',') if e.strip()]
+    if not pairs:
+        # If no pairs found, try splitting by comma and grouping into pairs
+        items = [item.strip().strip("'\"") for item in animals_str.split(',') if item.strip()]
+        pairs = []
+        for i in range(0, len(items)-1, 2):
+            if i+1 < len(items):
+                pairs.append(f"{items[i]}, {items[i+1]}")
     
     cleaned_entries = []
-    for entry in entries:
-        # Clean up each entry
-        parts = entry.split(',') if ',' in entry else entry.split("'")
-        if len(parts) >= 2:
-            animal = parts[0].strip().strip("'").strip('"')
-            description = parts[1].strip().strip("'").strip('"')
-            cleaned_entries.append(f"['{animal}', '{description}']")
+    for pair in pairs:
+        try:
+            # Split the pair into animal and description
+            if ',' in pair:
+                animal, description = [p.strip().strip("'\"") for p in pair.split(',', 1)]
+                cleaned_entries.append(f"['{animal}', '{description}']")
+        except Exception as e:
+            logger.warning(f"Error cleaning pair {pair}: {str(e)}")
+            continue
     
-    return '[' + ', '.join(cleaned_entries) + ']'
+    result = '[' + ', '.join(cleaned_entries) + ']'
+    logger.info("Cleaned result: %s", result)
+    return result
 
 def parse_langflow_response(full_response: str) -> Dict[str, Any]:
     """Parse the response from Langflow into structured data."""
@@ -129,7 +139,7 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
                             for entry in animal_entries
                             if isinstance(entry, (list, tuple)) and len(entry) == 2
                         ]
-                        logger.info("Parsed animal selection: %s", data['animal_selection'])
+                        logger.info("Final parsed animal selection: %s", data['animal_selection'])
                 except (SyntaxError, ValueError, TypeError) as e:
                     logger.warning("Failed to parse animal selection: %s", str(e), exc_info=True)
 
