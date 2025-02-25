@@ -8,13 +8,13 @@ import { Link } from 'react-router-dom';
 
 export const Header = () => {
   return (
-    <div className="flex justify-between items-center mt-0 mb-4 px-0 sm:px-1">
+    <div className="flex justify-between items-center mt-0 mb-4 px-0.5 sm:px-1">
       <div className="flex items-center gap-4 -mt-1">
         <a 
           href="https://langflow.new" 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="text-sm text-muted-foreground hover:text-primary transition-colors pl-1"
+          className="text-sm text-muted-foreground hover:text-primary transition-colors"
         >
           powered by Langflow
         </a>
@@ -29,7 +29,7 @@ export const Header = () => {
       </div>
       <Link
         to="/gallery"
-        className="text-sm text-muted-foreground hover:text-primary transition-colors pr-1"
+        className="text-sm text-muted-foreground hover:text-primary transition-colors -mt-1"
       >
         View Gallery
       </Link>
