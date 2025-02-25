@@ -83,6 +83,9 @@ export const useImageGeneration = () => {
         throw new Error(processData.error || 'Processing failed');
       }
 
+      console.log('Process data received:', processData);
+      console.log('Animal selection data:', processData.animal_selection);
+
       updateLoadingStatus('Pulling coding information from repos...', 0.3);
       await new Promise(resolve => setTimeout(resolve, 400));
 
@@ -92,7 +95,7 @@ export const useImageGeneration = () => {
       setGeneratedPrompt(processData.response);
       setRepoCount(processData.num_repositories);
       setGithubUrl(processData.github_url);
-      setAnimalSelection(processData.animal_selection);
+      setAnimalSelection(processData.animal_selection || []);
       
       await new Promise(resolve => setTimeout(resolve, 800));
 
