@@ -47,9 +47,14 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animal
           <div className="space-y-2">
             {animalSelection.map((entry, index) => (
               <div key={index} className="text-white/60 text-sm">
-                <span className="font-medium text-white/80">{entry[0]}</span>
-                <span className="text-white/40"> — </span>
-                <span className="italic">{entry[1]}</span>
+                {entry.map((item, itemIndex) => (
+                  <span key={itemIndex}>
+                    <span className={itemIndex === 0 ? "font-medium text-white/80" : "italic"}>
+                      {item}
+                    </span>
+                    {itemIndex < entry.length - 1 && <span className="text-white/40"> — </span>}
+                  </span>
+                ))}
               </div>
             ))}
           </div>
