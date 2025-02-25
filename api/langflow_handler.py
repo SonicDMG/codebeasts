@@ -8,6 +8,7 @@ import requests
 from config import BASE_API_URL
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def run_flow(
     message: str,
@@ -94,18 +95,8 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
             if len(animals_part) > 1:
                 animals_str = animals_part[1].strip()
                 try:
-                    animal_entries = ast.literal_eval(animals_str)
-                    if isinstance(animal_entries, list):
-                        # Convert each entry to a single-element list
-                        normalized_entries = []
-                        for entry in animal_entries:
-                            if isinstance(entry, list):
-                                # Take the first element if it's a list
-                                normalized_entries.append([entry[0]] if entry else [])
-                            else:
-                                # If it's not a list, wrap it in a list
-                                normalized_entries.append([entry])
-                        data['animal_selection'] = normalized_entries
+                    data['animal_selection'] = ast.literal_eval(animals_str)
+                    logger.info("Animal entries: %s", data['animal_selection'])
                 except (SyntaxError, ValueError, TypeError) as e:
                     logger.warning("Failed to parse animal selection: %s", str(e), exc_info=True)
 
@@ -114,4 +105,3 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         logger.error("Full response that caused error: %s", full_response)
 
     return data
-
