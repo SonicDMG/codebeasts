@@ -38,8 +38,6 @@ const Index = () => {
     generateImage,
   } = useImageGeneration();
 
-  console.log('Current animal selection in Index:', animalSelection);
-
   const handleGenerate = () => {
     generateImage(handle, model);
   };
