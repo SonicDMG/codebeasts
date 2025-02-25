@@ -58,7 +58,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col px-4 relative">
-      <div className="flex flex-col pt-0">
+      <div className="flex flex-col -mt-2">
         <Header />
         <Hero />
 
