@@ -103,11 +103,9 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
                     animal_entries = ast.literal_eval(animals_str)
                     logger.info("Animal entries after ast.literal_eval: %s", animal_entries)
                     
-                    if isinstance(animal_entries, list) and len(animal_entries) > 0:
-                        # Just grab the first two elements from each array entry
-                        for entry in animal_entries:
-                            data['animal_selection'].append((entry[0], entry[1]))
-                        
+                    if isinstance(animal_entries, list):
+                        # Simply add each array element to animal_selection
+                        data['animal_selection'] = animal_entries
                         logger.info("Final parsed animal selection: %s", data['animal_selection'])
                     else:
                         logger.warning("Animal entries is not a valid list: %s", type(animal_entries))
