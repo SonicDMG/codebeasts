@@ -1,9 +1,7 @@
 
-import { Link } from 'react-router-dom';
-
 export const Header = () => {
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center mb-2">
       <div className="flex items-center gap-4">
         <a 
           href="https://langflow.new" 
