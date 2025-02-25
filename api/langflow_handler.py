@@ -65,15 +65,12 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
             languages_part = parts[0].split(':', 1)
             if len(languages_part) > 1:
                 languages_str = languages_part[1].strip('[]')
-                # Parse languages and extract animal mappings
                 raw_languages = [lang.strip().strip("'\"") for lang in languages_str.split(',') if lang.strip()]
                 data['languages'] = []
-                language_animal_map = {}
                 for entry in raw_languages:
                     if ':' in entry:
-                        lang, animal = entry.split(':', 1)
+                        lang, _ = entry.split(':', 1)
                         data['languages'].append(lang.strip())
-                        language_animal_map[lang.strip()] = animal.strip()
 
         # Parse other fields
         if len(parts) > 1:
@@ -107,17 +104,14 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
                     logger.info("Animal entries after ast.literal_eval: %s", animal_entries)
                     
                     if isinstance(animal_entries, list) and len(animal_entries) > 0:
-                        # Handle the case where we have a nested array with descriptions
-                        descriptions = animal_entries[0] if isinstance(animal_entries[0], list) else animal_entries
-                        
-                        # Create pairs of animals and their descriptions
+                        # Handle the case where we have a nested array with language-animal pairs and descriptions
                         data['animal_selection'] = []
-                        for desc in descriptions:
-                            # Try to match the description with the corresponding animal
-                            for lang, animal in language_animal_map.items():
-                                if lang.lower() in desc.lower() or animal.lower() in desc.lower():
-                                    data['animal_selection'].append((animal, desc))
-                                    break
+                        for entry in animal_entries:
+                            if isinstance(entry, list) and len(entry) == 2:
+                                lang_animal, description = entry
+                                if ':' in lang_animal:
+                                    _, animal = lang_animal.split(':', 1)
+                                    data['animal_selection'].append((animal.strip(), description.strip()))
                         
                         logger.info("Final parsed animal selection: %s", data['animal_selection'])
                     else:
