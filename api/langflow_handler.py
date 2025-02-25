@@ -37,10 +37,7 @@ def run_flow(
         response.raise_for_status()
         response_data = response.json()
         full_response = response_data['outputs'][0]['outputs'][0]['results']['message']['text']
-        logger.info("Raw Langflow response: %s", full_response)
         parsed_data = parse_langflow_response(full_response)
-        logger.info("Final parsed data being sent to frontend: %s", parsed_data)
-        logger.info("Animal selection data being sent to frontend: %s", parsed_data['animal_selection'])
         return parsed_data
     except requests.exceptions.RequestException as e:
         logger.error("Error calling Langflow API: %s", str(e), exc_info=True)
@@ -49,8 +46,7 @@ def run_flow(
 def parse_langflow_response(full_response: str) -> Dict[str, Any]:
     """Parse the response from Langflow into structured data."""
     parts = full_response.split('|')
-    logger.info("Splitting response into parts: %s", parts)
-
+    
     data = {
         'languages': [],
         'prompt': "",
@@ -96,26 +92,15 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
             animals_part = parts[4].split(':', 1)
             if len(animals_part) > 1:
                 animals_str = animals_part[1].strip()
-                logger.info("Raw animal selection string before parsing: %s", animals_str)
-                
                 try:
-                    # Parse the nested array
                     animal_entries = ast.literal_eval(animals_str)
-                    logger.info("Animal entries after ast.literal_eval: %s", animal_entries)
-                    
                     if isinstance(animal_entries, list):
-                        # Simply add each array element to animal_selection
                         data['animal_selection'] = animal_entries
-                        logger.info("Final parsed animal selection: %s", data['animal_selection'])
-                    else:
-                        logger.warning("Animal entries is not a valid list: %s", type(animal_entries))
                 except (SyntaxError, ValueError, TypeError) as e:
                     logger.warning("Failed to parse animal selection: %s", str(e), exc_info=True)
-                    logger.warning("Problematic animals_str: %s", animals_str)
 
     except Exception as e:
         logger.error("Error parsing Langflow response: %s", str(e), exc_info=True)
         logger.error("Full response that caused error: %s", full_response)
 
-    logger.info("Final data object being returned: %s", data)
     return data
