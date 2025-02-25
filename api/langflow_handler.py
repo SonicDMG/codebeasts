@@ -4,7 +4,6 @@
 import logging
 from typing import Dict, Any
 import ast  # Import ast for safe evaluation
-import re  # Import re for string cleanup
 import requests
 from config import BASE_API_URL
 
@@ -43,39 +42,6 @@ def run_flow(
     except requests.exceptions.RequestException as e:
         logger.error("Error calling Langflow API: %s", str(e), exc_info=True)
         raise
-
-def clean_animal_string(animals_str: str) -> str:
-    """Clean and format the animal selection string for parsing."""
-    # Remove outer brackets if present
-    animals_str = animals_str.strip('[]')
-    logger.info("Cleaning animal string: %s", animals_str)
-    
-    # First try to find complete pairs using regex
-    pairs = re.findall(r'\[([^]]+)\]', animals_str)
-    logger.info("Found pairs: %s", pairs)
-    
-    if not pairs:
-        # If no pairs found, try splitting by comma and grouping into pairs
-        items = [item.strip().strip("'\"") for item in animals_str.split(',') if item.strip()]
-        pairs = []
-        for i in range(0, len(items)-1, 2):
-            if i+1 < len(items):
-                pairs.append(f"{items[i]}, {items[i+1]}")
-    
-    cleaned_entries = []
-    for pair in pairs:
-        try:
-            # Split the pair into animal and description
-            if ',' in pair:
-                animal, description = [p.strip().strip("'\"") for p in pair.split(',', 1)]
-                cleaned_entries.append(f"['{animal}', '{description}']")
-        except Exception as e:
-            logger.warning(f"Error cleaning pair {pair}: {str(e)}")
-            continue
-    
-    result = '[' + ', '.join(cleaned_entries) + ']'
-    logger.info("Cleaned result: %s", result)
-    return result
 
 def parse_langflow_response(full_response: str) -> Dict[str, Any]:
     """Parse the response from Langflow into structured data."""
@@ -127,12 +93,9 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
                 animals_str = animals_part[1].strip()
                 logger.info("Raw animal selection string: %s", animals_str)
                 
-                # Clean and format the string
-                cleaned_animals_str = clean_animal_string(animals_str)
-                logger.info("Cleaned animal selection string: %s", cleaned_animals_str)
-                
                 try:
-                    animal_entries = ast.literal_eval(cleaned_animals_str)
+                    # Just evaluate the string directly since we know it's a valid array format
+                    animal_entries = ast.literal_eval(animals_str)
                     if isinstance(animal_entries, list):
                         data['animal_selection'] = [
                             (str(entry[0]), str(entry[1]))
@@ -147,3 +110,4 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         logger.error("Error parsing Langflow response: %s", str(e), exc_info=True)
 
     return data
+
