@@ -8,7 +8,6 @@ import requests
 from config import BASE_API_URL
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 def run_flow(
     message: str,
@@ -40,9 +39,8 @@ def run_flow(
         full_response = response_data['outputs'][0]['outputs'][0]['results']['message']['text']
         logger.info("Raw Langflow response: %s", full_response)
         parsed_data = parse_langflow_response(full_response)
-        logger.info(
-            "Animal selection data being sent to frontend: %s", parsed_data['animal_selection']
-        )
+        logger.info("Final parsed data being sent to frontend: %s", parsed_data)
+        logger.info("Animal selection data being sent to frontend: %s", parsed_data['animal_selection'])
         return parsed_data
     except requests.exceptions.RequestException as e:
         logger.error("Error calling Langflow API: %s", str(e), exc_info=True)
@@ -66,11 +64,16 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         if len(parts) > 0:
             languages_part = parts[0].split(':', 1)
             if len(languages_part) > 1:
-                data['languages'] = [
-                    lang.strip().strip("'\"")
-                    for lang in languages_part[1].strip('[]').split(',')
-                    if lang.strip()
-                ]
+                languages_str = languages_part[1].strip('[]')
+                # Parse languages and extract animal mappings
+                raw_languages = [lang.strip().strip("'\"") for lang in languages_str.split(',') if lang.strip()]
+                data['languages'] = []
+                language_animal_map = {}
+                for entry in raw_languages:
+                    if ':' in entry:
+                        lang, animal = entry.split(':', 1)
+                        data['languages'].append(lang.strip())
+                        language_animal_map[lang.strip()] = animal.strip()
 
         # Parse other fields
         if len(parts) > 1:
@@ -96,20 +99,29 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
             animals_part = parts[4].split(':', 1)
             if len(animals_part) > 1:
                 animals_str = animals_part[1].strip()
-
+                logger.info("Raw animal selection string before parsing: %s", animals_str)
+                
                 try:
-                    # Just evaluate the string directly since we know it's a valid array format
+                    # Parse the nested array
                     animal_entries = ast.literal_eval(animals_str)
-
-                    if isinstance(animal_entries, list):
-                        data['animal_selection'] = [
-                            (str(entry[0]), str(entry[1]))
-                            for entry in animal_entries
-                            if isinstance(entry, (list, tuple)) and len(entry) == 2
-                        ]
-
+                    logger.info("Animal entries after ast.literal_eval: %s", animal_entries)
+                    
+                    if isinstance(animal_entries, list) and len(animal_entries) > 0:
+                        # Handle the case where we have a nested array with descriptions
+                        descriptions = animal_entries[0] if isinstance(animal_entries[0], list) else animal_entries
+                        
+                        # Create pairs of animals and their descriptions
+                        data['animal_selection'] = []
+                        for desc in descriptions:
+                            # Try to match the description with the corresponding animal
+                            for lang, animal in language_animal_map.items():
+                                if lang.lower() in desc.lower() or animal.lower() in desc.lower():
+                                    data['animal_selection'].append((animal, desc))
+                                    break
+                        
+                        logger.info("Final parsed animal selection: %s", data['animal_selection'])
                     else:
-                        logger.warning("Animal entries is not a list: %s", type(animal_entries))
+                        logger.warning("Animal entries is not a valid list: %s", type(animal_entries))
                 except (SyntaxError, ValueError, TypeError) as e:
                     logger.warning("Failed to parse animal selection: %s", str(e), exc_info=True)
                     logger.warning("Problematic animals_str: %s", animals_str)
@@ -120,4 +132,3 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
 
     logger.info("Final data object being returned: %s", data)
     return data
-
