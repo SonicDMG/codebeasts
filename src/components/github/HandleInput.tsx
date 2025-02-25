@@ -1,4 +1,9 @@
 
+/**
+ * Component that provides the GitHub handle input field and generation button.
+ * Includes loading state handling and keyboard event support for submission.
+ */
+
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';

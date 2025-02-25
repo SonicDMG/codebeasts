@@ -1,4 +1,10 @@
 
+/**
+ * Card component for displaying individual CodeBeasts in the gallery.
+ * Features image display, download functionality, and links to GitHub profiles.
+ * Includes hover effects and mobile-responsive design.
+ */
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Download, ExternalLink } from 'lucide-react';

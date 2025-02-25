@@ -1,3 +1,10 @@
+
+/**
+ * Gallery page component that displays a grid of generated CodeBeasts.
+ * Features auto-refresh functionality, manual refresh option, and responsive layout.
+ * Includes empty state handling and navigation back to generation page.
+ */
+
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

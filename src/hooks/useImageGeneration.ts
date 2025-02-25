@@ -1,4 +1,10 @@
 
+/**
+ * Custom hook that manages the image generation process for CodeBeasts.
+ * Handles API calls, loading states, and user feedback for the GitHub profile analysis
+ * and subsequent AI image generation. Includes progress tracking and error handling.
+ */
+
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import NProgress from 'nprogress';

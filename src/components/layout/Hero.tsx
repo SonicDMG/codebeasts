@@ -1,4 +1,9 @@
 
+/**
+ * Hero component that displays the main title and description of the CodeBeasts application.
+ * Features a gradient text animation and responsive design.
+ */
+
 export const Hero = () => {
   return (
     <div className="text-center space-y-2 mt-2 mb-2">

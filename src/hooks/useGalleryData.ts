@@ -1,4 +1,10 @@
 
+/**
+ * Custom hook for fetching and managing the CodeBeasts gallery data.
+ * Provides real-time updates and manual refresh functionality for the gallery view.
+ * Uses React Query for efficient data fetching and caching.
+ */
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { API_BASE_URL } from '@/config/api';

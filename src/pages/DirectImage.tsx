@@ -1,4 +1,10 @@
 
+/**
+ * Component for displaying a single CodeBeast image directly via URL parameters.
+ * Supports both URL query parameters and route parameters for image lookup.
+ * Includes fallback states for missing images and error handling.
+ */
+
 import { useState, useEffect } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
 import { API_BASE_URL } from '@/config/api';

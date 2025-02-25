@@ -1,4 +1,9 @@
 
+/**
+ * Component for selecting the AI model used to generate CodeBeasts.
+ * Provides a radio group interface to choose between Stability AI and DALL-E models.
+ */
+
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Sparkles, Zap } from "lucide-react";

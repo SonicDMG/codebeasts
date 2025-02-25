@@ -1,4 +1,10 @@
 
+/**
+ * Utility functions for image-related actions such as downloading and social sharing.
+ * Provides functionality for downloading CodeBeast images and sharing them on Twitter
+ * with appropriate meta tags and formatted messages.
+ */
+
 export const downloadImage = async (imageUrl: string, handle: string, toast: any) => {
   try {
     const response = await fetch(imageUrl);

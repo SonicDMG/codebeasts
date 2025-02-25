@@ -1,4 +1,10 @@
 
+/**
+ * Component that displays GitHub repository statistics and analysis results.
+ * Shows repository count, programming languages used, and animal characteristics
+ * selected for the CodeBeast generation.
+ */
+
 import { GitFork } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 

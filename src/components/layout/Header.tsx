@@ -1,4 +1,9 @@
 
+/**
+ * Header component that provides navigation links and external resources.
+ * Displays "powered by Langflow" and GitHub links on the left, and a Gallery link on the right.
+ */
+
 import { Link } from 'react-router-dom';
 
 export const Header = () => {
