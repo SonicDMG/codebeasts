@@ -1,5 +1,3 @@
-
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,11 +6,7 @@ import { BeastCard } from '@/components/gallery/BeastCard';
 import { useGalleryData } from '@/hooks/useGalleryData';
 
 const Gallery = () => {
-  const { codeBeasts, isRefreshing, handleManualRefresh, handleNewBeasts } = useGalleryData();
-
-  useEffect(() => {
-    handleNewBeasts(codeBeasts);
-  }, [codeBeasts]);
+  const { codeBeasts, isRefreshing, handleManualRefresh } = useGalleryData();
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
