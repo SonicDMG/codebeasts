@@ -64,9 +64,10 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
                 raw_languages = [lang.strip().strip("'\"") for lang in languages_str.split(',') if lang.strip()]
                 data['languages'] = []
                 for entry in raw_languages:
-                    if ':' in entry:
-                        lang, _ = entry.split(':', 1)
-                        data['languages'].append(lang.strip())
+                    # Extract just the language name, removing any percentage or additional info
+                    lang = entry.split(':')[0].strip()
+                    if lang:
+                        data['languages'].append(lang)
 
         # Parse other fields
         if len(parts) > 1:
