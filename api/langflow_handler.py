@@ -96,16 +96,15 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
                 try:
                     animal_entries = ast.literal_eval(animals_str)
                     if isinstance(animal_entries, list):
-                        # Ensure each entry is a list with exactly two elements
+                        # Convert each entry to a single-element list
                         normalized_entries = []
                         for entry in animal_entries:
                             if isinstance(entry, list):
-                                # If the entry is already a list, take the first two elements
-                                normalized_entry = entry[:2] if len(entry) >= 2 else entry
-                                normalized_entries.append(normalized_entry)
+                                # Take the first element if it's a list
+                                normalized_entries.append([entry[0]] if entry else [])
                             else:
-                                # If the entry is not a list, skip it
-                                continue
+                                # If it's not a list, wrap it in a list
+                                normalized_entries.append([entry])
                         data['animal_selection'] = normalized_entries
                 except (SyntaxError, ValueError, TypeError) as e:
                     logger.warning("Failed to parse animal selection: %s", str(e), exc_info=True)
@@ -115,3 +114,4 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         logger.error("Full response that caused error: %s", full_response)
 
     return data
+
