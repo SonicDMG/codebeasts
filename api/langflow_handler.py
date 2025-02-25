@@ -1,3 +1,4 @@
+
 """Module for handling Langflow API interactions."""
 
 import logging
@@ -36,6 +37,7 @@ def run_flow(
         response.raise_for_status()
         response_data = response.json()
         full_response = response_data['outputs'][0]['outputs'][0]['results']['message']['text']
+        logger.info("Raw Langflow response: %s", full_response)
         return parse_langflow_response(full_response)
     except requests.exceptions.RequestException as e:
         logger.error("Error calling Langflow API: %s", str(e), exc_info=True)
@@ -44,6 +46,7 @@ def run_flow(
 def parse_langflow_response(full_response: str) -> Dict[str, Any]:
     """Parse the response from Langflow into structured data."""
     parts = full_response.split('|')
+    logger.info("Splitting response into parts: %s", parts)
 
     data = {
         'languages': [],
@@ -87,20 +90,26 @@ def parse_langflow_response(full_response: str) -> Dict[str, Any]:
         if len(parts) > 4:
             animals_part = parts[4].split(':', 1)
             if len(animals_part) > 1:
-                animals_str = animals_part[1].strip().strip('[]')
+                animals_str = animals_part[1].strip()
+                logger.info("Animal selection string: %s", animals_str)
+                # Remove any leading/trailing brackets and quotes
+                animals_str = animals_str.strip('[]').strip("'\"")
                 if animals_str:
                     try:
-                        animal_entries = ast.literal_eval(animals_str)  # Use ast.literal_eval
+                        # Safely evaluate the string representation of the list
+                        animal_entries = ast.literal_eval(f"[{animals_str}]")
                         if isinstance(animal_entries, list):
                             data['animal_selection'] = [
-                                (entry[0], entry[1])
+                                (str(entry[0]), str(entry[1]))
                                 for entry in animal_entries
                                 if isinstance(entry, (list, tuple)) and len(entry) == 2
                             ]
-                    except (SyntaxError, ValueError, TypeError):
-                        logger.warning("Failed to parse animal selection", exc_info=True)
+                            logger.info("Parsed animal selection: %s", data['animal_selection'])
+                    except (SyntaxError, ValueError, TypeError) as e:
+                        logger.warning("Failed to parse animal selection: %s", str(e), exc_info=True)
 
-    except (SyntaxError, ValueError, TypeError) as e:
+    except Exception as e:
         logger.error("Error parsing Langflow response: %s", str(e), exc_info=True)
 
     return data
+
