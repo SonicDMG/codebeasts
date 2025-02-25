@@ -102,7 +102,7 @@ const Index = () => {
 
               {generatedImage && (
                 <GeneratedImage
-                  imageUrl={generatedImage}
+                  imageUrl={`${generatedImage}?t=${Date.now()}`} // Add timestamp to force fresh image
                   handle={handle}
                   onDownload={handleDownload}
                   onShare={handleShare}

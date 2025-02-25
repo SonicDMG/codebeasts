@@ -18,9 +18,7 @@ const Gallery = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
-    const response = await fetch(`${API_BASE_URL}/api/static/temp`, {
-      cache: 'no-store'
-    });
+    const response = await fetch(`${API_BASE_URL}/api/static/temp`);
     if (!response.ok) {
       throw new Error('Failed to fetch CodeBeasts');
     }
