@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,6 +17,7 @@ const Gallery = () => {
   const { toast } = useToast();
   const previousBeasts = useRef<Map<string, string>>(new Map());
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const isInitialMount = useRef(true);
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
     const response = await fetch(`${API_BASE_URL}/api/static/temp`);
@@ -37,6 +39,16 @@ const Gallery = () => {
   });
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      // On initial mount, just store the beasts without showing toasts
+      if (codeBeasts.length > 0) {
+        const newBeastsMap = new Map(codeBeasts.map(beast => [beast.username, beast.imageUrl]));
+        previousBeasts.current = newBeastsMap;
+      }
+      isInitialMount.current = false;
+      return;
+    }
+
     if (codeBeasts.length > 0) {
       const newOrUpdatedBeasts = codeBeasts.filter(beast => {
         const previousImageUrl = previousBeasts.current.get(beast.username);
