@@ -58,7 +58,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col px-4 relative">
-      <div className="flex flex-col pt-8 md:pt-2">
+      <div className="flex flex-col pt-0">
         <Header />
         <Hero />
 
@@ -102,7 +102,7 @@ const Index = () => {
 
               {generatedImage && (
                 <GeneratedImage
-                  imageUrl={`${generatedImage}?t=${Date.now()}`} // Add timestamp to force fresh image
+                  imageUrl={`${generatedImage}?t=${Date.now()}`}
                   handle={handle}
                   onDownload={handleDownload}
                   onShare={handleShare}
