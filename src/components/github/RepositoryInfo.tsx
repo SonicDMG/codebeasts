@@ -41,7 +41,7 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animal
         ))}
       </div>
 
-      {animalSelection && animalSelection.length > 0 && (
+      {Array.isArray(animalSelection) && animalSelection.length > 0 && (
         <Card className="p-4 bg-black/20 border-white/10">
           <h3 className="text-white/80 text-sm font-medium mb-2">Your CodeBeast Components</h3>
           <div className="space-y-2">
