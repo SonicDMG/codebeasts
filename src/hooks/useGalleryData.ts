@@ -12,6 +12,7 @@ import type { CodeBeast } from '@/types/gallery';
 
 export const useGalleryData = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [timestamp, setTimestamp] = useState(() => Date.now());
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
     const response = await fetch(`${API_BASE_URL}/api/static/temp`);
@@ -22,7 +23,7 @@ export const useGalleryData = () => {
   };
 
   const { data: codeBeasts = [], refetch } = useQuery({
-    queryKey: ['codebeasts'],
+    queryKey: ['codebeasts', timestamp],
     queryFn: fetchCodeBeasts,
     refetchInterval: 10000,
     staleTime: 0,
@@ -34,6 +35,7 @@ export const useGalleryData = () => {
 
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
+    setTimestamp(Date.now());
     await refetch();
     setIsRefreshing(false);
   };
@@ -41,6 +43,7 @@ export const useGalleryData = () => {
   return {
     codeBeasts,
     isRefreshing,
-    handleManualRefresh
+    handleManualRefresh,
+    timestamp
   };
 };

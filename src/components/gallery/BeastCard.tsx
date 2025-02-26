@@ -5,7 +5,7 @@
  * Includes hover effects and mobile-responsive design.
  */
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/card';
 import { Card, CardContent } from '@/components/ui/card';
 import { Download, ExternalLink } from 'lucide-react';
 import { API_BASE_URL } from '@/config/api';
@@ -14,14 +14,20 @@ import type { CodeBeast } from '@/types/gallery';
 
 interface BeastCardProps {
   beast: CodeBeast;
+  timestamp?: number;
 }
 
-export const BeastCard = ({ beast }: BeastCardProps) => {
+export const BeastCard = ({ beast, timestamp }: BeastCardProps) => {
   const { toast } = useToast();
+
+  const getImageUrl = (url: string) => {
+    const baseUrl = `${API_BASE_URL}${url}`;
+    return timestamp ? `${baseUrl}?t=${timestamp}` : baseUrl;
+  };
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}${beast.imageUrl}`);
+      const response = await fetch(getImageUrl(beast.imageUrl));
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -59,7 +65,7 @@ export const BeastCard = ({ beast }: BeastCardProps) => {
 
             <div className="aspect-square overflow-hidden rounded-lg">
               <img
-                src={`${API_BASE_URL}${beast.imageUrl}`}
+                src={getImageUrl(beast.imageUrl)}
                 alt={`CodeBeast for ${beast.username}`}
                 className="w-full h-full object-cover"
                 onError={(e) => {

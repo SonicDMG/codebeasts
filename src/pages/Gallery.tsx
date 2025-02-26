@@ -13,7 +13,7 @@ import { BeastCard } from '@/components/gallery/BeastCard';
 import { useGalleryData } from '@/hooks/useGalleryData';
 
 const Gallery = () => {
-  const { codeBeasts, isRefreshing, handleManualRefresh } = useGalleryData();
+  const { codeBeasts, isRefreshing, handleManualRefresh, timestamp } = useGalleryData();
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
@@ -55,7 +55,7 @@ const Gallery = () => {
       {codeBeasts.length > 0 ? (
         <div className="grid gap-4 grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 auto-rows-fr">
           {codeBeasts.map((beast) => (
-            <BeastCard key={beast.username} beast={beast} />
+            <BeastCard key={beast.username} beast={beast} timestamp={timestamp} />
           ))}
         </div>
       ) : (
