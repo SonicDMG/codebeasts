@@ -5,7 +5,7 @@
  * Includes hover effects and mobile-responsive design.
  */
 
-import { Button } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Download, ExternalLink } from 'lucide-react';
 import { API_BASE_URL } from '@/config/api';
