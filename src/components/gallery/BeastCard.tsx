@@ -51,7 +51,7 @@ export const BeastCard = ({ beast, timestamp }: BeastCardProps) => {
   };
 
   return (
-    <div className="group relative aspect-[1/1.4]">
+    <div className="group relative aspect-[1/1.4] animate-fade-in">
       <Card className="h-full overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
         <CardContent className="h-full p-2 flex flex-col">
           <div className="relative flex-1">
