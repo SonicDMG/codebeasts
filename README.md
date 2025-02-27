@@ -19,22 +19,22 @@ CodeBeasts is a full-stack application built with modern technologies:
 - TypeScript for type-safe development
 
 ### Backend
+- Agentic AI powered by [Langflow](https://langflow.new) 
 - [Flask](https://flask.palletsprojects.com/) Python web framework
 - Advanced logging with [Logfire](https://logfire.dev/) for production-grade monitoring
 - Integration with multiple AI providers:
   - [Stability AI](https://stability.ai/) for image generation
   - [OpenAI](https://openai.com/) (DALL-E) as an alternative image generator
-- Agentic AI powered by [Langflow](https://langflow.new)
 
 ## Live Demo
-Visit <a href="https://codebeasts.lovable.app/" target="_blank">CodeBeasts</a> to try it out!
+Visit <a href="https://codebeasts.onrender.com/" target="_blank">CodeBeasts</a> to try it out!
 
 ## Langflow
-We've included the `Cute_Animal_Generator.json` file which contains the Langflow AI workflow used in this project. To use it:
+We've included the `CODEBEASTS_v4.json` file *(built with [Langflow 1.2.0](https://github.com/langflow-ai/langflow/releases/tag/1.2.0))* which contains the Langflow AI workflow used in this project. To use it:
 
-1. Visit [Langflow](https://github.com/langflow-ai/langflow) and follow the instructions to install
+1. Visit [Langflow](https://github.com/langflow-ai/langflow) and follow the instructions to install *(ensure you're using Langflow >=1.2.0)*
 2. Click on "Upload a Flow"
-3. Upload the `Cute_Animal_Generator.json` file
+3. Upload the `CODEBEASTS_v4.json.json` file
 4. You'll now have access to the complete AI workflow that powers CodeBeasts!
 
 <div align="center">

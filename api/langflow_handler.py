@@ -47,7 +47,7 @@ def run_flow(
 def parse_langflow_response(full_response: str) -> Dict[str, Any]:
     """Parse the response from Langflow into structured data."""
     parts = full_response.split('|')
-    
+
     data = {
         'languages': [],
         'prompt': "",
