@@ -14,7 +14,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
   const [timestamp, setTimestamp] = useState(() => Date.now());
   const [currentPage, setCurrentPage] = useState(1);
   const previousDataRef = useRef<CodeBeast[]>([]);
-  const hasInitialComparisonRef = useRef(false);
+  const isInitialLoadRef = useRef(true);
   const autoRefreshCountRef = useRef(0);
   
   // Track new beasts with their timestamps
@@ -25,7 +25,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
     currentPage, 
     newBeasts,
     previousDataLength: previousDataRef.current.length,
-    hasInitialComparison: hasInitialComparisonRef.current
+    isInitialLoad: isInitialLoadRef.current
   });
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
@@ -59,12 +59,11 @@ export const useGalleryData = (itemsPerPage = 20) => {
     newBeastCount: Object.keys(newBeasts).length
   });
 
-  // Reset newBeasts only on manual refresh
+  // Reset newBeasts when refreshing the page (timestamp is initialized)
   useEffect(() => {
-    if (isRefreshing) {
-      setNewBeasts({});
-    }
-  }, [isRefreshing]);
+    // This only runs on initial mount, effectively clearing "new" status on page refresh
+    setNewBeasts({});
+  }, []);
 
   // Compare previous data with current data to detect new beasts
   useEffect(() => {
@@ -74,15 +73,11 @@ export const useGalleryData = (itemsPerPage = 20) => {
     }
 
     // Initialize the previous data reference if needed
-    if (previousDataRef.current.length === 0) {
+    if (isInitialLoadRef.current) {
       previousDataRef.current = [...allCodeBeasts];
-      
-      // On first load, don't consider any beasts as new
-      if (!hasInitialComparisonRef.current) {
-        hasInitialComparisonRef.current = true;
-        console.log('Initial data loaded, setting reference data');
-        return;
-      }
+      isInitialLoadRef.current = false;
+      console.log('Initial data loaded, setting reference data');
+      return;
     }
 
     // Find beasts that weren't in the previous data
