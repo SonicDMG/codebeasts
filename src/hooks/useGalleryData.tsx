@@ -15,6 +15,14 @@ export const useGalleryData = (itemsPerPage = 20) => {
   const autoRefreshCountRef = useRef(0);
   const newBeastsRef = useRef<string[]>([]);
 
+  // Add debug console log to track the component state
+  console.log('Gallery data state:', { 
+    timestamp, 
+    currentPage, 
+    newBeasts: newBeastsRef.current,
+    previousDataLength: previousDataRef.current.length 
+  });
+
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
     const response = await fetch(`${API_BASE_URL}/api/static/temp`);
     if (!response.ok) {
@@ -30,7 +38,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
     return await response.json();
   };
 
-  const { data: allCodeBeasts = [], refetch } = useQuery({
+  const { data: allCodeBeasts = [], refetch, isLoading } = useQuery({
     queryKey: ['codebeasts', timestamp],
     queryFn: fetchCodeBeasts,
     refetchInterval: 10000,
@@ -39,6 +47,12 @@ export const useGalleryData = (itemsPerPage = 20) => {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true
+  });
+
+  console.log('Fetched CodeBeasts data:', { 
+    count: allCodeBeasts.length,
+    isLoading,
+    newBeastCount: newBeastsRef.current.length
   });
 
   // Check for new CodeBeasts
@@ -62,7 +76,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
         setCurrentPage(1);
       }
       
-      console.log(`🎉 Found ${newBeasts.length} new CodeBeasts`);
+      console.log(`🎉 Found ${newBeasts.length} new CodeBeasts:`, newBeasts.map(b => b.username));
       
       // Store new beast usernames for prioritization
       newBeastsRef.current = newBeasts.map(beast => beast.username);
@@ -105,10 +119,19 @@ export const useGalleryData = (itemsPerPage = 20) => {
     return 0;
   });
 
+  console.log('Sorted CodeBeasts:', { 
+    total: sortedCodeBeasts.length,
+    newOnTop: sortedCodeBeasts.slice(0, 3).map(b => ({
+      username: b.username,
+      isNew: newBeastsRef.current.includes(b.username)
+    }))
+  });
+
   // Clear new beasts reference after 30 seconds
   useEffect(() => {
     if (newBeastsRef.current.length > 0) {
       const timer = setTimeout(() => {
+        console.log('Clearing new beasts reference after 30 seconds');
         newBeastsRef.current = [];
       }, 30000); // 30 seconds
       

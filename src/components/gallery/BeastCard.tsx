@@ -7,18 +7,34 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Download, ExternalLink } from 'lucide-react';
+import { Download, ExternalLink, Sparkles } from 'lucide-react';
 import { API_BASE_URL } from '@/config/api';
 import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from 'react';
 import type { CodeBeast } from '@/types/gallery';
 
 interface BeastCardProps {
   beast: CodeBeast;
   timestamp?: number;
+  isNew?: boolean;
 }
 
-export const BeastCard = ({ beast, timestamp }: BeastCardProps) => {
+export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) => {
   const { toast } = useToast();
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Add animation when a new beast is added
+  const [showNewAnimation, setShowNewAnimation] = useState(isNew);
+  
+  useEffect(() => {
+    if (isNew) {
+      // Reset animation after 5 seconds
+      const timer = setTimeout(() => {
+        setShowNewAnimation(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [isNew]);
 
   const getImageUrl = (url: string) => {
     const baseUrl = `${API_BASE_URL}${url}`;
@@ -50,9 +66,20 @@ export const BeastCard = ({ beast, timestamp }: BeastCardProps) => {
     }
   };
 
+  const handleImageLoad = () => {
+    setIsLoaded(true);
+  };
+
   return (
-    <div className="group relative aspect-[1/1.4] animate-fade-in">
-      <Card className="h-full overflow-hidden bg-black/20 border-white/10 hover:border-white/20 transition-colors">
+    <div className={`group relative aspect-[1/1.4] ${
+      !isLoaded ? 'opacity-0' : 'animate-fade-in'
+    } ${showNewAnimation ? 'animate-pulse' : ''}`}>
+      <Card className={`h-full overflow-hidden ${isNew ? 'bg-primary/10 border-primary/30' : 'bg-black/20 border-white/10'} hover:border-white/20 transition-colors`}>
+        {isNew && (
+          <div className="absolute top-2 right-2 z-20 flex items-center gap-1 bg-primary/80 rounded-full px-2 py-1">
+            <Sparkles className="w-3 h-3 text-primary-foreground" />
+          </div>
+        )}
         <CardContent className="h-full p-2 flex flex-col">
           <div className="relative flex-1">
             <button
@@ -68,6 +95,7 @@ export const BeastCard = ({ beast, timestamp }: BeastCardProps) => {
                 src={getImageUrl(beast.imageUrl)}
                 alt={`CodeBeast for ${beast.username}`}
                 className="w-full h-full object-cover"
+                onLoad={handleImageLoad}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.src = '/placeholder.svg';
@@ -77,7 +105,9 @@ export const BeastCard = ({ beast, timestamp }: BeastCardProps) => {
           </div>
 
           <div className="mt-2 pb-1">
-            <p className="text-white/80 text-center text-sm font-medium truncate">@{beast.username}</p>
+            <p className={`text-center text-sm font-medium truncate ${isNew ? 'text-primary' : 'text-white/80'}`}>
+              @{beast.username}
+            </p>
             
             <div className="flex justify-center gap-2 mt-2 md:hidden">
               <Button

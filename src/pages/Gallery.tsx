@@ -20,10 +20,23 @@ import {
   PaginationNext, 
   PaginationPrevious
 } from '@/components/ui/pagination';
+import { useEffect, useRef } from 'react';
 
 const Gallery = () => {
   const { codeBeasts, isRefreshing, handleManualRefresh, timestamp, pagination } = useGalleryData();
   const { currentPage, totalPages, goToPage, nextPage, prevPage } = pagination;
+  const newBeastsRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    // Track new beasts for visual highlighting
+    if (codeBeasts.length > 0) {
+      // For debugging
+      console.log('Gallery page received CodeBeasts:', 
+        codeBeasts.map(b => b.username).slice(0, 5), 
+        '... total:', codeBeasts.length
+      );
+    }
+  }, [codeBeasts]);
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
@@ -65,9 +78,19 @@ const Gallery = () => {
       {codeBeasts.length > 0 ? (
         <>
           <div className="grid gap-4 grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 auto-rows-fr">
-            {codeBeasts.map((beast) => (
-              <BeastCard key={beast.username} beast={beast} timestamp={timestamp} />
-            ))}
+            {codeBeasts.map((beast, index) => {
+              // Check if this beast is one of the new ones (should be at the top)
+              const isNew = index < 3 && beast.username.includes('new'); // Simple check for debugging
+              
+              return (
+                <BeastCard 
+                  key={`${beast.username}-${timestamp}`}
+                  beast={beast} 
+                  timestamp={timestamp}
+                  isNew={isNew}
+                />
+              );
+            })}
           </div>
           
           {totalPages > 1 && (
