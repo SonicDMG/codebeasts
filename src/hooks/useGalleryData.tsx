@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { API_BASE_URL } from '@/config/api';
@@ -27,6 +26,13 @@ export const useGalleryData = (itemsPerPage = 20) => {
     }
   });
 
+  console.log('Gallery data state:', { 
+    timestamp, 
+    currentPage, 
+    newBeasts,
+    previousDataLength: previousDataRef.current.length 
+  });
+
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
     const response = await fetch(`${API_BASE_URL}/api/static/temp`);
     if (!response.ok) {
@@ -35,6 +41,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
     
     if (!isRefreshing) {
       autoRefreshCountRef.current += 1;
+      console.log(`🔄 Auto-refreshing gallery data (count: ${autoRefreshCountRef.current})`);
     }
     
     return await response.json();
@@ -51,22 +58,29 @@ export const useGalleryData = (itemsPerPage = 20) => {
     refetchOnReconnect: true
   });
 
+  console.log('Fetched CodeBeasts data:', { 
+    count: allCodeBeasts.length,
+    isLoading,
+    newBeastCount: Object.keys(newBeasts).length
+  });
+
   useEffect(() => {
     if (isInitialLoadRef.current) {
-      // On initial load, just store the beasts but don't mark any as new
-      previousDataRef.current = allCodeBeasts.map(beast => ({...beast}));
+      previousDataRef.current = [...allCodeBeasts];
       isInitialLoadRef.current = false;
       return;
     }
 
-    // Only identify beasts that are truly new by comparing usernames
-    const existingUsernames = new Set(previousDataRef.current.map(beast => beast.username));
-    const justAddedBeasts = allCodeBeasts.filter(beast => !existingUsernames.has(beast.username));
+    const justAddedBeasts = allCodeBeasts.filter(beast => 
+      !previousDataRef.current.some(prevBeast => prevBeast.username === beast.username)
+    );
 
     if (justAddedBeasts.length > 0) {
       if (currentPage !== 1) {
         setCurrentPage(1);
       }
+      
+      console.log(`🎉 Found ${justAddedBeasts.length} new CodeBeasts:`, justAddedBeasts.map(b => b.username));
       
       const now = Date.now();
       const updatedNewBeasts = { ...newBeasts };
@@ -95,8 +109,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
       }
     }
 
-    // Update the previous data reference with the current data
-    previousDataRef.current = allCodeBeasts.map(beast => ({...beast}));
+    previousDataRef.current = [...allCodeBeasts];
   }, [allCodeBeasts, currentPage]);
 
   useEffect(() => {
@@ -109,6 +122,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
         if (now - timestamp > NEW_BEAST_DURATION) {
           delete updatedNewBeasts[username];
           hasExpired = true;
+          console.log(`Beast ${username} is no longer considered new`);
         }
       });
       
@@ -142,12 +156,21 @@ export const useGalleryData = (itemsPerPage = 20) => {
     return 0;
   });
 
+  console.log('Sorted CodeBeasts:', { 
+    total: sortedCodeBeasts.length,
+    newOnTop: sortedCodeBeasts.slice(0, 3).map(b => ({
+      username: b.username,
+      isNew: newBeasts[b.username] !== undefined
+    }))
+  });
+
   const startIndex = (validatedCurrentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const codeBeasts = sortedCodeBeasts.slice(startIndex, endIndex);
 
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
+    console.log('🖱️ Manual refresh triggered');
     setTimestamp(Date.now());
     await refetch();
     setIsRefreshing(false);

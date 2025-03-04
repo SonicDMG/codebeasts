@@ -19,10 +19,21 @@ import {
   PaginationNext, 
   PaginationPrevious
 } from '@/components/ui/pagination';
+import { useEffect } from 'react';
 
 const Gallery = () => {
   const { codeBeasts, isRefreshing, handleManualRefresh, timestamp, newBeasts, pagination } = useGalleryData();
   const { currentPage, totalPages, goToPage, nextPage, prevPage } = pagination;
+
+  useEffect(() => {
+    // Debug log to show CodeBeasts loading
+    if (codeBeasts.length > 0) {
+      console.log('Gallery page received CodeBeasts:', 
+        codeBeasts.map(b => b.username).slice(0, 5), 
+        '... total:', codeBeasts.length
+      );
+    }
+  }, [codeBeasts]);
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
