@@ -26,7 +26,7 @@ const Gallery = () => {
   const { currentPage, totalPages, goToPage, nextPage, prevPage } = pagination;
 
   return (
-    <div className="container mx-auto px-4 py-8 min-h-screen">
+    <div className="container mx-auto px-4 py-8 pt-6 min-h-screen">
       <div className="flex flex-col gap-6 mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
