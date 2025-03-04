@@ -12,12 +12,20 @@ export const useGalleryData = (itemsPerPage = 20) => {
   const [currentPage, setCurrentPage] = useState(1);
   const previousDataRef = useRef<CodeBeast[]>([]);
   const isInitialLoadRef = useRef(true);
+  const autoRefreshCountRef = useRef(0);
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
     const response = await fetch(`${API_BASE_URL}/api/static/temp`);
     if (!response.ok) {
       throw new Error('Failed to fetch CodeBeasts');
     }
+    
+    // For auto-refresh (not manual refresh), increment and log the counter
+    if (!isRefreshing) {
+      autoRefreshCountRef.current += 1;
+      console.log(`🔄 Auto-refreshing gallery data (count: ${autoRefreshCountRef.current})`);
+    }
+    
     return await response.json();
   };
 
@@ -52,6 +60,8 @@ export const useGalleryData = (itemsPerPage = 20) => {
       if (currentPage !== 1) {
         setCurrentPage(1);
       }
+      
+      console.log(`🎉 Found ${newBeasts.length} new CodeBeasts`);
       
       newBeasts.forEach(beast => {
         toast({
@@ -88,6 +98,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
 
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
+    console.log('🖱️ Manual refresh triggered');
     setTimestamp(Date.now());
     await refetch();
     setIsRefreshing(false);
