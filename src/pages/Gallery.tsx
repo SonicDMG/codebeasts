@@ -2,18 +2,27 @@
 /**
  * Gallery page component that displays a grid of generated CodeBeasts.
  * Features auto-refresh functionality, manual refresh option, and responsive layout.
- * Includes empty state handling and navigation back to generation page.
+ * Includes empty state handling, pagination, and navigation back to generation page.
  */
 
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RefreshCw, Sparkles } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, RefreshCw, Sparkles } from 'lucide-react';
 import { BeastCard } from '@/components/gallery/BeastCard';
 import { useGalleryData } from '@/hooks/useGalleryData';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious
+} from '@/components/ui/pagination';
 
 const Gallery = () => {
-  const { codeBeasts, isRefreshing, handleManualRefresh, timestamp } = useGalleryData();
+  const { codeBeasts, isRefreshing, handleManualRefresh, timestamp, pagination } = useGalleryData();
+  const { currentPage, totalPages, goToPage, nextPage, prevPage } = pagination;
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
@@ -53,11 +62,85 @@ const Gallery = () => {
       </div>
 
       {codeBeasts.length > 0 ? (
-        <div className="grid gap-4 grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 auto-rows-fr">
-          {codeBeasts.map((beast) => (
-            <BeastCard key={beast.username} beast={beast} timestamp={timestamp} />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-4 grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 auto-rows-fr">
+            {codeBeasts.map((beast) => (
+              <BeastCard key={beast.username} beast={beast} timestamp={timestamp} />
+            ))}
+          </div>
+          
+          {totalPages > 1 && (
+            <div className="mt-8">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={prevPage} 
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                    />
+                  </PaginationItem>
+                  
+                  {[...Array(totalPages)].map((_, i) => {
+                    const pageNumber = i + 1;
+                    // Show limited page numbers on mobile
+                    if (totalPages > 7) {
+                      // Always show first, last, current, and pages close to current
+                      if (
+                        pageNumber === 1 || 
+                        pageNumber === totalPages ||
+                        Math.abs(pageNumber - currentPage) <= 1 ||
+                        (pageNumber === 2 && currentPage === 1) ||
+                        (pageNumber === totalPages - 1 && currentPage === totalPages)
+                      ) {
+                        return (
+                          <PaginationItem key={pageNumber}>
+                            <PaginationLink 
+                              isActive={pageNumber === currentPage}
+                              onClick={() => goToPage(pageNumber)}
+                            >
+                              {pageNumber}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      } 
+                      // Add ellipsis for page breaks
+                      else if (
+                        (pageNumber === 2 && currentPage > 3) ||
+                        (pageNumber === totalPages - 1 && currentPage < totalPages - 2)
+                      ) {
+                        return (
+                          <PaginationItem key={`ellipsis-${pageNumber}`}>
+                            <span className="px-4 text-white/60">...</span>
+                          </PaginationItem>
+                        );
+                      }
+                      return null;
+                    }
+                    
+                    // Show all page numbers if there aren't too many
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink 
+                          isActive={pageNumber === currentPage}
+                          onClick={() => goToPage(pageNumber)}
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={nextPage}
+                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </>
       ) : (
         <div className="text-center text-white/60 py-12">
           <p className="text-lg mb-4">No CodeBeasts have been generated yet.</p>
