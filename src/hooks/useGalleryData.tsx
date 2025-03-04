@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { API_BASE_URL } from '@/config/api';
@@ -16,15 +17,8 @@ export const useGalleryData = (itemsPerPage = 20) => {
   const isInitialLoadRef = useRef(true);
   const autoRefreshCountRef = useRef(0);
   
-  const [newBeasts, setNewBeasts] = useState<{[username: string]: number}>(() => {
-    try {
-      const storedBeasts = localStorage.getItem(NEW_BEASTS_STORAGE_KEY);
-      return storedBeasts ? JSON.parse(storedBeasts) : {};
-    } catch (e) {
-      console.error("Error loading new beasts from localStorage:", e);
-      return {};
-    }
-  });
+  // Initialize newBeasts as empty on component mount
+  const [newBeasts, setNewBeasts] = useState<{[username: string]: number}>({});
 
   console.log('Gallery data state:', { 
     timestamp, 
@@ -63,6 +57,17 @@ export const useGalleryData = (itemsPerPage = 20) => {
     isLoading,
     newBeastCount: Object.keys(newBeasts).length
   });
+
+  // Reset newBeasts on manual refresh or timestamp change
+  useEffect(() => {
+    setNewBeasts({});
+    // Clear localStorage when timestamp changes (i.e., on refresh)
+    try {
+      localStorage.removeItem(NEW_BEASTS_STORAGE_KEY);
+    } catch (e) {
+      console.error("Error clearing localStorage:", e);
+    }
+  }, [timestamp]);
 
   useEffect(() => {
     if (isInitialLoadRef.current) {
