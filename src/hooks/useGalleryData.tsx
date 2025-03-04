@@ -53,15 +53,15 @@ export const useGalleryData = (itemsPerPage = 20) => {
 
   useEffect(() => {
     if (isInitialLoadRef.current) {
-      previousDataRef.current = [...allCodeBeasts];
+      // On initial load, just store the beasts but don't mark any as new
+      previousDataRef.current = allCodeBeasts.map(beast => ({...beast}));
       isInitialLoadRef.current = false;
       return;
     }
 
     // Only identify beasts that are truly new by comparing usernames
-    const justAddedBeasts = allCodeBeasts.filter(beast => 
-      !previousDataRef.current.some(prevBeast => prevBeast.username === beast.username)
-    );
+    const existingUsernames = new Set(previousDataRef.current.map(beast => beast.username));
+    const justAddedBeasts = allCodeBeasts.filter(beast => !existingUsernames.has(beast.username));
 
     if (justAddedBeasts.length > 0) {
       if (currentPage !== 1) {
@@ -95,7 +95,8 @@ export const useGalleryData = (itemsPerPage = 20) => {
       }
     }
 
-    previousDataRef.current = [...allCodeBeasts];
+    // Update the previous data reference with the current data
+    previousDataRef.current = allCodeBeasts.map(beast => ({...beast}));
   }, [allCodeBeasts, currentPage]);
 
   useEffect(() => {
