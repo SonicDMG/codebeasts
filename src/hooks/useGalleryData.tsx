@@ -14,7 +14,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
   const [timestamp, setTimestamp] = useState(() => Date.now());
   const [currentPage, setCurrentPage] = useState(1);
   const previousDataRef = useRef<CodeBeast[]>([]);
-  const isInitialLoadRef = useRef(true);
+  const hasInitialComparisonRef = useRef(false);
   const autoRefreshCountRef = useRef(0);
   
   // Track new beasts with their timestamps
@@ -24,7 +24,8 @@ export const useGalleryData = (itemsPerPage = 20) => {
     timestamp, 
     currentPage, 
     newBeasts,
-    previousDataLength: previousDataRef.current.length 
+    previousDataLength: previousDataRef.current.length,
+    hasInitialComparison: hasInitialComparisonRef.current
   });
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
@@ -58,18 +59,30 @@ export const useGalleryData = (itemsPerPage = 20) => {
     newBeastCount: Object.keys(newBeasts).length
   });
 
-  // Reset newBeasts on manual refresh or timestamp change
+  // Reset newBeasts only on manual refresh
   useEffect(() => {
-    setNewBeasts({});
-  }, [timestamp]);
+    if (isRefreshing) {
+      setNewBeasts({});
+    }
+  }, [isRefreshing]);
 
   // Compare previous data with current data to detect new beasts
   useEffect(() => {
-    // Skip the first load to avoid marking all beasts as new initially
-    if (isInitialLoadRef.current) {
-      previousDataRef.current = [...allCodeBeasts];
-      isInitialLoadRef.current = false;
+    // Skip if there's no data or if it's loading
+    if (allCodeBeasts.length === 0 || isLoading) {
       return;
+    }
+
+    // Initialize the previous data reference if needed
+    if (previousDataRef.current.length === 0) {
+      previousDataRef.current = [...allCodeBeasts];
+      
+      // On first load, don't consider any beasts as new
+      if (!hasInitialComparisonRef.current) {
+        hasInitialComparisonRef.current = true;
+        console.log('Initial data loaded, setting reference data');
+        return;
+      }
     }
 
     // Find beasts that weren't in the previous data
@@ -110,7 +123,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
 
     // Update reference to current data for next comparison
     previousDataRef.current = [...allCodeBeasts];
-  }, [allCodeBeasts, currentPage, newBeasts]);
+  }, [allCodeBeasts, currentPage, newBeasts, isLoading]);
 
   // Clean up expired "new" status beasts
   useEffect(() => {
