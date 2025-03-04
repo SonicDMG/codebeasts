@@ -13,6 +13,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
   const previousDataRef = useRef<CodeBeast[]>([]);
   const isInitialLoadRef = useRef(true);
   const autoRefreshCountRef = useRef(0);
+  const newBeastsRef = useRef<string[]>([]);
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
     const response = await fetch(`${API_BASE_URL}/api/static/temp`);
@@ -63,6 +64,9 @@ export const useGalleryData = (itemsPerPage = 20) => {
       
       console.log(`🎉 Found ${newBeasts.length} new CodeBeasts`);
       
+      // Store new beast usernames for prioritization
+      newBeastsRef.current = newBeasts.map(beast => beast.username);
+      
       newBeasts.forEach(beast => {
         toast({
           title: "New CodeBeast Arrived!",
@@ -91,10 +95,31 @@ export const useGalleryData = (itemsPerPage = 20) => {
     setCurrentPage(validatedCurrentPage);
   }
 
+  // Sort beasts to prioritize new ones at the top
+  const sortedCodeBeasts = [...allCodeBeasts].sort((a, b) => {
+    const aIsNew = newBeastsRef.current.includes(a.username);
+    const bIsNew = newBeastsRef.current.includes(b.username);
+    
+    if (aIsNew && !bIsNew) return -1;
+    if (!aIsNew && bIsNew) return 1;
+    return 0;
+  });
+
+  // Clear new beasts reference after 30 seconds
+  useEffect(() => {
+    if (newBeastsRef.current.length > 0) {
+      const timer = setTimeout(() => {
+        newBeastsRef.current = [];
+      }, 30000); // 30 seconds
+      
+      return () => clearTimeout(timer);
+    }
+  }, [newBeastsRef.current]);
+
   // Get current page items
   const startIndex = (validatedCurrentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  const codeBeasts = allCodeBeasts.slice(startIndex, endIndex);
+  const codeBeasts = sortedCodeBeasts.slice(startIndex, endIndex);
 
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
