@@ -1,19 +1,17 @@
 
-/**
- * Custom hook for fetching and managing the CodeBeasts gallery data.
- * Provides real-time updates, pagination, and manual refresh functionality for the gallery view.
- * Uses React Query for efficient data fetching and caching.
- */
-
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { API_BASE_URL } from '@/config/api';
 import type { CodeBeast } from '@/types/gallery';
+import { toast } from '@/hooks/use-toast';
+import { Sparkles } from 'lucide-react';
 
 export const useGalleryData = (itemsPerPage = 20) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [timestamp, setTimestamp] = useState(() => Date.now());
   const [currentPage, setCurrentPage] = useState(1);
+  const previousDataRef = useRef<CodeBeast[]>([]);
+  const isInitialLoadRef = useRef(true);
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
     const response = await fetch(`${API_BASE_URL}/api/static/temp`);
@@ -33,6 +31,45 @@ export const useGalleryData = (itemsPerPage = 20) => {
     refetchOnWindowFocus: true,
     refetchOnReconnect: true
   });
+
+  // Check for new CodeBeasts
+  useEffect(() => {
+    if (isInitialLoadRef.current) {
+      // Store initial data and skip notifications on first load
+      previousDataRef.current = [...allCodeBeasts];
+      isInitialLoadRef.current = false;
+      return;
+    }
+
+    // Compare with previous data to find new beasts
+    const newBeasts = allCodeBeasts.filter(beast => 
+      !previousDataRef.current.some(prevBeast => prevBeast.username === beast.username)
+    );
+
+    // Show toast for each new beast
+    if (newBeasts.length > 0) {
+      // If there are new beasts, reset to first page to show them
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+      }
+      
+      newBeasts.forEach(beast => {
+        toast({
+          title: "New CodeBeast Arrived!",
+          description: `${beast.username}'s CodeBeast has joined the gallery`,
+          variant: "default",
+          action: (
+            <div className="flex items-center gap-1">
+              <Sparkles className="h-4 w-4 text-yellow-400" /> 
+            </div>
+          )
+        });
+      });
+    }
+
+    // Update the reference
+    previousDataRef.current = [...allCodeBeasts];
+  }, [allCodeBeasts, currentPage]);
 
   // Calculate pagination values
   const totalItems = allCodeBeasts.length;

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronLeft, ChevronRight, RefreshCw, Sparkles } from 'lucide-react';
 import { BeastCard } from '@/components/gallery/BeastCard';
 import { useGalleryData } from '@/hooks/useGalleryData';
+import { Toaster } from '@/components/ui/toaster';
 import { 
   Pagination, 
   PaginationContent, 
@@ -153,6 +154,9 @@ const Gallery = () => {
           </Link>
         </div>
       )}
+      
+      {/* Toast notifications for new CodeBeasts */}
+      <Toaster />
     </div>
   );
 };
