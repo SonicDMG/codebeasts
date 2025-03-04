@@ -28,13 +28,14 @@ export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) =
   
   useEffect(() => {
     if (isNew) {
+      console.log(`Showing animation for new beast: ${beast.username}`);
       // Reset animation after 5 seconds
       const timer = setTimeout(() => {
         setShowNewAnimation(false);
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [isNew]);
+  }, [isNew, beast.username]);
 
   const getImageUrl = (url: string) => {
     const baseUrl = `${API_BASE_URL}${url}`;
@@ -70,14 +71,21 @@ export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) =
     setIsLoaded(true);
   };
 
+  // Add stronger visual treatment for new beasts
+  const newBeastStyles = isNew ? 
+    'ring-2 ring-primary/50 shadow-lg shadow-primary/20 transform-gpu scale-105 z-10' : '';
+
   return (
     <div className={`group relative aspect-[1/1.4] ${
       !isLoaded ? 'opacity-0' : 'animate-fade-in'
     } ${showNewAnimation ? 'animate-pulse' : ''}`}>
-      <Card className={`h-full overflow-hidden ${isNew ? 'bg-primary/10 border-primary/30' : 'bg-black/20 border-white/10'} hover:border-white/20 transition-colors`}>
+      <Card className={`h-full overflow-hidden transition-all duration-300 ${
+        isNew ? 'bg-primary/10 border-primary/30' : 'bg-black/20 border-white/10'
+      } hover:border-white/20 ${newBeastStyles}`}>
         {isNew && (
           <div className="absolute top-2 right-2 z-20 flex items-center gap-1 bg-primary/80 rounded-full px-2 py-1">
             <Sparkles className="w-3 h-3 text-primary-foreground" />
+            <span className="text-xs text-white font-medium">New</span>
           </div>
         )}
         <CardContent className="h-full p-2 flex flex-col">
