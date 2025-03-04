@@ -1,4 +1,3 @@
-
 /**
  * Card component for displaying individual CodeBeasts in the gallery.
  * Features image display, download functionality, and links to GitHub profiles.
@@ -31,7 +30,6 @@ export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) =
     setShowNewAnimation(isNew);
     
     if (isNew) {
-      console.log(`Showing animation for new beast: ${beast.username}`);
       // Reset animation after 5 seconds
       const timer = setTimeout(() => {
         setShowNewAnimation(false);

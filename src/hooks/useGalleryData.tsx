@@ -17,8 +17,8 @@ export const useGalleryData = (itemsPerPage = 20) => {
   const isInitialLoadRef = useRef(true);
   const autoRefreshCountRef = useRef(0);
   
-  // Track new beasts with their timestamps
-  const [newBeasts, setNewBeasts] = useState<{[username: string]: number}>({});
+  // Track new beasts with their timestamps - using a composite key to handle multiple beasts per username
+  const [newBeasts, setNewBeasts] = useState<{[key: string]: number}>({});
 
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
     const response = await fetch(`${API_BASE_URL}/api/static/temp`);
@@ -65,38 +65,18 @@ export const useGalleryData = (itemsPerPage = 20) => {
       return;
     }
 
-    // Create a set of usernames from previous data for faster lookup
-    const prevUsernameSet = new Set(previousDataRef.current.map(beast => beast.username));
+    // Create unique identifiers for each beast in previous data using imageUrl
+    // This allows detecting new beasts from the same user
+    const prevBeastKeys = new Set(
+      previousDataRef.current.map(beast => beast.imageUrl)
+    );
     
     // Find beasts in current data that weren't in the previous data
-    const justAddedBeasts = allCodeBeasts.filter(beast => !prevUsernameSet.has(beast.username));
+    const newlyAddedBeasts = allCodeBeasts.filter(beast => 
+      !prevBeastKeys.has(beast.imageUrl)
+    );
     
-    // Find beasts that were removed and then re-added (exist in both arrays but not consecutively)
-    const readdedBeasts = allCodeBeasts.filter(currentBeast => {
-      // Check if it existed in previous data
-      const existedInPrevious = prevUsernameSet.has(currentBeast.username);
-      
-      // If it existed before, check if it's at a different position or was temporarily removed
-      if (existedInPrevious) {
-        const prevIndex = previousDataRef.current.findIndex(
-          prevBeast => prevBeast.username === currentBeast.username
-        );
-        const currentIndex = allCodeBeasts.findIndex(
-          beast => beast.username === currentBeast.username
-        );
-        
-        // Consider it "re-added" if its position changed significantly
-        // This could indicate it was removed and re-added in the API response
-        return Math.abs(prevIndex - currentIndex) > 3;
-      }
-      
-      return false;
-    });
-    
-    // Combine newly added and re-added beasts
-    const allNewBeasts = [...justAddedBeasts, ...readdedBeasts];
-    
-    if (allNewBeasts.length > 0) {
+    if (newlyAddedBeasts.length > 0) {
       // When new beasts are detected, navigate to page 1 if not already there
       if (currentPage !== 1) {
         setCurrentPage(1);
@@ -106,8 +86,11 @@ export const useGalleryData = (itemsPerPage = 20) => {
       const updatedNewBeasts = { ...newBeasts };
       
       // Add all new beasts to the tracking object with current timestamp
-      allNewBeasts.forEach(beast => {
-        updatedNewBeasts[beast.username] = now;
+      // Use imageUrl as part of the key to allow multiple beasts per username
+      newlyAddedBeasts.forEach(beast => {
+        // Create a unique key for each beast using username and a hash of the imageUrl
+        const beastKey = beast.username + ":" + beast.imageUrl.substring(beast.imageUrl.lastIndexOf('/') + 1);
+        updatedNewBeasts[beastKey] = now;
         
         // Show toast notification for each new beast
         toast({
@@ -137,9 +120,9 @@ export const useGalleryData = (itemsPerPage = 20) => {
       const updatedNewBeasts = { ...newBeasts };
       
       // Remove beasts whose "new" status has expired
-      Object.entries(updatedNewBeasts).forEach(([username, timestamp]) => {
+      Object.entries(updatedNewBeasts).forEach(([key, timestamp]) => {
         if (now - timestamp > NEW_BEAST_DURATION) {
-          delete updatedNewBeasts[username];
+          delete updatedNewBeasts[key];
           hasExpired = true;
         }
       });
@@ -163,8 +146,9 @@ export const useGalleryData = (itemsPerPage = 20) => {
 
   // Sort beasts to show new ones first
   const sortedCodeBeasts = [...allCodeBeasts].sort((a, b) => {
-    const aIsNew = newBeasts[a.username] !== undefined;
-    const bIsNew = newBeasts[b.username] !== undefined;
+    // Check if any of the new beast keys contain this username
+    const aIsNew = Object.keys(newBeasts).some(key => key.startsWith(a.username + ":"));
+    const bIsNew = Object.keys(newBeasts).some(key => key.startsWith(b.username + ":"));
     
     if (aIsNew && !bIsNew) return -1;
     if (!aIsNew && bIsNew) return 1;
@@ -204,7 +188,12 @@ export const useGalleryData = (itemsPerPage = 20) => {
     isRefreshing,
     handleManualRefresh,
     timestamp,
-    newBeasts,
+    // We need to adapt the newBeasts interface for BeastCard to use
+    newBeasts: Object.keys(newBeasts).reduce((acc, key) => {
+      const username = key.split(':')[0];
+      acc[username] = newBeasts[key];
+      return acc;
+    }, {} as {[username: string]: number}),
     pagination: {
       currentPage: validatedCurrentPage,
       totalPages,
