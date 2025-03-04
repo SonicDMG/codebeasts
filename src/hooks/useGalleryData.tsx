@@ -20,14 +20,6 @@ export const useGalleryData = (itemsPerPage = 20) => {
   // Track new beasts with their timestamps
   const [newBeasts, setNewBeasts] = useState<{[username: string]: number}>({});
 
-  console.log('Gallery data state:', { 
-    timestamp, 
-    currentPage, 
-    newBeasts,
-    previousDataLength: previousDataRef.current.length,
-    isInitialLoad: isInitialLoadRef.current
-  });
-
   const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
     const response = await fetch(`${API_BASE_URL}/api/static/temp`);
     if (!response.ok) {
@@ -53,12 +45,6 @@ export const useGalleryData = (itemsPerPage = 20) => {
     refetchOnReconnect: true
   });
 
-  console.log('Fetched CodeBeasts data:', { 
-    count: allCodeBeasts.length,
-    isLoading,
-    newBeastCount: Object.keys(newBeasts).length
-  });
-
   // Reset newBeasts when refreshing the page (timestamp is initialized)
   useEffect(() => {
     // This only runs on initial mount, effectively clearing "new" status on page refresh
@@ -76,7 +62,6 @@ export const useGalleryData = (itemsPerPage = 20) => {
     if (isInitialLoadRef.current) {
       previousDataRef.current = [...allCodeBeasts];
       isInitialLoadRef.current = false;
-      console.log('Initial data loaded, setting reference data');
       return;
     }
 
@@ -90,8 +75,6 @@ export const useGalleryData = (itemsPerPage = 20) => {
       if (currentPage !== 1) {
         setCurrentPage(1);
       }
-      
-      console.log(`🎉 Found ${justAddedBeasts.length} new CodeBeasts:`, justAddedBeasts.map(b => b.username));
       
       const now = Date.now();
       const updatedNewBeasts = { ...newBeasts };
@@ -132,7 +115,6 @@ export const useGalleryData = (itemsPerPage = 20) => {
         if (now - timestamp > NEW_BEAST_DURATION) {
           delete updatedNewBeasts[username];
           hasExpired = true;
-          console.log(`Beast ${username} is no longer considered new`);
         }
       });
       
@@ -163,14 +145,6 @@ export const useGalleryData = (itemsPerPage = 20) => {
     return 0;
   });
 
-  console.log('Sorted CodeBeasts:', { 
-    total: sortedCodeBeasts.length,
-    newOnTop: sortedCodeBeasts.slice(0, 3).map(b => ({
-      username: b.username,
-      isNew: newBeasts[b.username] !== undefined
-    }))
-  });
-
   // Paginate the sorted beasts
   const startIndex = (validatedCurrentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
@@ -178,7 +152,6 @@ export const useGalleryData = (itemsPerPage = 20) => {
 
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
-    console.log('🖱️ Manual refresh triggered');
     setTimestamp(Date.now());
     await refetch();
     setIsRefreshing(false);
