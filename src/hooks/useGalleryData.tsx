@@ -107,6 +107,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
       
       setNewBeasts(updatedNewBeasts);
       
+      // Only store newly detected beasts, not all beasts
       try {
         localStorage.setItem(NEW_BEASTS_STORAGE_KEY, JSON.stringify(updatedNewBeasts));
       } catch (e) {
@@ -115,7 +116,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
     }
 
     previousDataRef.current = [...allCodeBeasts];
-  }, [allCodeBeasts, currentPage]);
+  }, [allCodeBeasts, currentPage, newBeasts]);
 
   useEffect(() => {
     const cleanupInterval = setInterval(() => {
