@@ -1,4 +1,3 @@
-
 /**
  * Gallery page component that displays a grid of generated CodeBeasts.
  * Features auto-refresh functionality, manual refresh option, and responsive layout.
@@ -20,7 +19,6 @@ import {
   PaginationNext, 
   PaginationPrevious
 } from '@/components/ui/pagination';
-import { useEffect } from 'react';
 
 const Gallery = () => {
   const { codeBeasts, isRefreshing, handleManualRefresh, timestamp, newBeasts, pagination } = useGalleryData();

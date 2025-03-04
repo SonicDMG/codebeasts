@@ -58,6 +58,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
       return;
     }
 
+    // Only identify beasts that are truly new by comparing usernames
     const justAddedBeasts = allCodeBeasts.filter(beast => 
       !previousDataRef.current.some(prevBeast => prevBeast.username === beast.username)
     );
