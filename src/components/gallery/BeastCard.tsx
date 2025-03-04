@@ -27,6 +27,9 @@ export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) =
   const [showNewAnimation, setShowNewAnimation] = useState(isNew);
   
   useEffect(() => {
+    // Update animation state when isNew changes
+    setShowNewAnimation(isNew);
+    
     if (isNew) {
       console.log(`Showing animation for new beast: ${beast.username}`);
       // Reset animation after 5 seconds
@@ -71,19 +74,20 @@ export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) =
     setIsLoaded(true);
   };
 
-  // Add stronger visual treatment for new beasts
-  const newBeastStyles = isNew ? 
-    'ring-2 ring-primary/50 shadow-lg shadow-primary/20 transform-gpu scale-105 z-10' : '';
+  // Enhanced visual treatment for new beasts
+  const newBeastStyles = isNew 
+    ? 'ring-2 ring-primary shadow-lg shadow-primary/30 transform-gpu scale-105 z-10' 
+    : '';
 
   return (
     <div className={`group relative aspect-[1/1.4] ${
       !isLoaded ? 'opacity-0' : 'animate-fade-in'
     } ${showNewAnimation ? 'animate-pulse' : ''}`}>
-      <Card className={`h-full overflow-hidden transition-all duration-300 ${
-        isNew ? 'bg-primary/10 border-primary/30' : 'bg-black/20 border-white/10'
+      <Card className={`h-full overflow-hidden transition-all duration-500 ${
+        isNew ? 'bg-primary/10 border-primary/40' : 'bg-black/20 border-white/10'
       } hover:border-white/20 ${newBeastStyles}`}>
         {isNew && (
-          <div className="absolute top-2 right-2 z-20 flex items-center gap-1 bg-primary/80 rounded-full px-2 py-1">
+          <div className="absolute top-2 right-2 z-20 flex items-center gap-1 bg-primary/90 rounded-full px-2 py-1 shadow-sm shadow-primary/30">
             <Sparkles className="w-3 h-3 text-primary-foreground" />
             <span className="text-xs text-white font-medium">New</span>
           </div>
@@ -102,7 +106,7 @@ export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) =
               <img
                 src={getImageUrl(beast.imageUrl)}
                 alt={`CodeBeast for ${beast.username}`}
-                className="w-full h-full object-cover"
+                className={`w-full h-full object-cover transition-transform duration-300 ${isNew ? 'scale-105' : ''}`}
                 onLoad={handleImageLoad}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
@@ -113,7 +117,7 @@ export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) =
           </div>
 
           <div className="mt-2 pb-1">
-            <p className={`text-center text-sm font-medium truncate ${isNew ? 'text-primary' : 'text-white/80'}`}>
+            <p className={`text-center text-sm font-medium truncate ${isNew ? 'text-primary font-semibold' : 'text-white/80'}`}>
               @{beast.username}
             </p>
             

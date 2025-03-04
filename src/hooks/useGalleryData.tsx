@@ -1,10 +1,12 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { API_BASE_URL } from '@/config/api';
 import type { CodeBeast } from '@/types/gallery';
 import { toast } from '@/hooks/use-toast';
 import { Sparkles } from 'lucide-react';
+
+const NEW_BEASTS_STORAGE_KEY = 'gallery-new-beasts';
+const NEW_BEAST_DURATION = 3 * 60 * 1000; // 3 minutes
 
 export const useGalleryData = (itemsPerPage = 20) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -13,13 +15,21 @@ export const useGalleryData = (itemsPerPage = 20) => {
   const previousDataRef = useRef<CodeBeast[]>([]);
   const isInitialLoadRef = useRef(true);
   const autoRefreshCountRef = useRef(0);
-  const newBeastsRef = useRef<string[]>([]);
+  
+  const [newBeasts, setNewBeasts] = useState<{[username: string]: number}>(() => {
+    try {
+      const storedBeasts = localStorage.getItem(NEW_BEASTS_STORAGE_KEY);
+      return storedBeasts ? JSON.parse(storedBeasts) : {};
+    } catch (e) {
+      console.error("Error loading new beasts from localStorage:", e);
+      return {};
+    }
+  });
 
-  // Add debug console log to track the component state
   console.log('Gallery data state:', { 
     timestamp, 
     currentPage, 
-    newBeasts: newBeastsRef.current,
+    newBeasts,
     previousDataLength: previousDataRef.current.length 
   });
 
@@ -29,7 +39,6 @@ export const useGalleryData = (itemsPerPage = 20) => {
       throw new Error('Failed to fetch CodeBeasts');
     }
     
-    // For auto-refresh (not manual refresh), increment and log the counter
     if (!isRefreshing) {
       autoRefreshCountRef.current += 1;
       console.log(`🔄 Auto-refreshing gallery data (count: ${autoRefreshCountRef.current})`);
@@ -52,36 +61,33 @@ export const useGalleryData = (itemsPerPage = 20) => {
   console.log('Fetched CodeBeasts data:', { 
     count: allCodeBeasts.length,
     isLoading,
-    newBeastCount: newBeastsRef.current.length
+    newBeastCount: Object.keys(newBeasts).length
   });
 
-  // Check for new CodeBeasts
   useEffect(() => {
     if (isInitialLoadRef.current) {
-      // Store initial data and skip notifications on first load
       previousDataRef.current = [...allCodeBeasts];
       isInitialLoadRef.current = false;
       return;
     }
 
-    // Compare with previous data to find new beasts
-    const newBeasts = allCodeBeasts.filter(beast => 
+    const justAddedBeasts = allCodeBeasts.filter(beast => 
       !previousDataRef.current.some(prevBeast => prevBeast.username === beast.username)
     );
 
-    // Show toast for each new beast
-    if (newBeasts.length > 0) {
-      // If there are new beasts, reset to first page to show them
+    if (justAddedBeasts.length > 0) {
       if (currentPage !== 1) {
         setCurrentPage(1);
       }
       
-      console.log(`🎉 Found ${newBeasts.length} new CodeBeasts:`, newBeasts.map(b => b.username));
+      console.log(`🎉 Found ${justAddedBeasts.length} new CodeBeasts:`, justAddedBeasts.map(b => b.username));
       
-      // Store new beast usernames for prioritization
-      newBeastsRef.current = newBeasts.map(beast => beast.username);
+      const now = Date.now();
+      const updatedNewBeasts = { ...newBeasts };
       
-      newBeasts.forEach(beast => {
+      justAddedBeasts.forEach(beast => {
+        updatedNewBeasts[beast.username] = now;
+        
         toast({
           title: "New CodeBeast Arrived!",
           description: `${beast.username}'s CodeBeast has joined the gallery`,
@@ -93,26 +99,57 @@ export const useGalleryData = (itemsPerPage = 20) => {
           )
         });
       });
+      
+      setNewBeasts(updatedNewBeasts);
+      
+      try {
+        localStorage.setItem(NEW_BEASTS_STORAGE_KEY, JSON.stringify(updatedNewBeasts));
+      } catch (e) {
+        console.error("Error saving new beasts to localStorage:", e);
+      }
     }
 
-    // Update the reference
     previousDataRef.current = [...allCodeBeasts];
   }, [allCodeBeasts, currentPage]);
 
-  // Calculate pagination values
+  useEffect(() => {
+    const cleanupInterval = setInterval(() => {
+      const now = Date.now();
+      let hasExpired = false;
+      const updatedNewBeasts = { ...newBeasts };
+      
+      Object.entries(updatedNewBeasts).forEach(([username, timestamp]) => {
+        if (now - timestamp > NEW_BEAST_DURATION) {
+          delete updatedNewBeasts[username];
+          hasExpired = true;
+          console.log(`Beast ${username} is no longer considered new`);
+        }
+      });
+      
+      if (hasExpired) {
+        setNewBeasts(updatedNewBeasts);
+        try {
+          localStorage.setItem(NEW_BEASTS_STORAGE_KEY, JSON.stringify(updatedNewBeasts));
+        } catch (e) {
+          console.error("Error saving updated new beasts to localStorage:", e);
+        }
+      }
+    }, 30000);
+    
+    return () => clearInterval(cleanupInterval);
+  }, [newBeasts]);
+
   const totalItems = allCodeBeasts.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
   
-  // Ensure current page is within valid range
   const validatedCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
   if (validatedCurrentPage !== currentPage) {
     setCurrentPage(validatedCurrentPage);
   }
 
-  // Sort beasts to prioritize new ones at the top
   const sortedCodeBeasts = [...allCodeBeasts].sort((a, b) => {
-    const aIsNew = newBeastsRef.current.includes(a.username);
-    const bIsNew = newBeastsRef.current.includes(b.username);
+    const aIsNew = newBeasts[a.username] !== undefined;
+    const bIsNew = newBeasts[b.username] !== undefined;
     
     if (aIsNew && !bIsNew) return -1;
     if (!aIsNew && bIsNew) return 1;
@@ -123,23 +160,10 @@ export const useGalleryData = (itemsPerPage = 20) => {
     total: sortedCodeBeasts.length,
     newOnTop: sortedCodeBeasts.slice(0, 3).map(b => ({
       username: b.username,
-      isNew: newBeastsRef.current.includes(b.username)
+      isNew: newBeasts[b.username] !== undefined
     }))
   });
 
-  // Clear new beasts reference after 30 seconds
-  useEffect(() => {
-    if (newBeastsRef.current.length > 0) {
-      const timer = setTimeout(() => {
-        console.log('Clearing new beasts reference after 30 seconds');
-        newBeastsRef.current = [];
-      }, 30000); // 30 seconds
-      
-      return () => clearTimeout(timer);
-    }
-  }, [newBeastsRef.current]);
-
-  // Get current page items
   const startIndex = (validatedCurrentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const codeBeasts = sortedCodeBeasts.slice(startIndex, endIndex);
@@ -173,6 +197,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
     isRefreshing,
     handleManualRefresh,
     timestamp,
+    newBeasts,
     pagination: {
       currentPage: validatedCurrentPage,
       totalPages,

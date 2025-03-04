@@ -1,4 +1,3 @@
-
 /**
  * Gallery page component that displays a grid of generated CodeBeasts.
  * Features auto-refresh functionality, manual refresh option, and responsive layout.
@@ -20,17 +19,15 @@ import {
   PaginationNext, 
   PaginationPrevious
 } from '@/components/ui/pagination';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 const Gallery = () => {
-  const { codeBeasts, isRefreshing, handleManualRefresh, timestamp, pagination } = useGalleryData();
+  const { codeBeasts, isRefreshing, handleManualRefresh, timestamp, newBeasts, pagination } = useGalleryData();
   const { currentPage, totalPages, goToPage, nextPage, prevPage } = pagination;
-  const newBeastsRef = useRef<string[]>([]);
 
   useEffect(() => {
-    // Track new beasts for visual highlighting
+    // Debug log to show CodeBeasts loading
     if (codeBeasts.length > 0) {
-      // For debugging
       console.log('Gallery page received CodeBeasts:', 
         codeBeasts.map(b => b.username).slice(0, 5), 
         '... total:', codeBeasts.length
@@ -78,9 +75,9 @@ const Gallery = () => {
       {codeBeasts.length > 0 ? (
         <>
           <div className="grid gap-4 grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 auto-rows-fr">
-            {codeBeasts.map((beast, index) => {
-              // Check if this beast is one of the new ones (should be at the top)
-              const isNew = index < 3 && beast.username.includes('new'); // Simple check for debugging
+            {codeBeasts.map((beast) => {
+              // Check if this beast is marked as new based on the newBeasts map
+              const isNew = newBeasts && newBeasts[beast.username] !== undefined;
               
               return (
                 <BeastCard 
