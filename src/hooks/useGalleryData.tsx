@@ -65,12 +65,38 @@ export const useGalleryData = (itemsPerPage = 20) => {
       return;
     }
 
-    // Find beasts that weren't in the previous data
-    const justAddedBeasts = allCodeBeasts.filter(beast => 
-      !previousDataRef.current.some(prevBeast => prevBeast.username === beast.username)
-    );
-
-    if (justAddedBeasts.length > 0) {
+    // Create a set of usernames from previous data for faster lookup
+    const prevUsernameSet = new Set(previousDataRef.current.map(beast => beast.username));
+    
+    // Find beasts in current data that weren't in the previous data
+    const justAddedBeasts = allCodeBeasts.filter(beast => !prevUsernameSet.has(beast.username));
+    
+    // Find beasts that were removed and then re-added (exist in both arrays but not consecutively)
+    const readdedBeasts = allCodeBeasts.filter(currentBeast => {
+      // Check if it existed in previous data
+      const existedInPrevious = prevUsernameSet.has(currentBeast.username);
+      
+      // If it existed before, check if it's at a different position or was temporarily removed
+      if (existedInPrevious) {
+        const prevIndex = previousDataRef.current.findIndex(
+          prevBeast => prevBeast.username === currentBeast.username
+        );
+        const currentIndex = allCodeBeasts.findIndex(
+          beast => beast.username === currentBeast.username
+        );
+        
+        // Consider it "re-added" if its position changed significantly
+        // This could indicate it was removed and re-added in the API response
+        return Math.abs(prevIndex - currentIndex) > 3;
+      }
+      
+      return false;
+    });
+    
+    // Combine newly added and re-added beasts
+    const allNewBeasts = [...justAddedBeasts, ...readdedBeasts];
+    
+    if (allNewBeasts.length > 0) {
       // When new beasts are detected, navigate to page 1 if not already there
       if (currentPage !== 1) {
         setCurrentPage(1);
@@ -80,7 +106,7 @@ export const useGalleryData = (itemsPerPage = 20) => {
       const updatedNewBeasts = { ...newBeasts };
       
       // Add all new beasts to the tracking object with current timestamp
-      justAddedBeasts.forEach(beast => {
+      allNewBeasts.forEach(beast => {
         updatedNewBeasts[beast.username] = now;
         
         // Show toast notification for each new beast
