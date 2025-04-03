@@ -1,4 +1,3 @@
-
 /**
  * Component for displaying a single CodeBeast image directly via URL parameters.
  * Supports both URL query parameters and route parameters for image lookup.
@@ -15,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Download, Share2 } from 'lucide-react';
 import { downloadImage, shareOnTwitter } from '@/utils/imageActions';
 import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 
 const DirectImage = () => {
   const [searchParams] = useSearchParams();
@@ -136,12 +136,12 @@ const DirectImage = () => {
               </div>
               
               <div className="text-center">
-                <a 
-                  href="/"
+                <Link 
+                  to="/"
                   className="text-primary hover:underline"
                 >
                   Generate your own CodeBeast
-                </a>
+                </Link>
               </div>
             </Card>
           </div>
@@ -149,12 +149,12 @@ const DirectImage = () => {
           <Card className="p-6">
             <h1 className="text-2xl font-bold text-center break-words">No CodeBeast found for @{handle}</h1>
             <p className="text-center mt-2">
-              <a 
-                href="/"
+              <Link 
+                to="/"
                 className="text-primary hover:underline"
               >
                 Generate a CodeBeast
-              </a>
+              </Link>
             </p>
           </Card>
         )}
