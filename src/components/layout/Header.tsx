@@ -1,9 +1,4 @@
 
-/**
- * Header component that provides navigation links and external resources.
- * Displays "powered by Langflow" and GitHub links on the left, and a Gallery link on the right.
- */
-
 import { Link } from 'react-router-dom';
 
 export const Header = () => {
@@ -28,10 +23,10 @@ export const Header = () => {
         </a>
       </div>
       <Link
-        to="/gallery"
+        to="/"
         className="text-sm text-muted-foreground hover:text-primary transition-colors"
       >
-        View Gallery
+        View Main
       </Link>
     </div>
   );
