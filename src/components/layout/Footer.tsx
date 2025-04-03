@@ -9,7 +9,7 @@ export const Footer = () => {
           <p>© {new Date().getFullYear()} CodeBeasts</p>
           <div className="mt-2 md:mt-0">
             <a 
-              href="https://www.datastax.com/blog/generate-personalized-mythical-creatures-with-langflow#components-in-the-codebeasts-langflow-flow--3"
+              href="https://www.datastax.com/blog/generate-personalized-mythical-creatures-with-langflow"
               target="_blank"
               rel="noopener noreferrer" 
               className="hover:text-primary transition-colors"
