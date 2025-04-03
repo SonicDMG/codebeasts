@@ -12,6 +12,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, RefreshCw, Sparkles } from 'lucid
 import { BeastCard } from '@/components/gallery/BeastCard';
 import { useGalleryData } from '@/hooks/useGalleryData';
 import { Toaster } from '@/components/ui/toaster';
+import { Header } from '@/components/layout/Header';
 import { 
   Pagination, 
   PaginationContent, 
@@ -27,6 +28,8 @@ const Gallery = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 pt-6 min-h-screen">
+      <Header />
+      
       <div className="flex flex-col gap-6 mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
