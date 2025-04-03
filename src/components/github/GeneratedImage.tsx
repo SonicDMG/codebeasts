@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Download, Share2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -41,7 +40,7 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
       ctx.font = '32px Arial';
       ctx.textAlign = 'center';
 
-      const text = `Generated for @${initialHandle}`; // Use the initial handle instead of the current one
+      const text = `Generated for @${initialHandle} with Langflow`; // Updated text
 
       // Position text at bottom center
       const x = canvas.width / 2;
@@ -51,7 +50,7 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
       ctx.strokeText(text, x, y);
       ctx.fillText(text, x, y);
     };
-  }, [imageUrl, initialHandle]); // Only depend on imageUrl and initialHandle, not the current handle
+  }, [imageUrl, initialHandle]); 
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
@@ -62,7 +61,7 @@ export const GeneratedImage = ({ imageUrl, handle, onDownload, onShare, classNam
     
     // Create a temporary link element
     const link = document.createElement('a');
-    link.download = `codebeast-${initialHandle}.png`; // Use initialHandle for filename too
+    link.download = `codebeast-${initialHandle}.png`;
     link.href = dataUrl;
     
     // Trigger the download
