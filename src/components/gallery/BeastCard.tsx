@@ -1,3 +1,4 @@
+
 /**
  * Card component for displaying individual CodeBeasts in the gallery.
  * Features image display, download functionality, and links to GitHub profiles.
@@ -11,6 +12,7 @@ import { API_BASE_URL } from '@/config/api';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import type { CodeBeast } from '@/types/gallery';
+import { Link } from 'react-router-dom';
 
 interface BeastCardProps {
   beast: CodeBeast;
@@ -43,7 +45,11 @@ export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) =
     return timestamp ? `${baseUrl}?t=${timestamp}` : baseUrl;
   };
 
-  const handleDownload = async () => {
+  const handleDownload = async (e: React.MouseEvent) => {
+    // Prevent the click from propagating to the parent element (which would navigate)
+    e.preventDefault();
+    e.stopPropagation();
+    
     try {
       const response = await fetch(getImageUrl(beast.imageUrl));
       const blob = await response.blob();
@@ -68,6 +74,12 @@ export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) =
     }
   };
 
+  const handleGitHubClick = (e: React.MouseEvent) => {
+    // Prevent the click from propagating to the parent element (which would navigate to direct image)
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   const handleImageLoad = () => {
     setIsLoaded(true);
   };
@@ -78,12 +90,15 @@ export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) =
     : '';
 
   return (
-    <div className={`group relative aspect-[1/1.4] ${
-      !isLoaded ? 'opacity-0' : 'animate-fade-in'
-    } ${showNewAnimation ? 'animate-pulse' : ''}`}>
+    <Link
+      to={`/direct/${beast.username}`}
+      className={`group relative aspect-[1/1.4] block ${
+        !isLoaded ? 'opacity-0' : 'animate-fade-in'
+      } ${showNewAnimation ? 'animate-pulse' : ''}`}
+    >
       <Card className={`h-full overflow-hidden transition-all duration-500 ${
         isNew ? 'bg-primary/10 border-primary/40' : 'bg-black/20 border-white/10'
-      } hover:border-white/20 ${newBeastStyles}`}>
+      } hover:border-white/20 hover:shadow-md cursor-pointer ${newBeastStyles}`}>
         {isNew && (
           <div className="absolute top-2 right-2 z-20 flex items-center gap-1 bg-primary/90 rounded-full px-2 py-1 shadow-sm shadow-primary/30">
             <Sparkles className="w-3 h-3 text-primary-foreground" />
@@ -140,6 +155,7 @@ export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) =
                   target="_blank"
                   rel="noopener noreferrer"
                   title="View GitHub Profile"
+                  onClick={handleGitHubClick}
                 >
                   <ExternalLink className="h-4 w-4" />
                 </a>
@@ -148,13 +164,6 @@ export const BeastCard = ({ beast, timestamp, isNew = false }: BeastCardProps) =
           </div>
         </CardContent>
       </Card>
-
-      <a 
-        href={`https://github.com/${beast.username}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute inset-0 hidden md:block hover:scale-105 transition-transform"
-      />
-    </div>
+    </Link>
   );
 };
