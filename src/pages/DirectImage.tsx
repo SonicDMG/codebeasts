@@ -1,3 +1,4 @@
+
 /**
  * Component for displaying a single CodeBeast image directly via URL parameters.
  * Supports both URL query parameters and route parameters for image lookup.
@@ -6,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { API_BASE_URL } from '@/config/api';
 import { Card } from '@/components/ui/card';
 import { Header } from '@/components/layout/Header';
@@ -68,6 +70,10 @@ const DirectImage = () => {
   if (!handle) {
     return (
       <div className="min-h-screen flex flex-col px-4 py-4">
+        <Helmet>
+          <title>CodeBeasts - No Handle Provided</title>
+          <meta name="description" content="Please provide a GitHub handle to view a CodeBeast." />
+        </Helmet>
         <Header />
         <div className="flex-1 flex items-center justify-center">
           <Card className="p-6">
@@ -81,6 +87,16 @@ const DirectImage = () => {
 
   return (
     <div className="min-h-screen flex flex-col px-4 py-4">
+      <Helmet>
+        <title>{`CodeBeast for ${handle}`}</title>
+        <meta name="description" content={`View the unique AI-generated CodeBeast for GitHub user ${handle}`} />
+        <meta property="og:title" content={`CodeBeast for ${handle}`} />
+        <meta property="og:description" content={`View the unique AI-generated creature for GitHub user ${handle}`} />
+        {imageUrl && <meta property="og:image" content={imageUrl} />}
+        <meta name="twitter:title" content={`CodeBeast for ${handle}`} />
+        <meta name="twitter:description" content={`Check out this unique AI-generated GitHub profile creature!`} />
+        {imageUrl && <meta name="twitter:image" content={imageUrl} />}
+      </Helmet>
       <Header />
       <div className="flex-1 flex items-center justify-center">
         {imageUrl ? (

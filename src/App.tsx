@@ -5,9 +5,10 @@
  * the QueryClient context for data fetching throughout the app.
  */
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
+import { HelmetProvider } from 'react-helmet-async';
 import Index from '@/pages/Index';
 import Gallery from '@/pages/Gallery';
 import DirectImage from '@/pages/DirectImage';
@@ -39,15 +40,17 @@ const RootComponent = () => {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<RootComponent />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/direct/:username" element={<DirectImage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-      </Router>
+      <HelmetProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<RootComponent />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/direct/:username" element={<DirectImage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </Router>
+      </HelmetProvider>
     </QueryClientProvider>
   );
 }
