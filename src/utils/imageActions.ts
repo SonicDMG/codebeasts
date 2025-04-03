@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for image-related actions such as downloading and social sharing.
  * Provides functionality for downloading CodeBeast images and sharing them on Twitter
@@ -92,9 +91,9 @@ export const shareOnTwitter = (imageUrl: string) => {
     }
   });
 
-  // Use query parameter format instead of path parameter format
+  // Use query parameter format and include the handle in the URL
   const directImageUrl = `https://codebeasts.onrender.com/?u=${handle}`;
-  const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nHere's my CodeBeast: ${directImageUrl}\n\nGenerate your own: https://codebeasts.onrender.com\n\n#AIart #AgenticAI #AI #CodeArt`;
+  const text = `Check out my unique CodeBeast! 🎮✨ Generated using my GitHub profile stats powered by @langflow_ai!\n\nHere's my CodeBeast: https://codebeasts.onrender.com/?u=${handle}\n\nGenerate your own: https://codebeasts.onrender.com\n\n#AIart #AgenticAI #AI #CodeArt`;
   
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
   
