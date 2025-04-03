@@ -48,7 +48,7 @@ const DirectImage = () => {
 
   if (!handle) {
     return (
-      <div className="min-h-screen flex flex-col p-4">
+      <div className="min-h-screen flex flex-col px-4 py-4">
         <Header />
         <div className="flex-1 flex items-center justify-center">
           <Card className="p-6">
@@ -61,7 +61,7 @@ const DirectImage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col p-4">
+    <div className="min-h-screen flex flex-col px-4 py-4">
       <Header />
       <div className="flex-1 flex items-center justify-center">
         {imageUrl ? (
