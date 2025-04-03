@@ -13,7 +13,7 @@ export const Footer = () => {
               rel="noopener noreferrer" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              Repo on GitHub
+              GitHub
             </a>
           </p>
           <div className="mt-2 md:mt-0">
