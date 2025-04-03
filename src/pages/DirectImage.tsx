@@ -10,11 +10,16 @@ import { useSearchParams, useParams } from 'react-router-dom';
 import { API_BASE_URL } from '@/config/api';
 import { Card } from '@/components/ui/card';
 import { Header } from '@/components/layout/Header';
+import { Button } from '@/components/ui/button';
+import { Download, Share2 } from 'lucide-react';
+import { downloadImage, shareOnTwitter } from '@/utils/imageActions';
+import { useToast } from '@/hooks/use-toast';
 
 const DirectImage = () => {
   const [searchParams] = useSearchParams();
   const params = useParams();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const { toast } = useToast();
   
   // Check both URL formats
   const handle = searchParams.get('u') || params.username;
@@ -46,6 +51,21 @@ const DirectImage = () => {
     }
   }, [handle]);
 
+  const handleDownload = async () => {
+    if (imageUrl && handle) {
+      await downloadImage(imageUrl, handle, toast);
+    }
+  };
+
+  const handleShare = () => {
+    if (imageUrl) {
+      shareOnTwitter(imageUrl);
+      toast({
+        description: "Twitter share dialog opened",
+      });
+    }
+  };
+
   if (!handle) {
     return (
       <div className="min-h-screen flex flex-col px-4 py-4">
@@ -75,6 +95,19 @@ const DirectImage = () => {
                   className="object-contain w-full h-full"
                 />
               </div>
+              
+              {/* Added action buttons */}
+              <div className="flex gap-4 justify-center">
+                <Button onClick={handleDownload} className="w-full sm:w-auto">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download
+                </Button>
+                <Button variant="outline" onClick={handleShare} className="w-full sm:w-auto">
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share
+                </Button>
+              </div>
+              
               <div className="text-center">
                 <a 
                   href="/"
