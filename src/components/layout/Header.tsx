@@ -16,14 +16,6 @@ export const Header = () => {
         >
           powered by Langflow
         </a>
-        <a 
-          href="https://github.com/SonicDMG/codebeasts" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="text-sm text-muted-foreground hover:text-primary transition-colors"
-        >
-          GitHub
-        </a>
       </div>
       <Link
         to={isGalleryPage ? "/" : "/gallery"}
