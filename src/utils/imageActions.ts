@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for image-related actions such as downloading and social sharing.
  * Provides functionality for downloading CodeBeast images and sharing them on Twitter
@@ -30,18 +31,14 @@ export const downloadImage = async (imageUrl: string, handle: string, toast: any
   }
 };
 
-export const shareOnTwitter = (imageUrl: string) => {
-  // Extract handle from the image URL
-  const handleMatch = imageUrl.match(/generated_([^.]+)\.png$/);
-  const handle = handleMatch ? handleMatch[1] : '';
+export const shareOnTwitter = (imageUrl: string, handle: string) => {
+  // Set app logo image URL
+  const appLogoUrl = `${window.location.origin}/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png`;
   
   // Update the meta tags for Twitter card
   const metaImage = document.querySelector('meta[property="og:image"]');
   const metaTitle = document.querySelector('meta[property="og:title"]');
   const metaDescription = document.querySelector('meta[property="og:description"]');
-  
-  // Set app logo image URL
-  const appLogoUrl = `${window.location.origin}/lovable-uploads/6e48cfe8-7c75-4565-939d-f665321ddd3a.png`;
   
   // Always update the image URL to the app logo
   if (metaImage) {

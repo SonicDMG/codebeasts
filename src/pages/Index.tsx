@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
@@ -53,7 +52,7 @@ const Index = () => {
   };
 
   const handleShare = () => {
-    shareOnTwitter(generatedImage);
+    shareOnTwitter(generatedImage, handle);
   };
 
   return (

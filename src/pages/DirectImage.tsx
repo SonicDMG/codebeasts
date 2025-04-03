@@ -58,8 +58,8 @@ const DirectImage = () => {
   };
 
   const handleShare = () => {
-    if (imageUrl) {
-      shareOnTwitter(imageUrl);
+    if (imageUrl && handle) {
+      shareOnTwitter(imageUrl, handle);
       toast({
         description: "Twitter share dialog opened",
       });
