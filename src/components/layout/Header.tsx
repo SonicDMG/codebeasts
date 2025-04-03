@@ -1,7 +1,10 @@
 
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 export const Header = () => {
+  const location = useLocation();
+  const isGalleryPage = location.pathname === '/gallery';
+
   return (
     <div className="flex justify-between items-center mt-0 mb-4">
       <div className="flex items-center gap-2">
@@ -23,10 +26,10 @@ export const Header = () => {
         </a>
       </div>
       <Link
-        to="/"
+        to={isGalleryPage ? "/" : "/gallery"}
         className="text-sm text-muted-foreground hover:text-primary transition-colors"
       >
-        View Main
+        {isGalleryPage ? "View Main" : "View Gallery"}
       </Link>
     </div>
   );
