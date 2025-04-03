@@ -6,7 +6,7 @@ export const Header = () => {
   const isGalleryPage = location.pathname === '/gallery';
 
   return (
-    <div className="flex justify-between items-center mt-0 mb-4">
+    <div className="flex justify-between items-center mb-4">
       <div className="flex items-center gap-2">
         <a 
           href="https://langflow.new" 
