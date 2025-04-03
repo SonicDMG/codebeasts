@@ -1,4 +1,3 @@
-
 /**
  * Component for displaying a single CodeBeast image directly via URL parameters.
  * Supports both URL query parameters and route parameters for image lookup.
@@ -89,11 +88,22 @@ const DirectImage = () => {
             <Card className="p-6 space-y-4">
               <h1 className="text-2xl font-bold text-center break-words">CodeBeast for @{handle}</h1>
               <div className="relative aspect-square w-full overflow-hidden rounded-lg">
-                <img
-                  src={imageUrl}
-                  alt={`CodeBeast for ${handle}`}
-                  className="object-contain w-full h-full"
-                />
+                <div className="absolute inset-0">
+                  <img
+                    src={imageUrl}
+                    alt={`CodeBeast for ${handle}`}
+                    className="object-contain w-full h-full"
+                  />
+                  <div 
+                    className="absolute bottom-4 left-0 right-0 text-center text-white text-sm font-semibold"
+                    style={{ 
+                      textShadow: '1px 1px 2px black', 
+                      backgroundColor: 'rgba(0,0,0,0.3)' 
+                    }}
+                  >
+                    Generated for @{handle} by Langflow
+                  </div>
+                </div>
               </div>
               
               {/* Updated buttons to match GeneratedImage component styling */}
