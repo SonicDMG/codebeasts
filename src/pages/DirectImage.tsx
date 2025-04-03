@@ -95,18 +95,19 @@ const DirectImage = () => {
                     className="object-contain w-full h-full"
                   />
                   <div 
-                    className="absolute bottom-4 left-0 right-0 text-center text-white text-sm font-semibold"
+                    className="absolute bottom-4 right-4 text-white text-sm font-semibold"
                     style={{ 
                       textShadow: '1px 1px 2px black', 
-                      backgroundColor: 'rgba(0,0,0,0.3)' 
+                      backgroundColor: 'rgba(0,0,0,0.3)',
+                      padding: '4px 8px',
+                      borderRadius: '4px'
                     }}
                   >
-                    Generated for @{handle} by Langflow
+                    Generated with Langflow
                   </div>
                 </div>
               </div>
               
-              {/* Updated buttons to match GeneratedImage component styling */}
               <div className="flex gap-4 justify-center">
                 <Button variant="secondary" className="glass w-full sm:w-auto" onClick={handleDownload}>
                   <Download className="mr-2 h-4 w-4" />
