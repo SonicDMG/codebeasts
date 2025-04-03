@@ -14,6 +14,7 @@ import Gallery from '@/pages/Gallery';
 import DirectImage from '@/pages/DirectImage';
 import NotFound from '@/pages/NotFound';
 import { useSearchParams } from 'react-router-dom';
+import { Footer } from '@/components/layout/Footer';
 import './App.css';
 
 // Create a client
@@ -32,9 +33,19 @@ const RootComponent = () => {
   const username = searchParams.get('u');
   
   if (username) {
-    return <DirectImage />;
+    return (
+      <>
+        <DirectImage />
+        <Footer />
+      </>
+    );
   }
-  return <Index />;
+  return (
+    <>
+      <Index />
+      <Footer />
+    </>
+  );
 };
 
 function App() {
@@ -42,12 +53,31 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
         <Router>
-          <Routes>
-            <Route path="/" element={<RootComponent />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/direct/:username" element={<DirectImage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <div className="flex flex-col min-h-screen">
+            <div className="flex-grow">
+              <Routes>
+                <Route path="/" element={<RootComponent />} />
+                <Route path="/gallery" element={
+                  <>
+                    <Gallery />
+                    <Footer />
+                  </>
+                } />
+                <Route path="/direct/:username" element={
+                  <>
+                    <DirectImage />
+                    <Footer />
+                  </>
+                } />
+                <Route path="*" element={
+                  <>
+                    <NotFound />
+                    <Footer />
+                  </>
+                } />
+              </Routes>
+            </div>
+          </div>
           <Toaster />
         </Router>
       </HelmetProvider>
