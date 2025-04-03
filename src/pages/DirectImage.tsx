@@ -96,13 +96,13 @@ const DirectImage = () => {
                 />
               </div>
               
-              {/* Added action buttons */}
+              {/* Updated buttons to match GeneratedImage component styling */}
               <div className="flex gap-4 justify-center">
-                <Button onClick={handleDownload} className="w-full sm:w-auto">
+                <Button variant="secondary" className="glass w-full sm:w-auto" onClick={handleDownload}>
                   <Download className="mr-2 h-4 w-4" />
                   Download
                 </Button>
-                <Button variant="outline" onClick={handleShare} className="w-full sm:w-auto">
+                <Button variant="secondary" className="glass w-full sm:w-auto" onClick={handleShare}>
                   <Share2 className="mr-2 h-4 w-4" />
                   Share
                 </Button>
