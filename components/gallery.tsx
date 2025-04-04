@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -24,6 +24,7 @@ export function Gallery() {
     queryKey: ["gallery"],
     queryFn: fetchGalleryImages,
   });
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -54,13 +55,20 @@ export function Gallery() {
     );
   }
 
+  const handleCardClick = (username: string) => {
+    router.push(`/direct/${username}`);
+  };
+
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {images.map((image: ImageRecord) => (
-        <Link 
-          key={image._id} 
-          href={`/direct/${image.username}`} 
-          className="block hover:scale-105 transition-transform duration-200 ease-in-out"
+        <div
+          key={image._id}
+          className="block hover:scale-105 transition-transform duration-200 ease-in-out cursor-pointer rounded-lg overflow-hidden"
+          onClick={() => handleCardClick(image.username)}
+          role="link"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleCardClick(image.username); }}
         >
           <Card className="overflow-hidden bg-[#0D1117] border-[#30363D] h-full">
             <CardHeader className="space-y-1">
@@ -101,7 +109,7 @@ export function Gallery() {
               </div>
             </CardContent>
           </Card>
-        </Link>
+        </div>
       ))}
     </div>
   );
