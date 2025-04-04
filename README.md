@@ -1,4 +1,3 @@
-
 # CodeBeasts AI Generator
 
 <div align="center">
@@ -131,3 +130,47 @@ The application uses both Dall-E and Stability AI's latest model for image gener
 
 ## Contributing
 Feel free to open issues and submit pull requests to help improve CodeBeasts!
+
+## Getting Started
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/codebeasts.git
+cd codebeasts
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up environment variables:
+   - Copy `.env.example` to `.env`
+   - Add your EverArt API key to `.env`
+
+4. Run the development server:
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Environment Variables
+
+The following environment variables are required:
+
+- `EVERART_API_KEY`: Your EverArt API key for image generation
+
+You can obtain an API key by signing up at [EverArt](https://everart.ai).
+
+## Tech Stack
+
+- [Next.js](https://nextjs.org/)
+- [React](https://reactjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [EverArt API](https://everart.ai)
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
