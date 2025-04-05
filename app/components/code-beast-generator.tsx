@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Image from "next/image";
 import { Sparkles } from "lucide-react";
+import { RepositoryInfo } from "./github/RepositoryInfo";
 
 // Function to generate prompt using our API
 const generatePrompt = async (username: string) => {
@@ -34,10 +35,12 @@ export default function CodeBeastGenerator() {
     prompt: string;
     githubUrl: string;
     imageUrl: string;
+    repoCount?: number;
+    animalSelection?: any[][];
   } | null>(null);
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGenerate = async (e?: React.FormEvent | React.MouseEvent) => {
+    e?.preventDefault();
     setLoading(true);
     setGeneratedData(null);
 
@@ -49,15 +52,23 @@ export default function CodeBeastGenerator() {
 
       const data = await generatePrompt(username);
       
+      data.repoCount = data.repoCount ?? 30;
+      data.animalSelection = data.animalSelection ?? [
+        ["Python snake", "symbolizing adaptability and wisdom"],
+        ["Spider", "reflecting the creativity and structure of HTML"],
+        ["Owl", "representing the analytical mindset needed for TypeScript programming"]
+      ];
+      
       setGeneratedData(data);
       toast.success("Successfully generated your CodeBeast!");
     } catch (error) {
-      console.error("Error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to generate CodeBeast");
     } finally {
       setLoading(false);
     }
   };
+
+  const languageList = generatedData?.languages?.split(",").map(lang => lang.trim()).filter(Boolean) || [];
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -65,7 +76,7 @@ export default function CodeBeastGenerator() {
         <CardContent className="p-6">
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 space-y-4">
-              <form onSubmit={onSubmit} className="space-y-4">
+              <form className="space-y-4">
                 <Input
                   type="text"
                   placeholder="Enter GitHub handle to generate your beast..."
@@ -75,9 +86,10 @@ export default function CodeBeastGenerator() {
                   className="w-full bg-black/20 border-white/10 text-lg py-6 px-4 rounded-xl placeholder:text-gray-500"
                 />
                 <Button 
-                  type="submit" 
+                  type="button"
                   disabled={loading}
                   className="w-full bg-purple-600 hover:bg-purple-500 text-white py-6 text-lg font-medium rounded-xl gap-2"
+                  onClick={handleGenerate}
                 >
                   <Sparkles className="w-4 h-4" />
                   {loading ? "Generating..." : "Generate"}
@@ -85,18 +97,14 @@ export default function CodeBeastGenerator() {
               </form>
 
               {generatedData && (
-                <div className="space-y-4 text-gray-400 animate-fade-in mt-4">
-                  <div className="space-y-1">
-                    <h3 className="text-md font-medium text-white">GitHub Profile</h3>
-                    <a 
-                      href={generatedData.githubUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-purple-400 hover:text-purple-300 transition-colors text-sm break-all"
-                    >
-                      {generatedData.githubUrl}
-                    </a>
-                  </div>
+                <div className="mt-6 animate-fade-in">
+                  <RepositoryInfo 
+                    repoCount={generatedData.repoCount ?? 0}
+                    languages={languageList}
+                    prompt={generatedData.prompt}
+                    githubUrl={generatedData.githubUrl}
+                    animalSelection={generatedData.animalSelection}
+                  />
                 </div>
               )}
             </div>

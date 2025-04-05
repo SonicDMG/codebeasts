@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { CodeBeastGenerator } from "@/components/code-beast-generator";
+import CodeBeastGenerator from "@/app/components/code-beast-generator";
 
 export default function Home() {
   const router = useRouter();

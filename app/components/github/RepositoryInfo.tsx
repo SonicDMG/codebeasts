@@ -1,4 +1,3 @@
-
 /**
  * Component that displays GitHub repository statistics and analysis results.
  * Shows repository count, programming languages used, and animal characteristics
