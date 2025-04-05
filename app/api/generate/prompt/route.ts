@@ -26,7 +26,7 @@ const everart = new EverArt(everartApiKey);
 // "and deliberately limited color palette. The overall style should embrace the constraints of 16-bit era graphics with visible, " +
 // "chunky pixels and that nostalgic game aesthetic.";
 
-const PROMPT_PREFIX = "Kawaii pixel art: Adorable chimera creature, ultra low-resolutionpixel 16-bit style. " +
+const PROMPT_PREFIX = "Kawaii adorable chimera creature, ultra low-resolution pixel 16-bit pixel art style. " +
   "Extremely pixelated NES/SNES aesthetic, chunky dithering patterns, and high contrast. " +
   "Rainbow gradient background.";
 
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log("API Route: Received request body:", body);
     
-    const { username } = body;
+    const { username, emotion } = body;
     const normalizedUsername = username.toLowerCase(); // Ensure we use normalized consistently
 
     if (!username) {
@@ -76,6 +76,15 @@ export async function POST(request: Request) {
         { error: "Username is required" },
         { status: 400 }
       );
+    }
+
+    // Add basic validation for emotion
+    if (!emotion) {
+        console.error("Emotion is missing from request body");
+        return NextResponse.json(
+            { error: "Emotion is required" },
+            { status: 400 }
+        );
     }
 
     // First, check if we have existing user details
@@ -97,14 +106,15 @@ export async function POST(request: Request) {
       };
       console.log("API Route: Data before EverArt (DB Cache):", JSON.stringify(dataToLog, null, 2));
 
-      // Generate new image using existing prompt
+      // Generate new image using existing prompt AND new emotion
       try {
-        const fullPrompt = PROMPT_PREFIX + existingDetails.prompt;
-        console.log("Full prompt for existing user:", fullPrompt);
+        // Prepend emotion to the full prompt
+        const fullPrompt = `A ${emotion} ${PROMPT_PREFIX}${existingDetails.prompt}`;
+        console.log("Full prompt for existing user (with emotion):", fullPrompt);
         
         const generations = await everart.v1.generations.create(
           '5000', // Model ID for FLUX1.1
-          fullPrompt,
+          fullPrompt, // Use modified prompt
           'txt2img',
           { 
             imageCount: 1,
@@ -263,15 +273,16 @@ export async function POST(request: Request) {
       console.log("API Route: Data before EverArt (Langflow):", JSON.stringify(newDataToLog, null, 2));
       // --- End Log ---
 
-      // Generate image using EverArt SDK
+      // Generate image using EverArt SDK, including emotion
       try {
-        const fullPrompt = PROMPT_PREFIX + prompt;
-        console.log("Full prompt for new user:", fullPrompt);
-        
+        // Prepend emotion to the full prompt
+        const fullPrompt = `A ${emotion} ${PROMPT_PREFIX}${newDataToLog.prompt}`;
+        console.log("Full prompt for new user (with emotion):", fullPrompt);
+
         const generations = await everart.v1.generations.create(
-          '5000', // Model ID for FLUX1.1
-          fullPrompt,
-          'txt2img', // Generation type
+          '5000',
+          fullPrompt, // Use modified prompt
+          'txt2img',
           { 
             imageCount: 1,
             height: 512,

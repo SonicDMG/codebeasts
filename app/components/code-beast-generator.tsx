@@ -4,6 +4,13 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import Image from "next/image";
 import { Sparkles, Share2 } from "lucide-react";
@@ -11,13 +18,13 @@ import { RepositoryInfo } from "./github/RepositoryInfo";
 import NProgress from 'nprogress';
 
 // Function to generate prompt using our API
-const generatePrompt = async (username: string) => {
+const generatePrompt = async (username: string, emotion: string) => {
   const response = await fetch('/api/generate/prompt', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ username }),
+    body: JSON.stringify({ username, emotion }),
   });
 
   if (!response.ok) {
@@ -37,8 +44,12 @@ function shareOnTwitter(username: string) {
   window.open(twitterUrl, '_blank');
 }
 
+// Define available emotions - Revised with more visual ones
+const EMOTIONS = ["Happy", "Angry", "Surprised", "Zen/Godlike", "Facepalm", "Exploding Head", "Crying", "Zombie", "Cyborg"];
+
 export default function CodeBeastGenerator() {
   const [username, setUsername] = useState("");
+  const [selectedEmotion, setSelectedEmotion] = useState<string>(EMOTIONS[0]); // Add state for emotion, default to first
   const [loading, setLoading] = useState(false);
   const [generatedData, setGeneratedData] = useState<{
     languages: string;
@@ -47,6 +58,7 @@ export default function CodeBeastGenerator() {
     imageUrl: string;
     repoCount?: number;
     animalSelection?: any[][];
+    source?: 'cache' | 'langflow'; // Include source if not already added
   } | null>(null);
 
   // Add state for toastId
@@ -73,8 +85,8 @@ export default function CodeBeastGenerator() {
         return;
       }
 
-      // Call the API (which now returns source)
-      const data = await generatePrompt(username);
+      // Call the API, now including the emotion
+      const data = await generatePrompt(username, selectedEmotion); // Pass selectedEmotion
       
       // Step 1: Update toast based on source
       if (data.source === 'cache') {
@@ -157,6 +169,26 @@ export default function CodeBeastGenerator() {
                   disabled={loading}
                   className="w-full bg-black/20 border-white/10 text-sm py-3 px-4 rounded-xl placeholder:text-gray-500"
                 />
+                <Select 
+                  value={selectedEmotion} 
+                  onValueChange={setSelectedEmotion}
+                  disabled={loading}
+                >
+                  <SelectTrigger className="w-full bg-black/20 border-white/10 text-sm py-3 px-4 rounded-xl placeholder:text-gray-500 focus:ring-purple-500">
+                    <SelectValue placeholder="Select an emotion..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-white/10 text-white">
+                    {EMOTIONS.map((emotion) => (
+                      <SelectItem 
+                        key={emotion} 
+                        value={emotion}
+                        className="hover:bg-purple-600/50 focus:bg-purple-600/50"
+                      >
+                        {emotion}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Button 
                   type="submit"
                   disabled={loading}
