@@ -33,6 +33,27 @@ function cleanLanguagesString(rawLangString: string | undefined): string {
   return rawLangString.replace(/^languages:\s*\[|\]|'/g, '').trim();
 }
 
+// Helper function to clean the GitHub URL
+function cleanGithubUrl(rawUrl: string | undefined, username: string): string {
+  const fallbackUrl = `https://github.com/${username.toLowerCase()}`;
+  if (!rawUrl) {
+    console.warn(`cleanGithubUrl: Raw URL missing. Returning fallback: ${fallbackUrl}`);
+    return fallbackUrl;
+  } 
+  
+  const githubPrefix = 'https://github.com/';
+  const index = rawUrl.indexOf(githubPrefix);
+  
+  if (index !== -1) {
+    const extractedUrl = rawUrl.substring(index);
+    console.log(`cleanGithubUrl: Extracted "${extractedUrl}" from "${rawUrl}"`);
+    return extractedUrl;
+  } 
+  
+  console.warn(`cleanGithubUrl: Unexpected format for rawUrl: "${rawUrl}". Returning fallback: ${fallbackUrl}`);
+  return fallbackUrl;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -55,16 +76,14 @@ export async function POST(request: Request) {
       
       // Clean languages from DB details
       const cleanedLanguages = cleanLanguagesString(existingDetails.languages);
+      const cleanedGithubUrl = cleanGithubUrl(existingDetails.githubUrl, username);
       
       const dataToLog = {
         ...existingDetails,
-        languages: cleanedLanguages, // Log cleaned version
-        repoCount: existingDetails.repoCount ?? 30, // Use placeholder if not present
-        animalSelection: existingDetails.animalSelection ?? [
-          ["Python snake", "symbolizing adaptability and wisdom"],
-          ["Spider", "reflecting the creativity and structure of HTML"],
-          ["Owl", "representing the analytical mindset needed for TypeScript programming"]
-        ] // Use placeholder if not present
+        languages: cleanedLanguages,
+        githubUrl: cleanedGithubUrl,
+        repoCount: existingDetails.repoCount ?? 30, // Keep repoCount placeholder for now
+        animalSelection: existingDetails.animalSelection // Pass actual value (could be undefined)
       };
       console.log("API Route: Data before EverArt (DB Cache):", JSON.stringify(dataToLog, null, 2));
 
@@ -92,11 +111,11 @@ export async function POST(request: Request) {
         console.log("EverArt generation result:", result);
 
         return NextResponse.json({ 
-          languages: cleanedLanguages, // Send cleaned version
+          languages: cleanedLanguages,
           prompt: existingDetails.prompt,
-          githubUrl: existingDetails.githubUrl,
-          repoCount: dataToLog.repoCount, // Include in response
-          animalSelection: dataToLog.animalSelection, // Include in response
+          githubUrl: cleanedGithubUrl,
+          repoCount: dataToLog.repoCount,
+          animalSelection: dataToLog.animalSelection, // Send actual value (could be undefined)
           imageUrl: result.image_url || FALLBACK_IMAGE_URL,
           status: {
             langflow: "cached",
@@ -106,11 +125,11 @@ export async function POST(request: Request) {
       } catch (everartError) {
         console.error("Error calling EverArt API:", everartError);
         return NextResponse.json({ 
-          languages: cleanedLanguages, // Send cleaned version
+          languages: cleanedLanguages,
           prompt: existingDetails.prompt,
-          githubUrl: existingDetails.githubUrl,
-          repoCount: dataToLog.repoCount, // Include in response
-          animalSelection: dataToLog.animalSelection, // Include in response
+          githubUrl: cleanedGithubUrl,
+          repoCount: dataToLog.repoCount,
+          animalSelection: dataToLog.animalSelection, // Send actual value (could be undefined)
           imageUrl: FALLBACK_IMAGE_URL,
           status: {
             langflow: "cached",
@@ -183,22 +202,19 @@ export async function POST(request: Request) {
       }
 
       // Parse the pipe-delimited fields
-      const [rawLanguages, prompt, githubUrl] = rawMessage.split('|').map((field: string) => field.trim());
+      const [rawLanguages, prompt, rawGithubUrl] = rawMessage.split('|').map((field: string) => field.trim());
 
       // Clean languages from Langflow details
       const cleanedLanguages = cleanLanguagesString(rawLanguages);
+      const cleanedGithubUrl = cleanGithubUrl(rawGithubUrl, username);
 
       // --- Log new data --- 
       const newDataToLog = {
-        languages: cleanedLanguages, // Log cleaned version
+        languages: cleanedLanguages,
         prompt,
-        githubUrl,
-        repoCount: 30, // Hardcoded placeholder for now
-        animalSelection: [
-           ["Python snake", "symbolizing adaptability and wisdom"],
-           ["Spider", "reflecting the creativity and structure of HTML"],
-           ["Owl", "representing the analytical mindset needed for TypeScript programming"]
-        ] // Hardcoded placeholder for now
+        githubUrl: cleanedGithubUrl,
+        repoCount: 30, // Keep repoCount placeholder
+        animalSelection: undefined // Explicitly undefined as Langflow doesn't provide it
       };
       console.log("API Route: Data before EverArt (Langflow):", JSON.stringify(newDataToLog, null, 2));
       // --- End Log ---
@@ -229,11 +245,11 @@ export async function POST(request: Request) {
 
         // Return both the parsed Langflow data and the generated image URL
         return NextResponse.json({ 
-          languages: cleanedLanguages, // Send cleaned version
+          languages: cleanedLanguages,
           prompt,
-          githubUrl,
-          repoCount: newDataToLog.repoCount, // Include in response
-          animalSelection: newDataToLog.animalSelection, // Include in response
+          githubUrl: cleanedGithubUrl,
+          repoCount: newDataToLog.repoCount,
+          animalSelection: newDataToLog.animalSelection, // Send undefined
           imageUrl: result.image_url || FALLBACK_IMAGE_URL,
           username: username.toLowerCase(),
           status: {
@@ -245,11 +261,11 @@ export async function POST(request: Request) {
         console.error("Error calling EverArt API:", everartError);
         // Continue with a placeholder image if EverArt fails
         return NextResponse.json({ 
-          languages: cleanedLanguages, // Send cleaned version
+          languages: cleanedLanguages,
           prompt,
-          githubUrl,
-          repoCount: newDataToLog.repoCount, // Include in response
-          animalSelection: newDataToLog.animalSelection, // Include in response
+          githubUrl: cleanedGithubUrl,
+          repoCount: newDataToLog.repoCount,
+          animalSelection: newDataToLog.animalSelection, // Send undefined
           imageUrl: FALLBACK_IMAGE_URL,
           username: username.toLowerCase(),
           status: {
