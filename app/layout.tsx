@@ -20,11 +20,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 text-white`} suppressHydrationWarning>
+      <body className={`${inter.className} bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 text-white min-w-[360px]`} suppressHydrationWarning>
         <Providers>
           <Header />
-          <div className="flex flex-col min-h-screen pt-20">
-            <main className="flex-1 flex flex-col items-center justify-center">
+          <div className="flex flex-col min-h-screen pt-12">
+            <main className="flex-1 flex flex-col items-center justify-center px-4">
               {children}
             </main>
             <Footer />

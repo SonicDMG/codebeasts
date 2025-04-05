@@ -12,14 +12,11 @@ export function Header() {
   const linkText = isGalleryPage ? 'View Main' : 'View Gallery';
 
   return (
-    <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-6 text-gray-400 z-10">
-      <div className="flex items-center gap-4">
-        <span className="opacity-60">powered by</span>
+    <div className="absolute top-0 left-0 right-0 flex justify-between items-center py-4 px-6 text-gray-400 z-10 text-sm">
+      <div className="flex items-center">
+        <span className="opacity-60 mr-1.5">powered by</span>
         <Link href="https://flowiseai.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
           Langflow
-        </Link>
-        <Link href="https://github.com/SonicDMG/codebeasts" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
-          GitHub
         </Link>
       </div>
       {/* Use the dynamic variables for the link */}
