@@ -26,10 +26,17 @@ const PROMPT_PREFIX = "Create a retro-style creature in authentic low-resolution
 // Local fallback image that doesn't depend on external services
 const FALLBACK_IMAGE_URL = "/images/codebeast-placeholder.png";
 
+// Helper function to clean the language string
+function cleanLanguagesString(rawLangString: string | undefined): string {
+  if (!rawLangString) return '';
+  // Remove prefix like "languages:", brackets [], and single quotes '
+  return rawLangString.replace(/^languages:\s*\[|\]|'/g, '').trim();
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    console.log("Received request body:", body);
+    console.log("API Route: Received request body:", body);
     
     const { username } = body;
 
@@ -44,8 +51,23 @@ export async function POST(request: Request) {
     // First, check if we have existing user details
     const existingDetails = await getUserDetails(username);
     if (existingDetails) {
-      console.log("Using existing user details");
+      console.log("API Route: Using existing user details from DB");
       
+      // Clean languages from DB details
+      const cleanedLanguages = cleanLanguagesString(existingDetails.languages);
+      
+      const dataToLog = {
+        ...existingDetails,
+        languages: cleanedLanguages, // Log cleaned version
+        repoCount: existingDetails.repoCount ?? 30, // Use placeholder if not present
+        animalSelection: existingDetails.animalSelection ?? [
+          ["Python snake", "symbolizing adaptability and wisdom"],
+          ["Spider", "reflecting the creativity and structure of HTML"],
+          ["Owl", "representing the analytical mindset needed for TypeScript programming"]
+        ] // Use placeholder if not present
+      };
+      console.log("API Route: Data before EverArt (DB Cache):", JSON.stringify(dataToLog, null, 2));
+
       // Generate new image using existing prompt
       try {
         const fullPrompt = PROMPT_PREFIX + existingDetails.prompt;
@@ -70,9 +92,11 @@ export async function POST(request: Request) {
         console.log("EverArt generation result:", result);
 
         return NextResponse.json({ 
-          languages: existingDetails.languages,
+          languages: cleanedLanguages, // Send cleaned version
           prompt: existingDetails.prompt,
           githubUrl: existingDetails.githubUrl,
+          repoCount: dataToLog.repoCount, // Include in response
+          animalSelection: dataToLog.animalSelection, // Include in response
           imageUrl: result.image_url || FALLBACK_IMAGE_URL,
           status: {
             langflow: "cached",
@@ -82,7 +106,11 @@ export async function POST(request: Request) {
       } catch (everartError) {
         console.error("Error calling EverArt API:", everartError);
         return NextResponse.json({ 
-          ...existingDetails,
+          languages: cleanedLanguages, // Send cleaned version
+          prompt: existingDetails.prompt,
+          githubUrl: existingDetails.githubUrl,
+          repoCount: dataToLog.repoCount, // Include in response
+          animalSelection: dataToLog.animalSelection, // Include in response
           imageUrl: FALLBACK_IMAGE_URL,
           status: {
             langflow: "cached",
@@ -137,17 +165,17 @@ export async function POST(request: Request) {
         );
       }
 
-      const data = await response.json();
-      console.log("Full Langflow response:", JSON.stringify(data, null, 2));
+      const langflowResponseData = await response.json();
+      console.log("API Route: Full Langflow response:", JSON.stringify(langflowResponseData, null, 2));
 
       // Extract the message from the Langflow response structure
       let rawMessage;
-      if (data?.outputs?.[0]?.outputs?.[0]?.messages?.[0]?.message) {
-        rawMessage = data.outputs[0].outputs[0].messages[0].message;
+      if (langflowResponseData?.outputs?.[0]?.outputs?.[0]?.messages?.[0]?.message) {
+        rawMessage = langflowResponseData.outputs[0].outputs[0].messages[0].message;
       }
 
       if (!rawMessage) {
-        console.error("Could not find message in response. Full response:", data);
+        console.error("Could not find message in response. Full response:", langflowResponseData);
         return NextResponse.json(
           { error: "Could not extract message from response" },
           { status: 500 }
@@ -155,9 +183,25 @@ export async function POST(request: Request) {
       }
 
       // Parse the pipe-delimited fields
-      const [languages, prompt, githubUrl] = rawMessage.split('|').map((field: string) => field.trim());
+      const [rawLanguages, prompt, githubUrl] = rawMessage.split('|').map((field: string) => field.trim());
 
-      console.log("Parsed fields:", { languages, prompt, githubUrl });
+      // Clean languages from Langflow details
+      const cleanedLanguages = cleanLanguagesString(rawLanguages);
+
+      // --- Log new data --- 
+      const newDataToLog = {
+        languages: cleanedLanguages, // Log cleaned version
+        prompt,
+        githubUrl,
+        repoCount: 30, // Hardcoded placeholder for now
+        animalSelection: [
+           ["Python snake", "symbolizing adaptability and wisdom"],
+           ["Spider", "reflecting the creativity and structure of HTML"],
+           ["Owl", "representing the analytical mindset needed for TypeScript programming"]
+        ] // Hardcoded placeholder for now
+      };
+      console.log("API Route: Data before EverArt (Langflow):", JSON.stringify(newDataToLog, null, 2));
+      // --- End Log ---
 
       // Generate image using EverArt SDK
       try {
@@ -185,11 +229,13 @@ export async function POST(request: Request) {
 
         // Return both the parsed Langflow data and the generated image URL
         return NextResponse.json({ 
-          languages,
+          languages: cleanedLanguages, // Send cleaned version
           prompt,
           githubUrl,
+          repoCount: newDataToLog.repoCount, // Include in response
+          animalSelection: newDataToLog.animalSelection, // Include in response
           imageUrl: result.image_url || FALLBACK_IMAGE_URL,
-          username: username.toLowerCase(), // Return normalized username
+          username: username.toLowerCase(),
           status: {
             langflow: "success",
             everart: result.image_url ? "success" : "error"
@@ -199,9 +245,11 @@ export async function POST(request: Request) {
         console.error("Error calling EverArt API:", everartError);
         // Continue with a placeholder image if EverArt fails
         return NextResponse.json({ 
-          languages,
+          languages: cleanedLanguages, // Send cleaned version
           prompt,
           githubUrl,
+          repoCount: newDataToLog.repoCount, // Include in response
+          animalSelection: newDataToLog.animalSelection, // Include in response
           imageUrl: FALLBACK_IMAGE_URL,
           username: username.toLowerCase(),
           status: {
