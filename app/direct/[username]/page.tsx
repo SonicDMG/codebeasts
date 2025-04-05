@@ -12,31 +12,43 @@ interface DirectPageProps {
 
 function getBaseUrl(): string {
   const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-  return `${protocol}://${process.env.VERCEL_URL || "localhost:3000"}`;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const vercelUrl = process.env.VERCEL_URL;
+  const host = vercelUrl ? `${protocol}://${vercelUrl}` : `${protocol}://localhost:3000`;
+  const url = appUrl || host;
+  console.log(`getBaseUrl: protocol=${protocol}, appUrl=${appUrl}, vercelUrl=${vercelUrl}, host=${host}, finalUrl=${url}`);
+  return url;
 }
 
 async function getImageForUser(username: string): Promise<ImageRecord | null> {
+  let response: Response | null = null;
+  let fetchUrl = '';
   try {
     const baseUrl = getBaseUrl();
-    console.log("Fetching image for user:", username);
-    console.log("Using base URL:", baseUrl);
+    fetchUrl = `${baseUrl}/api/images/${username}`;
+    console.log(`getImageForUser: Fetching image for user: ${username}`);
+    console.log(`getImageForUser: Attempting to fetch URL: ${fetchUrl}`);
     
-    const response = await fetch(`${baseUrl}/api/images/${username}`, { cache: 'no-store' });
+    response = await fetch(fetchUrl, { cache: 'no-store' });
+    console.log(`getImageForUser: Fetch response status: ${response.status}`);
+
     if (!response.ok) {
       if (response.status === 404) {
-        console.log("No image found for user:", username);
+        console.log(`getImageForUser: No image found (404) for user: ${username} at URL: ${fetchUrl}`);
         return null;
       }
-      throw new Error(`Failed to fetch image: ${response.statusText}`);
+      const errorText = await response.text().catch(() => 'Could not read error text');
+      console.error(`getImageForUser: Failed fetch response. Status: ${response.status}, StatusText: ${response.statusText}, URL: ${fetchUrl}, Body: ${errorText}`);
+      throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
     }
     const data = await response.json();
-    console.log("Found image:", data);
+    console.log(`getImageForUser: Successfully fetched and parsed image data for ${username}`);
     return data;
   } catch (error) {
-    console.error("Error fetching image:", error);
+    console.error(`getImageForUser: Error during fetch process for URL: ${fetchUrl}. Error:`, error instanceof Error ? error.message : String(error));
+    if (response) {
+       console.error(`getImageForUser: Error occurred after fetch. Response status was: ${response.status}`);
+    }
     return null;
   }
 }
@@ -64,43 +76,41 @@ export default async function DirectPage({ params }: DirectPageProps) {
   const image = await getImageForUser(username);
   
   return (
-    <div className="min-h-screen flex flex-col px-4 py-4">
-      <div className="flex-1 flex items-center justify-center">
-        <div className="max-w-2xl w-full">
-          <Card className="p-6 space-y-4">
-            {image ? (
-              <>
-                <h1 className="text-2xl font-bold text-center break-words">
-                  CodeBeast for @{username}
-                </h1>
-                <BeastCard
-                  beast={{
-                    username: image.username,
-                    image_url: image.image_url,
-                  }}
-                  showActions
-                />
-              </>
-            ) : (
-              <>
-                <h1 className="text-2xl font-bold text-center break-words">
-                  No CodeBeast found for @{username}
-                </h1>
-                <div className="text-center text-muted-foreground">
-                  This GitHub user hasn't generated their CodeBeast yet.
-                </div>
-              </>
-            )}
-            <div className="text-center">
-              <Link 
-                href="/"
-                className="text-primary hover:underline"
-              >
-                {image ? "Generate your own CodeBeast" : "Generate a CodeBeast"}
-              </Link>
-            </div>
-          </Card>
-        </div>
+    <div className="w-full flex flex-col items-center pt-8">
+      <div className="w-full max-w-4xl">
+        <Card className="p-6 space-y-4 bg-black/30 border-white/10 rounded-xl">
+          {image ? (
+            <>
+              <h1 className="text-2xl font-bold text-center break-words mb-4">
+                CodeBeast for @{username}
+              </h1>
+              <BeastCard
+                beast={{
+                  username: image.username,
+                  image_url: image.image_url,
+                }}
+                showActions
+              />
+            </>
+          ) : (
+            <>
+              <h1 className="text-2xl font-bold text-center break-words">
+                No CodeBeast found for @{username}
+              </h1>
+              <div className="text-center text-muted-foreground">
+                This GitHub user hasn't generated their CodeBeast yet.
+              </div>
+            </>
+          )}
+          <div className="text-center">
+            <Link 
+              href="/"
+              className="text-primary hover:underline"
+            >
+              {image ? "Generate your own CodeBeast" : "Generate a CodeBeast"}
+            </Link>
+          </div>
+        </Card>
       </div>
     </div>
   );

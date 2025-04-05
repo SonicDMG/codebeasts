@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 
 export default function GalleryPage() {
   return (
-    <main className="container mx-auto p-4">
-      <div className="flex flex-col items-center justify-center py-8">
-        <h1 className="text-4xl font-bold text-center mb-2">Gallery</h1>
-        <p className="text-muted-foreground text-center mb-8">
+    <main className="container mx-auto px-4 pt-8 w-full">
+      <div className="flex flex-col items-center justify-center mb-4">
+        <h1 className="text-3xl font-bold text-center mb-1">Gallery</h1>
+        <p className="text-white/70 text-center mt-1">
           View AI-generated images from the community
         </p>
       </div>
