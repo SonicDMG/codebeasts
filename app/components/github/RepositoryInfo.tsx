@@ -18,7 +18,7 @@ interface RepositoryInfoProps {
 export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animalSelection }: RepositoryInfoProps) => {
   return (
     <div className="space-y-4">
-      {repoCount > 0 && (
+      {typeof repoCount === 'number' && (
         <div className="flex items-center gap-2 text-white/60">
           <GitFork className="h-4 w-4" />
           <a 
@@ -44,7 +44,7 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animal
         </div>
       )}
 
-      {Array.isArray(animalSelection) && animalSelection.length > 0 && (
+      {Array.isArray(animalSelection) && animalSelection.length > 0 && repoCount > 0 && (
         <Card className="p-4 bg-black/20 border-white/10">
           <h3 className="text-white/80 text-sm font-medium mb-2">Your CodeBeast Components</h3>
           <div className="space-y-2">
