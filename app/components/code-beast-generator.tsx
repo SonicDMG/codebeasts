@@ -76,20 +76,19 @@ export default function CodeBeastGenerator() {
         <CardContent className="p-6">
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 space-y-4">
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleGenerate}>
                 <Input
                   type="text"
                   placeholder="Enter GitHub handle to generate your beast..."
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={loading}
-                  className="w-full bg-black/20 border-white/10 text-lg py-6 px-4 rounded-xl placeholder:text-gray-500"
+                  className="w-full bg-black/20 border-white/10 text-sm py-3 px-4 rounded-xl placeholder:text-gray-500"
                 />
                 <Button 
-                  type="button"
+                  type="submit"
                   disabled={loading}
-                  className="w-full bg-purple-600 hover:bg-purple-500 text-white py-6 text-lg font-medium rounded-xl gap-2"
-                  onClick={handleGenerate}
+                  className="w-full bg-purple-600 hover:bg-purple-500 text-white py-3 text-base font-medium rounded-xl gap-2"
                 >
                   <Sparkles className="w-4 h-4" />
                   {loading ? "Generating..." : "Generate"}
