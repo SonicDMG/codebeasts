@@ -1,5 +1,8 @@
 # Environment variables
 .env
+# Local environment variables
+.env.local
+.env.*.local
 
 # Python
 __pycache__/
@@ -35,3 +38,10 @@ node_modules
 *.swp
 *.swo
 .DS_Store
+
+# Next.js build output
+.next/
+out/
+
+# Log files
+*.log
