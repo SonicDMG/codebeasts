@@ -188,25 +188,28 @@ export async function getUserDetails(username: string): Promise<UserDetailsRecor
           }
 
           // Clean languages and githubUrl 
-          let cleanedLanguages = rawLanguages.replace(/^languages:\s*/, '');
-          // If the result is literally "[]", treat as empty
-          if (cleanedLanguages === '[]') {
-            cleanedLanguages = '';
-          }
-          console.log(`DB Service: Final cleaned languages string: [${cleanedLanguages}]`);
+          // Revert: Just strip label, frontend handles filtering placeholders
+          const cleanedLanguages = rawLanguages.replace(/^languages:\s*/, '').trim(); 
+          // Remove the conditional check and associated logs
+          // console.log(`DB Service: Checking cleanedLanguages: [${cleanedLanguages}]`); 
+          // if (cleanedLanguages === '[]' || cleanedLanguages.startsWith('[None') || cleanedLanguages === "[['None']]") {
+          //   console.log(`DB Service: Condition met! Setting cleanedLanguages to empty string.`); 
+          //   cleanedLanguages = '';
+          // }
+          // console.log(`DB Service: Final cleaned languages string: [${cleanedLanguages}]`); 
           const cleanedGithubUrl = rawGithubUrl.replace(/^github_user_name_url:\s*/, '');
 
           const userDetails: UserDetailsRecord = {
             _id: record._id,
             session_id: record.session_id,
             username: record.session_id, // Use session_id as the username field for return consistency
-            languages: cleanedLanguages, // Use cleaned value
+            languages: cleanedLanguages, // Send potentially raw cleaned string (e.g., "[]", "['None']")
             prompt,
             githubUrl: cleanedGithubUrl, // Use cleaned value
             repoCount, 
             animalSelection,
           };
-          console.log(`DB Service: Parsed user details from blob:`, userDetails);
+          console.log(`DB Service: FINAL userDetails object being returned:`, userDetails);
           return userDetails;
         } else {
           console.warn(`DB Service: body_blob found but content format unexpected for ${normalizedUsername}`);

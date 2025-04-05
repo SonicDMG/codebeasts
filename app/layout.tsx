@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import "nprogress/nprogress.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
@@ -29,7 +30,7 @@ export default function RootLayout({
             </main>
             <Footer />
           </div>
-          <Toaster richColors position="top-center" />
+          <Toaster position="top-center" theme="dark" />
         </Providers>
       </body>
     </html>

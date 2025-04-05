@@ -16,6 +16,7 @@ interface RepositoryInfoProps {
 }
 
 export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animalSelection }: RepositoryInfoProps) => {
+  console.log("RepositoryInfo Component received languages:", languages);
   return (
     <div className="space-y-4">
       {typeof repoCount === 'number' && (

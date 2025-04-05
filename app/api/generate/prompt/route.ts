@@ -62,6 +62,7 @@ function cleanGithubUrl(rawUrl: string | undefined, username: string): string {
 }
 
 export async function POST(request: Request) {
+  console.log("API Route: POST function entered."); // ADD VERY EARLY LOG
   try {
     const body = await request.json();
     console.log("API Route: Received request body:", body);
@@ -81,6 +82,7 @@ export async function POST(request: Request) {
     const existingDetails = await getUserDetails(username);
     if (existingDetails) {
       console.log("API Route: Using existing user details from DB");
+      console.log("API Route: repoCount from DB:", existingDetails.repoCount); // ADD Log
       
       // Clean languages from DB details
       const cleanedLanguages = cleanLanguagesString(existingDetails.languages);
@@ -90,7 +92,7 @@ export async function POST(request: Request) {
         ...existingDetails,
         languages: cleanedLanguages,
         githubUrl: cleanedGithubUrl,
-        repoCount: existingDetails.repoCount ?? 30, // Keep repoCount placeholder for now
+        repoCount: existingDetails.repoCount,
         animalSelection: existingDetails.animalSelection // Pass actual value (could be undefined)
       };
       console.log("API Route: Data before EverArt (DB Cache):", JSON.stringify(dataToLog, null, 2));
@@ -148,7 +150,8 @@ export async function POST(request: Request) {
           status: {
             langflow: "cached",
             everart: result.image_url ? "success" : "error"
-          }
+          },
+          source: 'cache'
         });
       } catch (everartError) {
         console.error("Error calling EverArt API:", everartError);
@@ -162,7 +165,8 @@ export async function POST(request: Request) {
           status: {
             langflow: "cached",
             everart: "error"
-          }
+          },
+          source: 'cache'
         });
       }
     }
@@ -192,9 +196,7 @@ export async function POST(request: Request) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          input: {
-            text: normalizedUsername // Use normalized username
-          }
+          session_id: normalizedUsername
         }),
       });
 
@@ -213,13 +215,18 @@ export async function POST(request: Request) {
       }
 
       const langflowResponseData = await response.json();
-      console.log("API Route: Full Langflow response:", JSON.stringify(langflowResponseData, null, 2));
+      // --- ADD LOGS --- 
+      console.log("API Route (Langflow Path): Full Langflow response data:", JSON.stringify(langflowResponseData, null, 2));
+      // --- END LOGS --- 
 
       // Extract the message from the Langflow response structure
       let rawMessage;
       if (langflowResponseData?.outputs?.[0]?.outputs?.[0]?.messages?.[0]?.message) {
         rawMessage = langflowResponseData.outputs[0].outputs[0].messages[0].message;
       }
+      // --- ADD LOGS --- 
+      console.log(`API Route (Langflow Path): Extracted rawMessage: [${rawMessage}]`);
+      // --- END LOGS --- 
 
       if (!rawMessage) {
         console.error("Could not find message in response. Full response:", langflowResponseData);
@@ -229,8 +236,17 @@ export async function POST(request: Request) {
         );
       }
 
-      // Parse the pipe-delimited fields
-      const [rawLanguages, prompt, rawGithubUrl] = rawMessage.split('|').map((field: string) => field.trim());
+      // Parse the pipe-delimited fields - ADD repoCount
+      console.log("API Route: Raw message from Langflow:", rawMessage); // ADD Log
+      const messageParts = rawMessage.split('|').map((field: string) => field.trim()); // Store parts
+      console.log("API Route: Split message parts:", messageParts); // ADD Log
+      const [rawLanguages, prompt, rawGithubUrl, rawRepoCount] = messageParts; // Assign from parts
+      console.log("API Route: Raw repo count string:", rawRepoCount); // ADD Log
+      
+      // Improved parsing: Handle NaN explicitly
+      const count = parseInt(rawRepoCount, 10);
+      const repoCount = !isNaN(count) ? count : undefined; 
+      console.log("API Route: Parsed repo count value:", repoCount); // ADD Log
 
       // Clean languages from Langflow details
       const cleanedLanguages = cleanLanguagesString(rawLanguages);
@@ -241,7 +257,7 @@ export async function POST(request: Request) {
         languages: cleanedLanguages,
         prompt,
         githubUrl: cleanedGithubUrl,
-        repoCount: 30, // Keep repoCount placeholder
+        repoCount: repoCount,
         animalSelection: undefined // Explicitly undefined as Langflow doesn't provide it
       };
       console.log("API Route: Data before EverArt (Langflow):", JSON.stringify(newDataToLog, null, 2));
@@ -291,33 +307,35 @@ export async function POST(request: Request) {
         // --- End Save/Update ---
 
         return NextResponse.json({ 
-          languages: cleanedLanguages,
-          prompt,
-          githubUrl: cleanedGithubUrl,
+          languages: newDataToLog.languages,
+          prompt: newDataToLog.prompt,
+          githubUrl: newDataToLog.githubUrl,
           repoCount: newDataToLog.repoCount,
-          animalSelection: newDataToLog.animalSelection, // Send undefined
+          animalSelection: newDataToLog.animalSelection,
           imageUrl: finalImageUrl,
           username: normalizedUsername, // Ensure normalized username is returned
           status: {
             langflow: "success",
             everart: result.image_url ? "success" : "error"
-          }
+          },
+          source: 'langflow'
         });
       } catch (everartError) {
         console.error("Error calling EverArt API:", everartError);
         // Continue with a placeholder image if EverArt fails
         return NextResponse.json({ 
-          languages: cleanedLanguages,
-          prompt,
-          githubUrl: cleanedGithubUrl,
+          languages: newDataToLog.languages,
+          prompt: newDataToLog.prompt,
+          githubUrl: newDataToLog.githubUrl,
           repoCount: newDataToLog.repoCount,
-          animalSelection: newDataToLog.animalSelection, // Send undefined
+          animalSelection: newDataToLog.animalSelection,
           imageUrl: FALLBACK_IMAGE_URL,
           username: normalizedUsername,
           status: {
             langflow: "success",
             everart: "error"
-          }
+          },
+          source: 'langflow'
         });
       }
     } catch (langflowError) {

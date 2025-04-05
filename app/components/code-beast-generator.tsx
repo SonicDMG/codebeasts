@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { Sparkles, Share2 } from "lucide-react";
 import { RepositoryInfo } from "./github/RepositoryInfo";
+import NProgress from 'nprogress';
 
 // Function to generate prompt using our API
 const generatePrompt = async (username: string) => {
@@ -48,44 +49,98 @@ export default function CodeBeastGenerator() {
     animalSelection?: any[][];
   } | null>(null);
 
+  // Add state for toastId
+  const [toastId, setToastId] = useState<string | number | undefined>(undefined);
+
   const handleGenerate = async (e?: React.FormEvent | React.MouseEvent) => {
     e?.preventDefault();
     setLoading(true);
     setGeneratedData(null);
+    NProgress.configure({ showSpinner: false }); // Disable the spinner
+    NProgress.start();
+    // Use toast.message for title/description style
+    const currentToastId = toast.message("Starting Generation...", { 
+      description: "Please wait while we fetch data..."
+    }); 
+    setToastId(currentToastId); // Store toast ID
 
     try {
       if (!username.trim()) {
-        toast.error("Please enter a GitHub username");
+        toast.error("Please enter a GitHub username"); // Keep error simple
+        NProgress.done();
+        toast.dismiss(currentToastId);
+        setLoading(false);
         return;
       }
 
+      // Call the API (which now returns source)
       const data = await generatePrompt(username);
       
-      data.repoCount = data.repoCount ?? 30;
+      // Step 1: Update toast based on source
+      if (data.source === 'cache') {
+        toast.message("Found User in DB", { 
+          description: "Using saved details...",
+          id: currentToastId 
+        });
+      } else { // source === 'langflow'
+        toast.message("Generating Prompt with Langflow AI", { 
+          description: "Fetching repository data...", 
+          id: currentToastId 
+        });
+      }
       
+      // Step 2: Simulate brief delay and update toast for image generation
+      await new Promise(resolve => setTimeout(resolve, 500)); // Short delay 
+      toast.message("Generating Image with EverArt AI", { 
+        description: "Conjuring pixels... please wait.", 
+        id: currentToastId 
+      });
+
+      // Step 3: Store data (image appears)
       setGeneratedData(data);
-      toast.success("Successfully generated your CodeBeast!");
+
+      // Step 4: Final success toast update (after a slight delay to let image render)
+      await new Promise(resolve => setTimeout(resolve, 100)); // Short delay
+      toast.message("CodeBeast Generated!", { 
+        description: "Your unique creature is ready.",
+        id: currentToastId 
+      });
+
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to generate CodeBeast");
+      // Use title/description for error too
+      toast.message("Generation Failed", { 
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        id: currentToastId,
+        // Use explicit type for sonner error styling if default isn't dark
+        // type: 'error' // Uncomment if needed
+      });
+      // Alternatively, use toast.error if the default error style is preferred
+      // toast.error(error instanceof Error ? error.message : "Failed to generate CodeBeast", { id: currentToastId });
     } finally {
+      NProgress.done();
       setLoading(false);
     }
   };
 
-  // handleShare needs to pass username to shareOnTwitter
   const handleShare = () => {
     if (generatedData?.githubUrl) {
       const urlParts = generatedData.githubUrl.split('/');
       const extractedUsername = urlParts[urlParts.length - 1] || username; 
       
-      shareOnTwitter(extractedUsername); // Pass username only
+      shareOnTwitter(extractedUsername);
       toast.success("Twitter share dialog opened");
     } else {
-      toast.error("Cannot share - missing required data (URL)."); // Updated error message
+      toast.error("Cannot share - missing required data (URL).");
     }
   };
 
-  const languageList = generatedData?.languages?.split(",").map(lang => lang.trim()).filter(Boolean) || [];
+  // Refine languageList creation to filter out specific placeholders
+  const languageList = generatedData?.languages
+    ?.split(",")
+    .map(lang => lang.trim())
+    .filter(Boolean) // Remove empty strings
+    .filter(lang => lang !== '[]' && !lang.startsWith('[None')) // Remove placeholders
+    || [];
 
   return (
     <div className="w-full max-w-4xl mx-auto">
