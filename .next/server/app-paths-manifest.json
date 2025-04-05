@@ -1,0 +1,8 @@
+{
+  "/api/generate/prompt/route": "app/api/generate/prompt/route.js",
+  "/api/images/[username]/route": "app/api/images/[username]/route.js",
+  "/api/gallery/route": "app/api/gallery/route.js",
+  "/direct/[username]/page": "app/direct/[username]/page.js",
+  "/gallery/page": "app/gallery/page.js",
+  "/page": "app/page.js"
+}

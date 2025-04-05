@@ -32,13 +32,17 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animal
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        {languages.map((tech) => (
-          <span key={tech} className="px-3 py-1 rounded-full glass text-sm text-white/60">
-            {tech}
-          </span>
-        ))}
-      </div>
+      {languages && languages.length > 0 && (
+        <div>
+          <div className="flex flex-wrap gap-2">
+            {languages.map((tech) => (
+              <span key={tech} className="px-3 py-1 rounded-full glass text-sm text-white/60">
+                {tech}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {Array.isArray(animalSelection) && animalSelection.length > 0 && (
         <Card className="p-4 bg-black/20 border-white/10">

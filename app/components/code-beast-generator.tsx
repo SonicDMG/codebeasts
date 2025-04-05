@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Share2 } from "lucide-react";
 import { RepositoryInfo } from "./github/RepositoryInfo";
 
 // Function to generate prompt using our API
@@ -26,6 +26,15 @@ const generatePrompt = async (username: string) => {
 
   return response.json();
 };
+
+// Share function updated to use index page URL with query param
+function shareOnTwitter(username: string) {
+  const text = `Check out my unique AI-generated CodeBeast! 🦾\n\nGenerated for @${username} using @LangFlow\n\n`;
+  // Construct the index page URL with the username query parameter
+  const shareUrl = `${window.location.origin}/?u=${username.toLowerCase()}`;
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
+  window.open(twitterUrl, '_blank');
+}
 
 export default function CodeBeastGenerator() {
   const [username, setUsername] = useState("");
@@ -53,11 +62,6 @@ export default function CodeBeastGenerator() {
       const data = await generatePrompt(username);
       
       data.repoCount = data.repoCount ?? 30;
-      data.animalSelection = data.animalSelection ?? [
-        ["Python snake", "symbolizing adaptability and wisdom"],
-        ["Spider", "reflecting the creativity and structure of HTML"],
-        ["Owl", "representing the analytical mindset needed for TypeScript programming"]
-      ];
       
       setGeneratedData(data);
       toast.success("Successfully generated your CodeBeast!");
@@ -65,6 +69,19 @@ export default function CodeBeastGenerator() {
       toast.error(error instanceof Error ? error.message : "Failed to generate CodeBeast");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // handleShare needs to pass username to shareOnTwitter
+  const handleShare = () => {
+    if (generatedData?.githubUrl) {
+      const urlParts = generatedData.githubUrl.split('/');
+      const extractedUsername = urlParts[urlParts.length - 1] || username; 
+      
+      shareOnTwitter(extractedUsername); // Pass username only
+      toast.success("Twitter share dialog opened");
+    } else {
+      toast.error("Cannot share - missing required data (URL)."); // Updated error message
     }
   };
 
@@ -122,10 +139,11 @@ export default function CodeBeastGenerator() {
                 <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full">
                   <Button 
                     variant="outline"
-                    onClick={() => window.open(generatedData.imageUrl, '_blank')}
+                    onClick={handleShare}
                     className="flex-1 bg-black/20 border-white/10 text-white hover:bg-black/30 text-md font-medium rounded-xl"
                   >
-                    View Full Size
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share
                   </Button>
                    <Button 
                     variant="outline"

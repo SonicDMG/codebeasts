@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import EverArt from 'everart';
-import { getUserDetails } from "../../../lib/db/astra";
+import { getUserDetails, upsertImage } from "../../../lib/db/astra";
 
 // Define types from the EverArt SDK
 type Generation = {
@@ -21,7 +21,14 @@ if (!everartApiKey) {
 const everart = new EverArt(everartApiKey);
 
 // Style prefix for consistent image generation
-const PROMPT_PREFIX = "Create a retro-style creature in authentic low-resolution pixel art, reminiscent of classic SNES RPGs. The character should have large, sparkly eyes with pixel-perfect star reflections, chunky pixel shading, and deliberately limited color palette focusing on deep purples, teals, and warm golden tones. Add retro-style sparkles and light beams in the background using classic dithering patterns. The overall style should embrace the constraints of 16-bit era graphics with visible, chunky pixels and that nostalgic game aesthetic. ";
+// const PROMPT_PREFIX = "Create a cute, retro-style creature in authentic low-resolution pixel art, " +
+// "reminiscent of classic SNES RPGs. The character should have large, sparkly eyes, chunky pixel shading, " +
+// "and deliberately limited color palette. The overall style should embrace the constraints of 16-bit era graphics with visible, " +
+// "chunky pixels and that nostalgic game aesthetic.";
+
+const PROMPT_PREFIX = "Kawaii pixel art: Adorable chimera creature, ultra low-resolutionpixel 16-bit style. " +
+  "Extremely pixelated NES/SNES aesthetic, chunky dithering patterns, and high contrast. " +
+  "Rainbow gradient background.";
 
 // Local fallback image that doesn't depend on external services
 const FALLBACK_IMAGE_URL = "/images/codebeast-placeholder.png";
@@ -60,6 +67,7 @@ export async function POST(request: Request) {
     console.log("API Route: Received request body:", body);
     
     const { username } = body;
+    const normalizedUsername = username.toLowerCase(); // Ensure we use normalized consistently
 
     if (!username) {
       console.error("Username is missing from request body");
@@ -108,7 +116,27 @@ export async function POST(request: Request) {
         }
 
         const result = await everart.v1.generations.fetchWithPolling(generations[0].id) as Generation;
-        console.log("EverArt generation result:", result);
+        console.log("EverArt generation result (cached path):", result);
+
+        const finalImageUrl = result.image_url || FALLBACK_IMAGE_URL;
+
+        // --- Save/Update the image record in the DB --- 
+        if (result.image_url) { // Only save if EverArt succeeded
+          try {
+            console.log(`API Route: Upserting image for ${normalizedUsername} (cached path)`);
+            await upsertImage({
+              username: normalizedUsername, 
+              image_url: finalImageUrl,
+              created_at: new Date().toISOString()
+            });
+            console.log(`API Route: Upsert successful for ${normalizedUsername}`);
+          } catch (dbError) {
+            console.error(`API Route: Failed to upsert image for ${normalizedUsername} (cached path):`, dbError);
+            // Decide if failure to save should prevent returning success to user?
+            // For now, we'll still return the image URL but log the error.
+          }
+        }
+        // --- End Save/Update ---
 
         return NextResponse.json({ 
           languages: cleanedLanguages,
@@ -116,7 +144,7 @@ export async function POST(request: Request) {
           githubUrl: cleanedGithubUrl,
           repoCount: dataToLog.repoCount,
           animalSelection: dataToLog.animalSelection, // Send actual value (could be undefined)
-          imageUrl: result.image_url || FALLBACK_IMAGE_URL,
+          imageUrl: finalImageUrl,
           status: {
             langflow: "cached",
             everart: result.image_url ? "success" : "error"
@@ -165,7 +193,7 @@ export async function POST(request: Request) {
         },
         body: JSON.stringify({
           input: {
-            text: username.toLowerCase() // Use normalized username
+            text: normalizedUsername // Use normalized username
           }
         }),
       });
@@ -241,17 +269,35 @@ export async function POST(request: Request) {
 
         // Wait for the first generation to complete
         const result = await everart.v1.generations.fetchWithPolling(generations[0].id) as Generation;
-        console.log("EverArt generation result:", result);
+        console.log("EverArt generation result (new path):", result);
 
-        // Return both the parsed Langflow data and the generated image URL
+        const finalImageUrl = result.image_url || FALLBACK_IMAGE_URL;
+
+        // --- Save/Update the image record in the DB --- 
+        if (result.image_url) { // Only save if EverArt succeeded
+           try {
+            console.log(`API Route: Upserting image for ${normalizedUsername} (new path)`);
+            await upsertImage({
+              username: normalizedUsername,
+              image_url: finalImageUrl,
+              created_at: new Date().toISOString()
+            });
+            console.log(`API Route: Upsert successful for ${normalizedUsername}`);
+          } catch (dbError) {
+            console.error(`API Route: Failed to upsert image for ${normalizedUsername} (new path):`, dbError);
+            // Log error but continue
+          }
+        }
+        // --- End Save/Update ---
+
         return NextResponse.json({ 
           languages: cleanedLanguages,
           prompt,
           githubUrl: cleanedGithubUrl,
           repoCount: newDataToLog.repoCount,
           animalSelection: newDataToLog.animalSelection, // Send undefined
-          imageUrl: result.image_url || FALLBACK_IMAGE_URL,
-          username: username.toLowerCase(),
+          imageUrl: finalImageUrl,
+          username: normalizedUsername, // Ensure normalized username is returned
           status: {
             langflow: "success",
             everart: result.image_url ? "success" : "error"
@@ -267,7 +313,7 @@ export async function POST(request: Request) {
           repoCount: newDataToLog.repoCount,
           animalSelection: newDataToLog.animalSelection, // Send undefined
           imageUrl: FALLBACK_IMAGE_URL,
-          username: username.toLowerCase(),
+          username: normalizedUsername,
           status: {
             langflow: "success",
             everart: "error"
@@ -279,7 +325,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { 
           error: "Failed to communicate with Langflow API",
-          username: username.toLowerCase(), // Return normalized username
+          username: normalizedUsername, // Return normalized username
           status: {
             langflow: "error",
             everart: "not_started"
