@@ -2,13 +2,23 @@ import { ImageRecord } from "@/app/api/db/astra";
 
 // Moved from app/direct/[username]/page.tsx
 export function getBaseUrl(): string {
-  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
   const vercelUrl = process.env.VERCEL_URL;
-  const host = vercelUrl ? `${protocol}://${vercelUrl}` : `${protocol}://localhost:3000`;
-  const url = appUrl || host;
+
+  // Priority: Explicit APP_URL > Vercel URL > Localhost default
+  let url: string;
+  if (appUrl) {
+    url = appUrl;
+  } else if (vercelUrl) {
+    // Vercel automatically handles https
+    url = `https://${vercelUrl}`;
+  } else {
+    // Default to http for localhost if no other URL is provided
+    url = 'http://localhost:3000';
+  }
+
   // Keep console logs for debugging if needed, or remove for production
-  console.log(`getBaseUrl: protocol=${protocol}, appUrl=${appUrl}, vercelUrl=${vercelUrl}, host=${host}, finalUrl=${url}`);
+  console.log(`getBaseUrl: appUrl=${appUrl}, vercelUrl=${vercelUrl}, finalUrl=${url}`);
   return url;
 }
 
