@@ -8,8 +8,8 @@ import {
   Card,
   CardContent,
   CardHeader,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/app/components/ui/card";
+import { Button } from "@/app/components/ui/button";
 import { ImageRecord } from "@/app/lib/db/astra";
 
 const ITEMS_PER_PAGE = 20;

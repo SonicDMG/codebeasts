@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import { BeastCard } from "@/components/gallery/BeastCard";
-import { Card } from "@/components/ui/card";
+import { BeastCard } from "@/app/components/gallery/BeastCard";
+import { Card } from "@/app/components/ui/card";
 import Link from "next/link";
 import { ImageRecord } from "@/app/api/db/astra";
 

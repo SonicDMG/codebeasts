@@ -3,7 +3,7 @@ import "nprogress/nprogress.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
-import { Providers } from "../components/providers";
+import { Providers } from "@/app/components/providers";
 import { Footer } from "./components/layout/Footer";
 import { Header } from "./components/layout/Header";
 

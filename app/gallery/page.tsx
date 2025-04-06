@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { Gallery } from "@/components/gallery";
+import { Gallery } from "@/app/components/gallery";
 
 export const metadata: Metadata = {
   title: "Gallery - CodeBeasts",

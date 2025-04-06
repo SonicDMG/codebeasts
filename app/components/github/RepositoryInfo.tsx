@@ -4,8 +4,8 @@
  * selected for the CodeBeast generation.
  */
 
-import { GitFork } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { FileCode2, GitFork } from 'lucide-react';
+import { Card } from "@/app/components/ui/card";
 
 interface RepositoryInfoProps {
   repoCount: number;
