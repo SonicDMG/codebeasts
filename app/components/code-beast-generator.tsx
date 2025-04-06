@@ -16,6 +16,7 @@ import Image from "next/image";
 import { Sparkles, Share2 } from "lucide-react";
 import { RepositoryInfo } from "./github/RepositoryInfo";
 import NProgress from 'nprogress';
+import { downloadImageClientSide } from "@/app/lib/utils";
 
 // GitHub username validation regex
 const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
@@ -268,14 +269,7 @@ export default function CodeBeastGenerator() {
                   </Button>
                    <Button 
                     variant="outline"
-                    onClick={() => {
-                      const link = document.createElement('a');
-                      link.href = generatedData.imageUrl;
-                      link.download = `codebeast-${username}.png`;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }}
+                    onClick={() => downloadImageClientSide(generatedData.imageUrl, username)}
                     className="flex-1 bg-black/20 border-white/10 text-white hover:bg-black/30 text-md font-medium rounded-xl"
                   >
                     Download Beast

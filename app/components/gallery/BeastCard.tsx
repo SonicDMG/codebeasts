@@ -5,6 +5,7 @@ import { Button } from "@/app/components/ui/button";
 import { Download, Share2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { downloadImageClientSide } from "@/app/lib/utils";
 
 interface BeastCardProps {
   beast: {
@@ -12,24 +13,6 @@ interface BeastCardProps {
     image_url: string;
   };
   showActions?: boolean;
-}
-
-async function downloadImage(image_url: string, username: string) {
-  try {
-    const response = await fetch(image_url);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `codebeast-${username}.png`;
-    document.body.appendChild(link);
-    link.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(link);
-    toast.success("CodeBeast downloaded successfully!");
-  } catch (error) {
-    toast.error("Failed to download CodeBeast");
-  }
 }
 
 function shareOnTwitter(image_url: string, username: string) {
@@ -40,7 +23,7 @@ function shareOnTwitter(image_url: string, username: string) {
 }
 
 export function BeastCard({ beast, showActions = false }: BeastCardProps) {
-  const handleDownload = () => downloadImage(beast.image_url, beast.username);
+  const handleDownload = () => downloadImageClientSide(beast.image_url, beast.username);
   const handleShare = () => {
     shareOnTwitter(beast.image_url, beast.username);
     toast.success("Twitter share dialog opened");
