@@ -41,7 +41,7 @@ const generatePrompt = async (username: string, emotion: string) => {
 };
 
 // Define available emotions - Revised with more visual ones
-const EMOTIONS = ["Happy", "Angry", "Surprised", "Zen/Godlike", "Facepalm", "Exploding Head", "Crying", "Zombie", "Cyborg"];
+const EMOTIONS = ["Happy", "Angry", "Surprised", "Zen/Godlike", "Facepalm", "Exploding Head", "Crying", "Zombie", "Cyborg", "Caped Crusader"];
 
 export default function CodeBeastGenerator() {
   const [username, setUsername] = useState("");
@@ -147,12 +147,17 @@ export default function CodeBeastGenerator() {
     }
   };
 
-  // Refine languageList creation to filter out specific placeholders
+  // --- Remove filtering logic for animalSelection --- 
+  // const filteredAnimalSelection = generatedData?.animalSelection?.filter(entry => ... ) || [];
+
+  // Refine languageList creation - Clean brackets within map
   const languageList = generatedData?.languages
     ?.split(",")
-    .map(lang => lang.trim())
-    .filter(Boolean) // Remove empty strings
-    .filter(lang => lang !== '[]' && !lang.startsWith('[None')) // Remove placeholders
+    // Trim whitespace AND remove leading/trailing brackets
+    .map(lang => lang.trim().replace(/^\s*[\[\]]|[\[\]]\s*$/g, '').trim())
+    .filter(Boolean) // Remove empty strings resulting from cleaning
+    // Keep filter for [None... placeholders (filtering single/double brackets is now less critical here)
+    .filter(lang => !lang.startsWith('[None')) 
     || [];
 
   return (
@@ -221,6 +226,7 @@ export default function CodeBeastGenerator() {
                     languages={languageList}
                     prompt={generatedData.prompt}
                     githubUrl={generatedData.githubUrl}
+                    // Pass the raw data
                     animalSelection={generatedData.animalSelection}
                   />
                 </div>

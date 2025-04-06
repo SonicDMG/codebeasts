@@ -15,6 +15,11 @@ interface RepositoryInfoProps {
   animalSelection?: any[][];
 }
 
+const isPlaceholder = (item: string | undefined | null): boolean => {
+  if (typeof item !== 'string') return true;
+  return item === '[]' || item.startsWith('[None');
+};
+
 export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animalSelection }: RepositoryInfoProps) => {
   console.log("RepositoryInfo Component received languages:", languages);
   return (
@@ -49,18 +54,22 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animal
         <Card className="p-4 bg-black/20 border-white/10">
           <h3 className="text-white/80 text-sm font-medium mb-2">Your CodeBeast Components</h3>
           <div className="space-y-2">
-            {animalSelection.map((entry, index) => (
-              <div key={index} className="text-white/60 text-sm">
-                {entry.map((item, itemIndex) => (
-                  <span key={itemIndex}>
-                    <span className={itemIndex === 0 ? "font-medium text-white/80" : "italic"}>
-                      {item}
+            {animalSelection
+              .filter(entry => Array.isArray(entry) && entry.length >= 1 && typeof entry[0] === 'string' && !isPlaceholder(entry[0]))
+              .map((entry, index) => {
+                const category = entry[0];
+                const trait = (entry.length > 1 && typeof entry[1] === 'string' && !isPlaceholder(entry[1])) ? entry[1] : "-";
+
+                return (
+                  <div key={index} className="text-white/60 text-sm">
+                    <span>
+                      <span className="font-medium text-white/80">{category}</span>
+                      <span className="text-white/40"> — </span>
+                      <span className="italic">{trait}</span>
                     </span>
-                    {itemIndex < entry.length - 1 && <span className="text-white/40"> — </span>}
-                  </span>
-                ))}
-              </div>
-            ))}
+                  </div>
+                );
+              })}
           </div>
         </Card>
       )}
