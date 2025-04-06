@@ -1,4 +1,4 @@
-import "@/styles/globals.css";
+import "@/app/globals.css";
 import "nprogress/nprogress.css";
 import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
