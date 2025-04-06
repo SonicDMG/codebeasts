@@ -5,7 +5,7 @@ import { Button } from "@/app/components/ui/button";
 import { Download, Share2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
-import { downloadImageClientSide } from "@/app/lib/utils";
+import { BeastActions } from "./BeastActions";
 
 interface BeastCardProps {
   beast: {
@@ -15,20 +15,7 @@ interface BeastCardProps {
   showActions?: boolean;
 }
 
-function shareOnTwitter(image_url: string, username: string) {
-  const text = `Check out my unique AI-generated CodeBeast! 🦾\n\nGenerated for @${username} using @LangFlow\n\n`;
-  const url = window.location.href;
-  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-  window.open(twitterUrl, '_blank');
-}
-
 export function BeastCard({ beast, showActions = false }: BeastCardProps) {
-  const handleDownload = () => downloadImageClientSide(beast.image_url, beast.username);
-  const handleShare = () => {
-    shareOnTwitter(beast.image_url, beast.username);
-    toast.success("Twitter share dialog opened");
-  };
-
   return (
     <Card className="overflow-hidden bg-[#0D1117] border-[#30363D]">
       <CardContent className="p-0">
@@ -68,17 +55,7 @@ export function BeastCard({ beast, showActions = false }: BeastCardProps) {
                 {beast.username}
               </a>
             </div>
-
-            <div className="flex gap-4 justify-center">
-              <Button variant="secondary" className="glass w-full sm:w-auto" onClick={handleDownload}>
-                <Download className="mr-2 h-4 w-4" />
-                Download
-              </Button>
-              <Button variant="secondary" className="glass w-full sm:w-auto" onClick={handleShare}>
-                <Share2 className="mr-2 h-4 w-4" />
-                Share
-              </Button>
-            </div>
+            <BeastActions imageUrl={beast.image_url} username={beast.username} />
           </div>
         )}
       </CardContent>

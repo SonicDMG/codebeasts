@@ -16,7 +16,8 @@ import Image from "next/image";
 import { Sparkles, Share2 } from "lucide-react";
 import { RepositoryInfo } from "./github/RepositoryInfo";
 import NProgress from 'nprogress';
-import { downloadImageClientSide } from "@/app/lib/utils";
+import { downloadImageClientSide, shareOnTwitterClientSide } from "@/app/lib/utils";
+import { BeastActions } from "./gallery/BeastActions";
 
 // GitHub username validation regex
 const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
@@ -38,15 +39,6 @@ const generatePrompt = async (username: string, emotion: string) => {
 
   return response.json();
 };
-
-// Share function updated to use index page URL with query param
-function shareOnTwitter(username: string) {
-  const text = `Check out my unique AI-generated CodeBeast! 🦾\n\nGenerated for @${username} using @LangFlow\n\n`;
-  // Construct the index page URL with the username query parameter
-  const shareUrl = `${window.location.origin}/?u=${username.toLowerCase()}`;
-  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
-  window.open(twitterUrl, '_blank');
-}
 
 // Define available emotions - Revised with more visual ones
 const EMOTIONS = ["Happy", "Angry", "Surprised", "Zen/Godlike", "Facepalm", "Exploding Head", "Crying", "Zombie", "Cyborg"];
@@ -155,18 +147,6 @@ export default function CodeBeastGenerator() {
     }
   };
 
-  const handleShare = () => {
-    if (generatedData?.githubUrl) {
-      const urlParts = generatedData.githubUrl.split('/');
-      const extractedUsername = urlParts[urlParts.length - 1] || username; 
-      
-      shareOnTwitter(extractedUsername);
-      toast.success("Twitter share dialog opened");
-    } else {
-      toast.error("Cannot share - missing required data (URL).");
-    }
-  };
-
   // Refine languageList creation to filter out specific placeholders
   const languageList = generatedData?.languages
     ?.split(",")
@@ -258,23 +238,7 @@ export default function CodeBeastGenerator() {
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full">
-                  <Button 
-                    variant="outline"
-                    onClick={handleShare}
-                    className="flex-1 bg-black/20 border-white/10 text-white hover:bg-black/30 text-md font-medium rounded-xl"
-                  >
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Share
-                  </Button>
-                   <Button 
-                    variant="outline"
-                    onClick={() => downloadImageClientSide(generatedData.imageUrl, username)}
-                    className="flex-1 bg-black/20 border-white/10 text-white hover:bg-black/30 text-md font-medium rounded-xl"
-                  >
-                    Download Beast
-                  </Button>
-                </div>
+                <BeastActions imageUrl={generatedData.imageUrl} username={username} />
               </div>
             )}
             {!generatedData && !loading && (
