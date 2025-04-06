@@ -44,16 +44,15 @@ async function getAstraClient() {
   return astraClient;
 }
 
-// Helper function to get the images collection
-export async function getImagesCollection() {
+// Collection getters
+async function getImagesCollection() {
   const client = await getAstraClient();
-  return client.collection('images');
+  return client.collection("images");
 }
 
-// Helper function to get the user_details collection
-export async function getUserDetailsCollection() {
+async function getUserDetailsCollection() {
   const client = await getAstraClient();
-  return client.collection('github_user_details');
+  return client.collection("github_user_details");
 }
 
 // Image operations
@@ -62,9 +61,9 @@ export async function getAllImages() {
     console.log("getAllImages - Fetching images collection");
     const collection = await getImagesCollection();
     
-    console.log("getAllImages - Finding all records (using find() with no arguments)");
+    console.log("getAllImages - Finding all records");
     const records = await collection.find().toArray();
-    console.log(`getAllImages - Found ${records.length} records (no-args find())`);
+    console.log(`getAllImages - Found ${records.length} records`);
     
     return records;
   } catch (error) {
@@ -189,22 +188,15 @@ export async function getUserDetails(username: string): Promise<UserDetailsRecor
           }
 
           // Clean languages and githubUrl 
-          let languageString = rawLanguages.replace(/^languages:\s*/, '').trim(); 
-          console.log(`DB Service: Initial languageString after label strip: [${languageString}]`);
-          
-          // Handle empty/None cases explicitly
-          if (languageString === '[]' || languageString.startsWith('[None') || languageString === "[['None']]") {
-            console.log(`DB Service: Detected empty/None language string.`);
-            languageString = '';
-          } else if (languageString.startsWith('[') && languageString.endsWith(']')) {
-            // If it looks like an array string, remove outer brackets and single quotes
-            console.log(`DB Service: Stripping outer brackets and single quotes.`);
-            languageString = languageString.slice(1, -1).replace(/'/g, ''); 
-          }
-          // Any other format is returned as is (or could be treated as empty too)
-
-          const cleanedLanguages = languageString; // Assign final string
-          console.log(`DB Service: Final processed languages string: [${cleanedLanguages}]`); 
+          // Revert: Just strip label, frontend handles filtering placeholders
+          const cleanedLanguages = rawLanguages.replace(/^languages:\s*/, '').trim(); 
+          // Remove the conditional check and associated logs
+          // console.log(`DB Service: Checking cleanedLanguages: [${cleanedLanguages}]`); 
+          // if (cleanedLanguages === '[]' || cleanedLanguages.startsWith('[None') || cleanedLanguages === "[['None']]") {
+          //   console.log(`DB Service: Condition met! Setting cleanedLanguages to empty string.`); 
+          //   cleanedLanguages = '';
+          // }
+          // console.log(`DB Service: Final cleaned languages string: [${cleanedLanguages}]`); 
           const cleanedGithubUrl = rawGithubUrl.replace(/^github_user_name_url:\s*/, '');
 
           const userDetails: UserDetailsRecord = {
