@@ -1,9 +1,7 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { API_BASE_URL } from '@/config/api';
-import type { CodeBeast } from '@/types/gallery';
-import { toast } from '@/hooks/use-toast';
+import type { CodeBeast } from '@/app/types/gallery';
+import { toast } from '@/app/hooks/use-toast';
 import { Sparkles } from 'lucide-react';
 
 // Duration to show the "new" status (3 minutes)
@@ -20,23 +18,17 @@ export const useGalleryData = (itemsPerPage = 20) => {
   // Track new beasts with their timestamps - using a composite key to handle multiple beasts per username
   const [newBeasts, setNewBeasts] = useState<{[key: string]: number}>({});
 
-  const fetchCodeBeasts = async (): Promise<CodeBeast[]> => {
-    const response = await fetch(`${API_BASE_URL}/api/static/temp`);
+  const fetchGallery = async (page: number, limit: number): Promise<{ data: CodeBeast[], total: number, totalPages: number }> => {
+    const response = await fetch(`/api/gallery?page=${page}&limit=${limit}`);
     if (!response.ok) {
-      throw new Error('Failed to fetch CodeBeasts');
+      throw new Error('Network response was not ok');
     }
-    
-    if (!isRefreshing) {
-      autoRefreshCountRef.current += 1;
-      console.log(`🔄 Auto-refreshing gallery data (count: ${autoRefreshCountRef.current})`);
-    }
-    
-    return await response.json();
+    return response.json();
   };
 
   const { data: allCodeBeasts = [], refetch, isLoading } = useQuery({
     queryKey: ['codebeasts', timestamp],
-    queryFn: fetchCodeBeasts,
+    queryFn: () => fetchGallery(currentPage, itemsPerPage).then(data => data.data),
     refetchInterval: 10000,
     staleTime: 0,
     gcTime: 0,

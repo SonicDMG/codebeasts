@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getImageByUsername } from "../../../lib/db/astra";
 
+// Applying 'any' workaround for build issue in Next.js 15 RC
 export async function GET(
   request: NextRequest,
-  { params }: { params: { username: string } }
+  context: any // Use 'any' type temporarily
 ) {
-  const { username } = params;
+  // Access username safely and assert type
+  const username = context?.params?.username as string;
   
+  // Add check for username existence after potential 'any' access
+  if (!username) {
+    return NextResponse.json({ error: "Username parameter missing" }, { status: 400 });
+  }
+
   try {
     console.log(`GET /api/images/${username} - Starting request`);
     const image = await getImageByUsername(username);

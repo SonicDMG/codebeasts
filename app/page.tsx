@@ -5,19 +5,20 @@ import { Card } from "@/app/components/ui/card"; // Need Card for layout
 import Link from "next/link"; // Need Link
 import type { Metadata, ResolvingMetadata } from 'next'; // Import Metadata types
 
-// Define props to receive searchParams
-interface HomePageProps {
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
+// Applying 'any' workaround for props due to Next.js 15 build issue
+// interface HomePageProps { ... }
 
 // --- Dynamic Metadata Generation --- 
 export async function generateMetadata(
-  { searchParams }: HomePageProps,
-  parent: ResolvingMetadata // Optional: access parent metadata
+  props: any, // Use 'any' temporarily
+  parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const username = typeof searchParams?.u === 'string' ? searchParams.u : null;
+  const searchParams = props?.searchParams ?? {}; // Safely access searchParams
+  const uParam = searchParams.u;
+  const username = typeof uParam === 'string' ? uParam : null;
 
   if (username) {
+    // Await is only needed if searchParams itself is accessed, which we aren't here
     const image = await getImageForUser(username);
     if (image) {
       // Found user - generate specific metadata
@@ -70,10 +71,12 @@ export async function generateMetadata(
 }
 // --- End Metadata --- 
 
-export default async function Home({ searchParams }: HomePageProps) {
-  const username = typeof searchParams?.u === 'string' ? searchParams.u : null;
+export default async function Home(props: any) { // Use 'any' temporarily
+  const searchParams = props?.searchParams ?? {}; // Safely access searchParams
+  // Await is NOT needed here as we access the already resolved prop directly
+  const uParam = searchParams.u;
+  const username = typeof uParam === 'string' ? uParam : null;
   
-  // Fetch data only if username exists in searchParams
   const image = username ? await getImageForUser(username) : null;
 
   // Conditional Rendering

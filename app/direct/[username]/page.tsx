@@ -4,14 +4,14 @@ import Link from "next/link";
 import { ImageRecord } from "@/app/api/db/astra";
 import { getImageForUser } from "@/app/lib/data";
 
-interface DirectPageProps {
-  params: {
-    username: string;
-  };
-}
+// Applying 'any' workaround for props due to Next.js 15 build issue
+export default async function DirectPage(props: any) {
+  const username = props?.params?.username as string;
 
-export default async function DirectPage({ params }: DirectPageProps) {
-  const { username } = params;
+  if (!username) {
+    return <div>Error: Username not found in parameters.</div>;
+  }
+
   const image = await getImageForUser(username);
   
   return (

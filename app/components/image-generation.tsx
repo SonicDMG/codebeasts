@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/app/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,17 +10,18 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+} from "@/app/components/ui/card";
+import { Label } from "@/app/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+} from "@/app/components/ui/select";
+import { Textarea } from "@/app/components/ui/textarea";
+import { useToast } from "@/app/components/ui/use-toast";
+import { Input } from "@/app/components/ui/input";
 
 const models = [
   { id: "5000", name: "FLUX1.1", description: "Standard quality" },

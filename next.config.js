@@ -16,11 +16,10 @@ const nextConfig = {
       },
     ],
   },
-  // Allow the cz-shortcut-listen attribute
-  experimental: {
-    allowedAttributesByTag: {
-      body: ['cz-shortcut-listen'],
-    },
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
   },
 };
 

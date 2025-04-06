@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/app/components/ui/button';
 import { Download, Share2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
