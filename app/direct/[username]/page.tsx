@@ -1,4 +1,3 @@
-import { Metadata } from "next";
 import { BeastCard } from "@/app/components/gallery/BeastCard";
 import { Card } from "@/app/components/ui/card";
 import Link from "next/link";
@@ -8,24 +7,6 @@ import { getImageForUser } from "@/app/lib/data";
 interface DirectPageProps {
   params: {
     username: string;
-  };
-}
-
-export async function generateMetadata({ params }: DirectPageProps): Promise<Metadata> {
-  const { username } = params;
-  
-  return {
-    title: `CodeBeast for ${username}`,
-    description: `View the unique AI-generated CodeBeast for GitHub user ${username}`,
-    openGraph: {
-      title: `CodeBeast for ${username}`,
-      description: `View the unique AI-generated creature for GitHub user ${username}`,
-    },
-    twitter: {
-      title: `CodeBeast for ${username}`,
-      description: `Check out this unique AI-generated GitHub profile creature!`,
-      card: 'summary_large_image',
-    },
   };
 }
 

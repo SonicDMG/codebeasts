@@ -3,11 +3,72 @@ import { getImageForUser } from "@/app/lib/data"; // Import data fetching functi
 import { BeastCard } from "@/app/components/gallery/BeastCard"; // Import BeastCard
 import { Card } from "@/app/components/ui/card"; // Need Card for layout
 import Link from "next/link"; // Need Link
+import type { Metadata, ResolvingMetadata } from 'next'; // Import Metadata types
 
 // Define props to receive searchParams
 interface HomePageProps {
   searchParams?: { [key: string]: string | string[] | undefined };
 }
+
+// --- Dynamic Metadata Generation --- 
+export async function generateMetadata(
+  { searchParams }: HomePageProps,
+  parent: ResolvingMetadata // Optional: access parent metadata
+): Promise<Metadata> {
+  const username = typeof searchParams?.u === 'string' ? searchParams.u : null;
+
+  if (username) {
+    const image = await getImageForUser(username);
+    if (image) {
+      // Found user - generate specific metadata
+      const title = `CodeBeast for @${username}`;
+      const description = `Check out this unique AI-generated creature for GitHub user ${username}!`;
+      const imageUrl = image.image_url; // Assuming image_url is the direct URL
+
+      return {
+        title: title,
+        description: description,
+        openGraph: {
+          title: title,
+          description: description,
+          images: [
+            {
+              url: imageUrl,
+              // Add width/height if known for better rendering
+              // width: 800, 
+              // height: 600,
+            },
+          ],
+          // Optional: Add site name, type etc.
+          // siteName: 'CodeBeasts',
+          // type: 'website',
+        },
+        twitter: {
+          card: "summary_large_image",
+          title: title,
+          description: description,
+          images: [imageUrl], 
+        },
+      };
+    } else {
+      // User specified but not found
+      return {
+        title: `CodeBeast Not Found for @${username}`,
+        description: `The GitHub user @${username} has not generated a CodeBeast yet.`,
+      };
+    }
+  } else {
+    // No user specified - default metadata for the main page
+    return {
+      title: "CodeBeasts - Transform Your Code Into a Beast!",
+      description: "Generate unique AI creatures based on your GitHub profile.",
+      // Add default OG/Twitter images if you have a generic one
+      // openGraph: { ... }, 
+      // twitter: { ... },
+    };
+  }
+}
+// --- End Metadata --- 
 
 export default async function Home({ searchParams }: HomePageProps) {
   const username = typeof searchParams?.u === 'string' ? searchParams.u : null;
