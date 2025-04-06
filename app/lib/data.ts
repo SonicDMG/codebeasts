@@ -32,7 +32,7 @@ export async function getImageForUser(username: string): Promise<ImageRecord | n
     console.log(`getImageForUser: Fetching image for user: ${username}`);
     console.log(`getImageForUser: Attempting to fetch URL: ${fetchUrl}`);
     
-    response = await fetch(fetchUrl, { cache: 'no-store' });
+    response = await fetch(fetchUrl);
     console.log(`getImageForUser: Fetch response status: ${response.status}`);
 
     if (!response.ok) {

@@ -1,5 +1,5 @@
 import CodeBeastGenerator from "@/app/components/code-beast-generator";
-import { getImageForUser } from "@/app/lib/data"; // Import data fetching function
+import { getImageForUser, getBaseUrl } from "@/app/lib/data"; // Import data fetching function AND getBaseUrl
 import { BeastCard } from "@/app/components/gallery/BeastCard"; // Import BeastCard
 import { Card } from "@/app/components/ui/card"; // Need Card for layout
 import Link from "next/link"; // Need Link
@@ -16,56 +16,51 @@ export async function generateMetadata(
   const searchParams = props?.searchParams ?? {}; // Safely access searchParams
   const uParam = searchParams.u;
   const username = typeof uParam === 'string' ? uParam : null;
+  const baseUrl = getBaseUrl(); // Get base URL once
+  const DEFAULT_IMAGE_URL = `${baseUrl}/images/code-beast-placeholder.png`; // Define default image URL (updated path)
 
   if (username) {
-    // Await is only needed if searchParams itself is accessed, which we aren't here
     const image = await getImageForUser(username);
     if (image) {
       // Found user - generate specific metadata
       const title = `CodeBeast for @${username}`;
       const description = `Check out this unique AI-generated creature for GitHub user ${username}!`;
-      const imageUrl = image.image_url; // Assuming image_url is the direct URL
+      const imageUrl = image.image_url;
 
       return {
+        metadataBase: new URL(baseUrl), // Important for resolving relative paths if any
         title: title,
         description: description,
         openGraph: {
           title: title,
           description: description,
-          images: [
-            {
-              url: imageUrl,
-              // Add width/height if known for better rendering
-              // width: 800, 
-              // height: 600,
-            },
-          ],
-          // Optional: Add site name, type etc.
-          // siteName: 'CodeBeasts',
-          // type: 'website',
+          images: [{ url: imageUrl }], // Use specific image
         },
         twitter: {
           card: "summary_large_image",
           title: title,
           description: description,
-          images: [imageUrl], 
+          images: [imageUrl], // Use specific image
         },
       };
     } else {
-      // User specified but not found
+      // User specified but not found - Use default image
       return {
+        metadataBase: new URL(baseUrl),
         title: `CodeBeast Not Found for @${username}`,
         description: `The GitHub user @${username} has not generated a CodeBeast yet.`,
+        openGraph: { images: [{ url: DEFAULT_IMAGE_URL }] }, // Add default OG
+        twitter: { card: "summary", images: [DEFAULT_IMAGE_URL] }, // Add default Twitter
       };
     }
   } else {
-    // No user specified - default metadata for the main page
+    // No user specified - default metadata - Use default image
     return {
+      metadataBase: new URL(baseUrl),
       title: "CodeBeasts - Transform Your Code Into a Beast!",
       description: "Generate unique AI creatures based on your GitHub profile.",
-      // Add default OG/Twitter images if you have a generic one
-      // openGraph: { ... }, 
-      // twitter: { ... },
+      openGraph: { images: [{ url: DEFAULT_IMAGE_URL }] }, // Add default OG
+      twitter: { card: "summary", images: [DEFAULT_IMAGE_URL] }, // Add default Twitter
     };
   }
 }
