@@ -1,31 +1,36 @@
-
 services:
-  # Flask API service
-  - type: web
-    name: codebeasts-api
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python api/main.py
+  - type: web # Specifies a web service
+    name: codebeasts # Service name
+    env: node # Specifies the Node.js environment
+    plan: free # Or your desired plan (e.g., 'starter')
+    buildCommand: "npm install --force && npm run build" # Install deps (using --force if needed for peer deps) and build
+    startCommand: "npm start" # Command to run the production server
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: STABILITY_API_KEY
-        sync: false
-      - key: PORT
-        value: 10000
-
-  # Frontend static site
-  - type: web
-    name: codebeasts-web
-    env: static
-    buildCommand: npm install && npm run build
-    staticPublishPath: ./dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
-      - key: VITE_API_URL
-        sync: false
+      # General Node/Next.js env vars
+      - key: NODE_ENV
+        value: production
+      # Add ASTRA DB secrets from Render Secret Files or Env Groups
+      - key: ASTRA_DB_ENDPOINT
+        fromSecretFile: /etc/secrets/astra-endpoint # Example path if using secrets file
+        # OR from an Env Group:
+        # fromGroup: astra-secrets
+      - key: ASTRA_DB_APPLICATION_TOKEN
+        fromSecretFile: /etc/secrets/astra-token # Example path if using secrets file
+        # OR from an Env Group:
+        # fromGroup: astra-secrets
+      # Add Langflow secrets/config
+      - key: LANGFLOW_BASE_URL
+        value: https://langflow-jfjl.onrender.com # Or from an Env Var/Group
+      - key: LANGFLOW_FLOW_ID
+        value: generate_codebeast # Or from an Env Var/Group
+      # Add EverArt API Key
+      - key: EVERART_API_KEY
+        fromSecretFile: /etc/secrets/everart-key # Example path if using secrets file
+        # OR from an Env Group:
+        # fromGroup: api-keys
+      # Add Client-side variables (Must start with NEXT_PUBLIC_)
+      - key: NEXT_PUBLIC_LANGFLOW_BASE_URL
+        value: https://langflow-jfjl.onrender.com # Match server-side value
+      - key: NEXT_PUBLIC_LANGFLOW_FLOW_ID
+        value: generate_codebeast # Match server-side value
+      # --- Add any other necessary environment variables below ---
