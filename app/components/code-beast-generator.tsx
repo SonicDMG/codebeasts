@@ -17,6 +17,9 @@ import { Sparkles, Share2 } from "lucide-react";
 import { RepositoryInfo } from "./github/RepositoryInfo";
 import NProgress from 'nprogress';
 
+// GitHub username validation regex
+const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
+
 // Function to generate prompt using our API
 const generatePrompt = async (username: string, emotion: string) => {
   const response = await fetch('/api/generate/prompt', {
@@ -49,6 +52,7 @@ const EMOTIONS = ["Happy", "Angry", "Surprised", "Zen/Godlike", "Facepalm", "Exp
 
 export default function CodeBeastGenerator() {
   const [username, setUsername] = useState("");
+  const [isUsernameValid, setIsUsernameValid] = useState(true); // State for input validity
   const [selectedEmotion, setSelectedEmotion] = useState<string>(EMOTIONS[0]); // Add state for emotion, default to first
   const [loading, setLoading] = useState(false);
   const [generatedData, setGeneratedData] = useState<{
@@ -64,29 +68,50 @@ export default function CodeBeastGenerator() {
   // Add state for toastId
   const [toastId, setToastId] = useState<string | number | undefined>(undefined);
 
+  // Updated onChange handler for username input
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setUsername(newValue);
+    // Validate on change, allow empty string
+    if (newValue.trim() === "") {
+      setIsUsernameValid(true); 
+    } else {
+      setIsUsernameValid(GITHUB_USERNAME_REGEX.test(newValue.trim()));
+    }
+  };
+
   const handleGenerate = async (e?: React.FormEvent | React.MouseEvent) => {
     e?.preventDefault();
+
+    const trimmedUsername = username.trim(); // Trim once
+
+    // --- Pre-submit checks (redundant but safe) --- 
+    if (!trimmedUsername) {
+      toast.error("Please enter a GitHub username");
+      setIsUsernameValid(false); // Also set state if submitted empty
+      return;
+    }
+    if (!GITHUB_USERNAME_REGEX.test(trimmedUsername)) {
+      toast.error("Invalid GitHub username format.");
+      setIsUsernameValid(false); // Ensure state reflects error
+      return;
+    }
+    // --- End pre-submit checks ---
+
+    // Ensure validity state is true before proceeding (belt-and-suspenders)
+    if (!isUsernameValid) return; 
+
     setLoading(true);
     setGeneratedData(null);
-    NProgress.configure({ showSpinner: false }); // Disable the spinner
+    NProgress.configure({ showSpinner: false });
     NProgress.start();
-    // Use toast.message for title/description style
     const currentToastId = toast.message("Starting Generation...", { 
       description: "Please wait while we fetch data..."
     }); 
-    setToastId(currentToastId); // Store toast ID
+    setToastId(currentToastId); 
 
     try {
-      if (!username.trim()) {
-        toast.error("Please enter a GitHub username"); // Keep error simple
-        NProgress.done();
-        toast.dismiss(currentToastId);
-        setLoading(false);
-        return;
-      }
-
-      // Call the API, now including the emotion
-      const data = await generatePrompt(username, selectedEmotion); // Pass selectedEmotion
+      const data = await generatePrompt(trimmedUsername, selectedEmotion);
       
       // Step 1: Update toast based on source
       if (data.source === 'cache') {
@@ -119,15 +144,10 @@ export default function CodeBeastGenerator() {
       });
 
     } catch (error) {
-      // Use title/description for error too
       toast.message("Generation Failed", { 
         description: error instanceof Error ? error.message : "An unknown error occurred",
         id: currentToastId,
-        // Use explicit type for sonner error styling if default isn't dark
-        // type: 'error' // Uncomment if needed
       });
-      // Alternatively, use toast.error if the default error style is preferred
-      // toast.error(error instanceof Error ? error.message : "Failed to generate CodeBeast", { id: currentToastId });
     } finally {
       NProgress.done();
       setLoading(false);
@@ -160,15 +180,28 @@ export default function CodeBeastGenerator() {
         <CardContent className="p-6">
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 space-y-4">
-              <form className="space-y-4" onSubmit={handleGenerate}>
-                <Input
-                  type="text"
-                  placeholder="Enter GitHub handle to generate your beast..."
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={loading}
-                  className="w-full bg-black/20 border-white/10 text-sm py-3 px-4 rounded-xl placeholder:text-gray-500"
-                />
+              <form className="space-y-1" onSubmit={handleGenerate}> {/* Reduced space for error message */} 
+                <div> {/* Wrap input and error message */} 
+                  <Input
+                    type="text"
+                    placeholder="Enter GitHub handle to generate your beast..."
+                    value={username}
+                    onChange={handleUsernameChange} // Use updated handler
+                    disabled={loading}
+                    // Apply conditional styling for invalid input
+                    className={`w-full bg-black/20 border-white/10 text-sm py-3 px-4 rounded-xl placeholder:text-gray-500 \
+                      ${!isUsernameValid && username.trim() !== '' ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-purple-500'}`}
+                    aria-invalid={!isUsernameValid && username.trim() !== ''}
+                    aria-describedby={!isUsernameValid && username.trim() !== '' ? "username-error" : undefined}
+                  />
+                  {/* Conditional error message */} 
+                  {!isUsernameValid && username.trim() !== '' && (
+                    <p id="username-error" className="text-xs text-red-500 mt-1">
+                      Invalid format (1-39 chars, alphanumeric/hyphen, no leading/trailing/double hyphens).
+                    </p>
+                  )}
+                </div>
+
                 <Select 
                   value={selectedEmotion} 
                   onValueChange={setSelectedEmotion}
@@ -191,8 +224,9 @@ export default function CodeBeastGenerator() {
                 </Select>
                 <Button 
                   type="submit"
-                  disabled={loading}
-                  className="w-full bg-purple-600 hover:bg-purple-500 text-white py-3 text-base font-medium rounded-xl gap-2"
+                  // Disable button if loading OR username is invalid (and not empty)
+                  disabled={loading || (!isUsernameValid && username.trim() !== '') || !username.trim()}
+                  className="w-full bg-purple-600 hover:bg-purple-500 text-white py-3 text-base font-medium rounded-xl gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Sparkles className="w-4 h-4" />
                   {loading ? "Generating..." : "Generate"}

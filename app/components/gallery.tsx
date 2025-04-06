@@ -73,7 +73,7 @@ export function Gallery() {
   }
 
   const handleCardClick = (username: string) => {
-    router.push(`/direct/${username}`);
+    router.push(`/?u=${username}`);
   };
 
   return (
