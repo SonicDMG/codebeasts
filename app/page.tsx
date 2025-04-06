@@ -17,7 +17,7 @@ export async function generateMetadata(
   const uParam = searchParams.u;
   const username = typeof uParam === 'string' ? uParam : null;
   const baseUrl = getBaseUrl(); // Get base URL once
-  const DEFAULT_IMAGE_URL = `${baseUrl}/images/code-beast-placeholder.png`; // Define default image URL (updated path)
+  const DEFAULT_IMAGE_URL = `${baseUrl}/images/codebeast-placeholder.png`; // Corrected filename
 
   if (username) {
     const image = await getImageForUser(username);
