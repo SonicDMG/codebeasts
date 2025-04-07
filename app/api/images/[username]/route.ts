@@ -6,6 +6,9 @@ export async function GET(
   request: NextRequest,
   context: any // Use 'any' type temporarily
 ) {
+  // Ensure params are resolved before accessing
+  await context?.params;
+
   // Access username safely and assert type
   const username = context?.params?.username as string;
   
