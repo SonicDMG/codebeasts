@@ -118,4 +118,20 @@
   box-shadow: 0 0 10px hsl(var(--primary)), 0 0 5px hsl(var(--primary));
   opacity: 1.0;
   transform: rotate(3deg) translate(0px, -4px);
-} 
+}
+
+/* Add animation keyframes and class */
+@keyframes subtle-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px); /* Increased float height significantly */
+  }
+}
+
+.animate-subtle-float {
+  animation: subtle-float 6s ease-in-out infinite; /* Adjust duration (6s) and timing */
+}
+
+/* Existing global styles (if any) below */ 

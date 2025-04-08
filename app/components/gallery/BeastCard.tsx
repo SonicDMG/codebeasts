@@ -19,7 +19,7 @@ export function BeastCard({ beast, showActions = false }: BeastCardProps) {
   return (
     <Card className="overflow-hidden bg-[#0D1117] border-[#30363D]">
       <CardContent className="p-0">
-        <div className="aspect-square relative">
+        <div className="aspect-square relative animate-subtle-float">
           <Image
             src={beast.image_url}
             alt={`CodeBeast for ${beast.username}`}
