@@ -31,7 +31,7 @@ CodeBeasts is a full-stack application built with modern technologies:
 
 ## Live Demo
 
-Visit <a href="https://codebeasts-nextjs.onrender.com/" target="_blank">CodeBeasts</a> to try it out!
+Visit <a href="https://codebeasts.onrender.com/" target="_blank">CodeBeasts</a> to try it out!
 
 ## Langflow Workflow
 
