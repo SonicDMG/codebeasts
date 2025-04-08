@@ -1,17 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Add the GITHUB_USERNAME_REGEX
+const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
+// Define expected image host prefix
+const ALLOWED_IMAGE_PREFIX = 'https://storage.googleapis.com/'; // Adjust if EverArt URL changes
+
 export async function GET(request: NextRequest) {
+  await request.nextUrl.searchParams;
   const searchParams = request.nextUrl.searchParams;
   const imageUrl = searchParams.get('url');
-  const username = searchParams.get('username'); // Get username for filename
+  const username = searchParams.get('username'); 
 
-  if (!imageUrl) {
-    return new NextResponse('Missing image URL', { status: 400 });
+  // 1. Validate imageUrl
+  if (!imageUrl || typeof imageUrl !== 'string' || !imageUrl.startsWith(ALLOWED_IMAGE_PREFIX)) {
+    console.error("Invalid or missing image URL:", imageUrl);
+    return new NextResponse('Invalid or missing image URL parameter', { status: 400 });
   }
 
-  if (!username) {
-    return new NextResponse('Missing username for filename', { status: 400 });
+  // 2. Validate username format
+  if (!username || typeof username !== 'string' || !GITHUB_USERNAME_REGEX.test(username)) {
+    console.error("Invalid or missing username format:", username);
+    return new NextResponse('Invalid or missing username parameter', { status: 400 });
   }
+
+  // --- Inputs validated ---
 
   try {
     // Fetch the image server-side (bypasses browser CORS)
@@ -29,6 +41,7 @@ export async function GET(request: NextRequest) {
 
     // Determine content type (default to png if not available)
     const contentType = imageResponse.headers.get('content-type') || 'image/png';
+    // Construct filename safely using validated username
     const filename = `codebeast-${username}.png`;
 
     // Create a new response with the image data and correct headers
