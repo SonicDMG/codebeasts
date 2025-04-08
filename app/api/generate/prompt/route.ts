@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import EverArt from 'everart';
 import { getUserDetails, upsertImage } from "../../../lib/db/astra";
 
+// Add the GITHUB_USERNAME_REGEX (from code-beast-generator.tsx)
+const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
+
+// Define the allowed emotions (same as client-side)
+const ALLOWED_EMOTIONS = [
+  "Zen/Godlike", "Happy", "Angry", "Surprised", "Facepalm",
+  "Exploding Head", "Crying", "Zombie", "Ghibli", "Caped Crusader"
+];
+
 // Define types from the EverArt SDK
 type Generation = {
   id: string;
@@ -62,40 +71,42 @@ function cleanGithubUrl(rawUrl: string | undefined, username: string): string {
 }
 
 export async function POST(request: Request) {
-  console.log("API Route: POST function entered."); // ADD VERY EARLY LOG
+  console.log("API Route: POST function entered."); 
   try {
     const body = await request.json();
     console.log("API Route: Received request body:", body);
     
     const { username, emotion } = body;
-    const normalizedUsername = username.toLowerCase(); // Ensure we use normalized consistently
 
-    if (!username) {
-      console.error("Username is missing from request body");
+    // 1. Validate Username Presence and Format
+    if (!username || typeof username !== 'string' || !GITHUB_USERNAME_REGEX.test(username.trim())) {
+      console.error("Invalid or missing username:", username);
       return NextResponse.json(
-        { error: "Username is required" },
+        { error: "Valid GitHub username is required" },
         { status: 400 }
       );
     }
 
-    // Add basic validation for emotion
-    if (!emotion) {
-        console.error("Emotion is missing from request body");
-        return NextResponse.json(
-            { error: "Emotion is required" },
-            { status: 400 }
-        );
+    // 2. Validate Emotion Presence and Value
+    if (!emotion || typeof emotion !== 'string' || !ALLOWED_EMOTIONS.includes(emotion)) {
+      console.error("Invalid or missing emotion:", emotion);
+      return NextResponse.json(
+        { error: `Invalid emotion selected. Must be one of: ${ALLOWED_EMOTIONS.join(', ')}` },
+        { status: 400 }
+      );
     }
 
+    const normalizedUsername = username.trim().toLowerCase(); // Use trimmed & validated username
+
     // First, check if we have existing user details
-    const existingDetails = await getUserDetails(username);
+    const existingDetails = await getUserDetails(normalizedUsername);
     if (existingDetails) {
       console.log("API Route: Using existing user details from DB");
       console.log("API Route: repoCount from DB:", existingDetails.repoCount); // ADD Log
       
       // Clean languages from DB details
       const cleanedLanguages = cleanLanguagesString(existingDetails.languages);
-      const cleanedGithubUrl = cleanGithubUrl(existingDetails.githubUrl, username);
+      const cleanedGithubUrl = cleanGithubUrl(existingDetails.githubUrl, normalizedUsername);
       
       const dataToLog = {
         ...existingDetails,
@@ -260,7 +271,7 @@ export async function POST(request: Request) {
 
       // Clean languages from Langflow details
       const cleanedLanguages = cleanLanguagesString(rawLanguages);
-      const cleanedGithubUrl = cleanGithubUrl(rawGithubUrl, username);
+      const cleanedGithubUrl = cleanGithubUrl(rawGithubUrl, normalizedUsername);
 
       // --- Log new data --- 
       const newDataToLog = {
