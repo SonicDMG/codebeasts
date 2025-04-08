@@ -27,9 +27,15 @@ export function downloadImageClientSide(imageUrl: string, username: string) {
 export function shareOnTwitterClientSide(username: string) {
   if (typeof window === "undefined") return;
 
-  const text = `Check out my unique AI-generated CodeBeast! 🦾\n\nGenerated for @${username} using @LangFlow and @GitHub\n\n`;
-  // Construct the index page URL with the username query parameter
-  const shareUrl = `${window.location.origin}/?u=${username.toLowerCase()}`;
-  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
+  // Get the base origin URL
+  const originUrl = window.location.origin;
+  // Construct the specific beast URL
+  const beastUrl = `${originUrl}/?u=${username.toLowerCase()}`;
+  
+  // Option D Text (Hinting at Emotion Choices)
+  const text = `This AI beast was generated from @${username}'s GitHub profile! 🐲 Generate yours with its own personality (like Zen, Zombie, or Ghibli style!). What will your code conjure?\n\nConjure Yours: ${originUrl}\n\n#CodeBeasts #AI #AIart #GenerativeArt #GitHub @langflow_ai`;
+
+  // Explicitly set the URL for Twitter card preview (this will be displayed as the card)
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(beastUrl)}`; 
   window.open(twitterUrl, '_blank');
 }
