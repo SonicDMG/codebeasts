@@ -145,18 +145,25 @@
   animation: vibrate 0.1s linear infinite;
 }
 
-/* Pulse Brightness Animation */
+/* Pulse Brightness & Glow Animation */
 @keyframes pulse-brightness {
-  0%   { filter: brightness(0.7); } /* Shifted down more */
-  50%  { filter: brightness(1.0); } /* Shifted down more (0.7 + 0.3) */
-  100% { filter: brightness(0.7); } /* Shifted down more */
+  0%   { filter: brightness(1.0) drop-shadow(0 0 0px transparent); } 
+  50%  { filter: brightness(1.3) drop-shadow(0 0 5px #0af); } 
+  100% { filter: brightness(1.0) drop-shadow(0 0 0px transparent); } 
 }
 
-/* Auto Tilt Animation */
+/* Pulse Depth (Zoom + TranslateZ) Animation */
+@keyframes pulse-depth {
+  0%   { transform: scale(1.1) translateZ(0px); }
+  50%  { transform: scale(1.1125) translateZ(8px); } /* Subtle zoom & forward */
+  100% { transform: scale(1.1) translateZ(0px); }
+}
+
+/* Auto Tilt Animation - ONLY ROTATION */
 @keyframes auto-tilt {
-  0%   { transform: perspective(1000px) rotateY(-0.75deg) scale(1.1); }
-  50%  { transform: perspective(1000px) rotateY(0.75deg) scale(1.1); }
-  100% { transform: perspective(1000px) rotateY(-0.75deg) scale(1.1); }
+  0%   { transform: perspective(1000px) rotateY(-0.75deg) scale(1.1); } /* Back to subtle tilt */
+  50%  { transform: perspective(1000px) rotateY(0.75deg) scale(1.1); }  /* Back to subtle tilt */
+  100% { transform: perspective(1000px) rotateY(-0.75deg) scale(1.1); } /* Back to subtle tilt */
 }
 
 /* Ensure old shimmer-hue is removed or commented out */
@@ -167,5 +174,33 @@
   100% { filter: hue-rotate(0deg); }
 }
 */
+
+/* Scan Line Animation */
+@keyframes scan-lines {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 100%; } /* Adjust % for speed/direction */
+}
+
+.scan-line-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    transparent,
+    transparent 2px,
+    rgba(0, 170, 255, 0.1) 3px, /* Match glow color (#0af), adjust opacity */
+    rgba(0, 170, 255, 0.1) 4px
+  );
+  background-size: 100% 6px; /* Adjust line thickness/spacing */
+  opacity: 0;
+  animation: scan-lines 15s linear infinite; /* Slow scroll */
+  transition: opacity 0.3s ease-in-out;
+  z-index: 1; /* Ensure it's above the images */
+}
+
+/* Card Hover Shadow */
+.beast-card-root:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+}
 
 /* Existing global styles (if any) below */ 

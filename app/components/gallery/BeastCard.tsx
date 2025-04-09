@@ -20,42 +20,59 @@ export function BeastCard({ beast, showActions = false }: BeastCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const topImageRef = useRef<HTMLImageElement>(null);
+  const scanLineRef = useRef<HTMLDivElement>(null);
 
-  // Combined handlers for auto-tilt parallax and masked brightness pulse
+  // Combined handlers for tilt and brightness/glow pulse (NO translateZ)
   const handleMouseEnter = () => {
     if (topImageRef.current) {
       topImageRef.current.style.opacity = '1';
-      topImageRef.current.style.animation = 'pulse-brightness 2s ease-in-out infinite';
-      // Also apply auto-tilt animation to top image
-      topImageRef.current.style.animation += ', auto-tilt 2s ease-in-out infinite';
+      // Apply brightness/glow and tilt animations
+      topImageRef.current.style.animation = 
+        `pulse-brightness 2s ease-in-out infinite, 
+         auto-tilt 2s ease-in-out infinite`;
+      // Set base transform for animation start
+      topImageRef.current.style.transform = 'perspective(1000px) rotateY(0deg) scale(1.1)'; 
     }
     if (imageRef.current) {
-      // Apply auto-tilt animation to bottom image
+      // Apply only auto-tilt to bottom image
       imageRef.current.style.animation = 'auto-tilt 2s ease-in-out infinite';
+      // Set base transform for animation start
+      imageRef.current.style.transform = 'perspective(1000px) rotateY(0deg) scale(1.1)'; 
+    }
+    // Show scan lines
+    if (scanLineRef.current) {
+      scanLineRef.current.style.opacity = '1';
     }
   };
 
   const handleMouseLeave = () => {
-    const resetTransform = 'scale(1.1)'; // Base scale, no perspective/rotation needed
+    const resetTransform = 'perspective(1000px) rotateY(0deg) scale(1.1)'; // Reset rotation and scale
+    const resetTransition = 'transform 0.3s ease-out, opacity 0.3s ease-in-out, filter 0.3s ease-out';
 
-    // Reset pulse and tilt on top image
+    // Reset effects on top image
     if (topImageRef.current) {
       topImageRef.current.style.opacity = '0';
       topImageRef.current.style.animation = 'none'; 
-      topImageRef.current.style.filter = 'brightness(1)';
+      topImageRef.current.style.filter = 'brightness(1.0) drop-shadow(0 0 0px transparent)';
       topImageRef.current.style.transform = resetTransform; 
-      topImageRef.current.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-in-out'; // Add transform transition
+      topImageRef.current.style.transition = resetTransition;
     }
-    // Reset tilt on bottom image
+    // Reset effects on bottom image
     if (imageRef.current) {
       imageRef.current.style.animation = 'none'; 
       imageRef.current.style.transform = resetTransform;
-      imageRef.current.style.transition = 'transform 0.3s ease-out'; // Add transform transition
+      imageRef.current.style.transition = 'transform 0.3s ease-out'; 
+    }
+    // Hide scan lines
+    if (scanLineRef.current) {
+      scanLineRef.current.style.opacity = '0';
     }
   };
 
   return (
-    <Card className="overflow-hidden bg-[#0D1117] border-[#30363D]">
+    <Card className="beast-card-root overflow-hidden bg-[#0D1117] border-[#30363D]"
+          style={{ transition: 'box-shadow 0.3s ease-in-out' }}
+    >
       <CardContent
         ref={containerRef}
         className="p-0"
@@ -71,7 +88,7 @@ export function BeastCard({ beast, showActions = false }: BeastCardProps) {
             className="object-cover"
             style={{ 
               pointerEvents: 'none', 
-              transform: 'scale(1.1)' // Initial state: scaled only
+              transform: 'perspective(1000px) rotateY(0deg) scale(1.1)' // Full initial state
             }} 
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority
@@ -86,16 +103,17 @@ export function BeastCard({ beast, showActions = false }: BeastCardProps) {
               position: 'absolute', 
               inset: 0,
               pointerEvents: 'none', 
-              transform: 'scale(1.1)', // Initial state: scaled only
+              transform: 'perspective(1000px) rotateY(0deg) scale(1.1)', // Full initial state
               opacity: 0,
-              maskImage: 'radial-gradient(ellipse 50% 60% at center, black 40%, transparent 70%)',
-              WebkitMaskImage: 'radial-gradient(ellipse 50% 60% at center, black 40%, transparent 70%)',
-              filter: 'brightness(1)',
-              transition: 'opacity 0.3s ease-in-out' // Keep opacity transition
+              maskImage: 'radial-gradient(ellipse 50% 60% at center, black 20%, transparent 50%)',
+              WebkitMaskImage: 'radial-gradient(ellipse 50% 60% at center, black 20%, transparent 50%)',
+              filter: 'brightness(1.0) drop-shadow(0 0 0px transparent)',
+              transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-out, filter 0.3s ease-out' // Keep transitions
             }} 
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             aria-hidden="true"
           />
+          <div ref={scanLineRef} className="scan-line-overlay" />
           <div 
             className="absolute bottom-4 right-4 text-white text-sm font-semibold"
             style={{ 
