@@ -7,7 +7,7 @@ const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,3
 
 // Define the allowed emotions (same as client-side)
 const ALLOWED_EMOTIONS = [
-  "Zen/Godlike", "Happy", "Angry", "Surprised", "Facepalm",
+  "Zen/Godlike", "Ecstatic", "Angry", "Surprised", "Legendary",
   "Exploding Head", "Crying", "Zombie", "Ghibli", "Caped Crusader"
 ];
 
