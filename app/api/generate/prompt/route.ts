@@ -30,13 +30,9 @@ if (!everartApiKey) {
 const everart = new EverArt(everartApiKey);
 
 // Style prefix for consistent image generation
-// const PROMPT_PREFIX = "Create a cute, retro-style creature in authentic low-resolution pixel art, " +
-// "reminiscent of classic SNES RPGs. The character should have large, sparkly eyes, chunky pixel shading, " +
-// "and deliberately limited color palette. The overall style should embrace the constraints of 16-bit era graphics with visible, " +
-// "chunky pixels and that nostalgic game aesthetic.";
-
 const PROMPT_PREFIX = "Kawaii adorable chimera creature, ultra low-resolution pixel 16-bit pixel art style. " +
   "Extremely pixelated NES/SNES aesthetic, chunky dithering patterns, and high contrast. " +
+  "Strong directional lighting from the upper left, casting distinct pixelated shadows on the right side. " +
   "Rainbow gradient background.";
 
 // Local fallback image that doesn't depend on external services
