@@ -16,8 +16,8 @@ import Image from "next/image";
 import { Sparkles, Share2 } from "lucide-react";
 import { RepositoryInfo } from "./github/RepositoryInfo";
 import NProgress from 'nprogress';
-import { downloadImageClientSide, shareOnTwitterClientSide } from "@/app/lib/utils";
 import { BeastActions } from "./gallery/BeastActions";
+import { GeneratedImage } from "./github/GeneratedImage";
 
 // GitHub username validation regex
 const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
@@ -235,16 +235,10 @@ export default function CodeBeastGenerator() {
 
             {generatedData?.imageUrl && (
               <div className="flex-1 flex flex-col items-center justify-center animate-fade-in">
-                <div className="relative w-full aspect-square rounded-xl overflow-hidden border border-white/10">
-                  <Image
-                    src={generatedData.imageUrl}
-                    alt="Generated CodeBeast"
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
-                <BeastActions imageUrl={generatedData.imageUrl} username={username} />
+                <GeneratedImage 
+                  imageUrl={generatedData.imageUrl} 
+                  handle={username}
+                />
               </div>
             )}
             {!generatedData && !loading && (

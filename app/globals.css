@@ -134,4 +134,38 @@
   animation: subtle-float 6s ease-in-out infinite; /* Adjust duration (6s) and timing */
 }
 
+/* Vibration Animation */
+@keyframes vibrate {
+  0% { transform: perspective(1000px) rotateY(-1deg); }
+  50% { transform: perspective(1000px) rotateY(1deg); }
+  100% { transform: perspective(1000px) rotateY(-1deg); }
+}
+
+.animate-vibrate {
+  animation: vibrate 0.1s linear infinite;
+}
+
+/* Pulse Brightness Animation */
+@keyframes pulse-brightness {
+  0%   { filter: brightness(0.7); } /* Shifted down more */
+  50%  { filter: brightness(1.0); } /* Shifted down more (0.7 + 0.3) */
+  100% { filter: brightness(0.7); } /* Shifted down more */
+}
+
+/* Auto Tilt Animation */
+@keyframes auto-tilt {
+  0%   { transform: perspective(1000px) rotateY(-0.75deg) scale(1.1); }
+  50%  { transform: perspective(1000px) rotateY(0.75deg) scale(1.1); }
+  100% { transform: perspective(1000px) rotateY(-0.75deg) scale(1.1); }
+}
+
+/* Ensure old shimmer-hue is removed or commented out */
+/* 
+@keyframes shimmer-hue {
+  0% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(45deg); } 
+  100% { filter: hue-rotate(0deg); }
+}
+*/
+
 /* Existing global styles (if any) below */ 
