@@ -30,7 +30,7 @@ if (!everartApiKey) {
 const everart = new EverArt(everartApiKey);
 
 // Style prefix for consistent image generation
-const PROMPT_PREFIX = "Kawaii adorable chimera creature, ultra low-resolution pixel 16-bit pixel art style. " +
+const PROMPT_PREFIX = "Kawaii bizarre chimera hybrid creature, ultra low-resolution pixel 16-bit pixel art style. " +
   "Extremely pixelated NES/SNES aesthetic, chunky dithering patterns, and high contrast. " +
   "Strong directional lighting from the upper left, casting distinct pixelated shadows on the right side. " +
   "Rainbow gradient background.";
