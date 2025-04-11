@@ -41,7 +41,7 @@ const generatePrompt = async (username: string, emotion: string) => {
 };
 
 // Define available emotions - Revised with more visual ones
-const EMOTIONS = ["Zen/Godlike", "Ecstatic", "Angry", "Surprised", "Legendary", "Exploding Head", "Crying", "Zombie", "Ghibli Scene in rolling meadows", "Caped Crusader"];
+const EMOTIONS = ["Action Figure", "Zen/Godlike", "Ecstatic", "Angry", "Surprised", "Legendary", "Exploding Head", "Crying", "Zombie", "Ghibli Scene in rolling meadows", "Caped Crusader"];
 
 export default function CodeBeastGenerator() {
   const [username, setUsername] = useState("");

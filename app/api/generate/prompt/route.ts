@@ -8,7 +8,8 @@ const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,3
 // Define the allowed emotions (same as client-side)
 const ALLOWED_EMOTIONS = [
   "Zen/Godlike", "Ecstatic", "Angry", "Surprised", "Legendary",
-  "Exploding Head", "Crying", "Zombie", "Ghibli Scene in rolling meadows", "Caped Crusader"
+  "Exploding Head", "Crying", "Zombie", "Ghibli Scene in rolling meadows", "Caped Crusader",
+  "Action Figure"
 ];
 
 // Define types from the EverArt SDK
@@ -37,6 +38,32 @@ const PROMPT_PREFIX = "Kawaii bizarre chimera hybrid creature, ultra low-resolut
 
 // Local fallback image that doesn't depend on external services
 const FALLBACK_IMAGE_URL = "/images/codebeast-placeholder.png";
+
+// New prompt template for Action Figure
+const ACTION_FIGURE_PROMPT_TEMPLATE = "Close-up product shot on white background: detailed toy blister pack with [character description] action figure. Red header band reads '[Name] the [Title]' in bold white text. Includes 'Ages [X]+' label, accessories in separate compartments ([key items]). Professional retail packaging with clear plastic bubble, detailed labeling, and product information. Sharp focus on packaging details";
+
+// Helper function to build the Action Figure prompt
+function buildActionFigurePrompt(
+  username: string,
+  basePrompt: string,
+  animalSelection: string | undefined,
+  languages: string
+): string {
+  const name = username.charAt(0).toUpperCase() + username.slice(1); // Capitalize username
+  const title = animalSelection || "Code Beast"; // Use animal selection or fallback
+  const characterDescription = basePrompt; // Use the generated creature prompt
+  // Extract first 2-3 languages as accessories
+  const languageList = languages.split(',').map(l => l.trim()).filter(l => l);
+  const keyItems = languageList.slice(0, 3).join(', ') || 'Code Snippets'; // Use languages or fallback
+  const ages = "All"; // Static value as requested
+
+  return ACTION_FIGURE_PROMPT_TEMPLATE
+    .replace('[character description]', characterDescription)
+    .replace('[Name]', name)
+    .replace('[Title]', title)
+    .replace('[X]', ages)
+    .replace('[key items]', keyItems);
+}
 
 // Helper function to clean the language string
 function cleanLanguagesString(rawLangString: string | undefined): string {
@@ -115,9 +142,24 @@ export async function POST(request: Request) {
 
       // Generate new image using existing prompt AND new emotion
       try {
-        // Prepend emotion to the full prompt
-        const fullPrompt = `A ${emotion} ${PROMPT_PREFIX}${existingDetails.prompt}`;
-        console.log("Full prompt for existing user (with emotion):", fullPrompt);
+        // Prepend emotion to the full prompt OR use custom Action Figure prompt
+        let fullPrompt: string;
+        if (emotion === "Action Figure") {
+          console.log("Building Action Figure prompt (cached path).");
+          // Safely handle potential non-string type for animalSelection
+          const animalForPrompt = typeof existingDetails.animalSelection === 'string'
+                                     ? existingDetails.animalSelection
+                                     : undefined;
+          fullPrompt = buildActionFigurePrompt(
+            normalizedUsername,
+            existingDetails.prompt,
+            animalForPrompt, // Pass the validated/coerced value
+            cleanedLanguages
+          );
+        } else {
+          fullPrompt = `A ${emotion} ${PROMPT_PREFIX}${existingDetails.prompt}`;
+        }
+        console.log("Full prompt for existing user:", fullPrompt);
         
         const generations = await everart.v1.generations.create(
           '5000', // Model ID for FLUX1.1
@@ -282,9 +324,20 @@ export async function POST(request: Request) {
 
       // Generate image using EverArt SDK, including emotion
       try {
-        // Prepend emotion to the full prompt
-        const fullPrompt = `A ${emotion} ${PROMPT_PREFIX}${newDataToLog.prompt}`;
-        console.log("Full prompt for new user (with emotion):", fullPrompt);
+        // Prepend emotion to the full prompt OR use custom Action Figure prompt
+        let fullPrompt: string;
+        if (emotion === "Action Figure") {
+          console.log("Building Action Figure prompt (new path).");
+          fullPrompt = buildActionFigurePrompt(
+            normalizedUsername,
+            newDataToLog.prompt,
+            newDataToLog.animalSelection, // Will be undefined here
+            cleanedLanguages
+          );
+        } else {
+          fullPrompt = `A ${emotion} ${PROMPT_PREFIX}${newDataToLog.prompt}`;
+        }
+        console.log("Full prompt for new user:", fullPrompt);
 
         const generations = await everart.v1.generations.create(
           '5000',
