@@ -325,12 +325,19 @@ export async function POST(request: Request) {
     // Get prompt details (needed for both paths to build the final prompt)
     promptDetails = await getUserPromptDetails(normalizedUsername);
 
-    // Build the final prompt based on emotion
+    // Build the final prompt (based on emotion)
     if (emotion === "Action Figure") {
         finalPrompt = buildActionFigurePrompt(normalizedUsername, promptDetails.basePrompt, promptDetails.animalSelection, promptDetails.cleanedLanguages);
     } else {
         finalPrompt = `A ${emotion} ${PROMPT_PREFIX}${promptDetails.basePrompt}`;
     }
+    
+    // Add specific instruction for img2img feature transfer
+    if (isImg2ImgRequest) {
+        // Revised instruction focusing on personal features and ignoring structure
+        finalPrompt += " Transfer specific personal appearance features (like hair color, eye color, skin tone, freckles, clothing color/style, glasses, hats) from the person in the input image onto the generated creature. Maintain the creature's form and pose based on the initial prompt description, not the input image's structure.";
+    }
+
     console.log("API Route: Final prompt for EverArt:", finalPrompt);
 
     if (isImg2ImgRequest && processedImageDataUri) {
