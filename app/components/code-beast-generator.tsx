@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
@@ -13,7 +13,7 @@ import {
 } from "@/app/components/ui/select";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Sparkles, Share2 } from "lucide-react";
+import { Sparkles, Share2, X } from "lucide-react";
 import { RepositoryInfo } from "./github/RepositoryInfo";
 import NProgress from 'nprogress';
 import { BeastActions } from "./gallery/BeastActions";
@@ -61,6 +61,7 @@ export default function CodeBeastGenerator() {
 
   // Add state for toastId
   const [toastId, setToastId] = useState<string | number | undefined>(undefined);
+  const fileInputRef = useRef<HTMLInputElement>(null); // <-- Add ref for file input
 
   // Updated onChange handler for username input
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,6 +81,14 @@ export default function CodeBeastGenerator() {
       setSelectedFile(e.target.files[0]);
     } else {
       setSelectedFile(null);
+    }
+  };
+
+  // <-- Add handler to clear the file
+  const handleClearFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''; // Reset the file input
     }
   };
 
@@ -246,27 +255,41 @@ export default function CodeBeastGenerator() {
                   <label className="text-sm font-medium text-gray-300 mb-1 block">Upload Your Image (Experimental)</label>
                   {/* Hidden actual file input */}
                   <Input
-                    id="imageUpload" // Needs ID for the label to point to
+                    id="imageUpload"
+                    ref={fileInputRef} // <-- Assign ref
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
                     disabled={loading}
-                    className="hidden" // Hide the actual input
+                    className="hidden"
                   />
                   {/* Visible Button wrapped in Label */}
                   <label htmlFor="imageUpload" className="w-full">
-                    <Button 
-                      asChild // Makes the Button render as its child (the label)
-                      variant="outline" 
-                      disabled={loading} 
+                    <Button
+                      asChild
+                      variant="outline"
+                      disabled={loading}
                       className="w-full bg-black/20 border-white/10 text-gray-300 hover:bg-black/40 hover:text-white cursor-pointer"
                     >
                        <span>Choose Image</span>
                     </Button>
                   </label>
-                  {/* Display selected file name */}
+                  {/* Display selected file name and Clear button */}
                   {selectedFile && (
-                    <p className="text-xs text-gray-400 mt-1 truncate">Selected: {selectedFile.name}</p>
+                    <div className="flex items-center justify-between mt-1"> {/* Container for name and button */} 
+                      <p className="text-xs text-gray-400 truncate flex-1 mr-2">Selected: {selectedFile.name}</p>
+                      <Button
+                        type="button" // Prevent form submission
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleClearFile}
+                        disabled={loading}
+                        className="h-6 w-6 text-gray-500 hover:text-red-500 disabled:opacity-50"
+                        aria-label="Clear selected image"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                   )}
                 </div>
 
