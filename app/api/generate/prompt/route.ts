@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import EverArt from 'everart';
 import { getUserDetails, upsertImage } from "../../../lib/db/astra";
 import sharp from 'sharp';
+import { Buffer } from 'buffer';
 
 // Add the GITHUB_USERNAME_REGEX (from code-beast-generator.tsx)
 const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
@@ -252,7 +253,8 @@ export async function POST(request: Request) {
         originalImageMimeType = file.type; // Store original mime type
         // Convert ArrayBuffer to Uint8Array before passing to Buffer.from()
         const arrayBuffer = await file.arrayBuffer();
-        let imageBuffer = Buffer.from(new Uint8Array(arrayBuffer)); 
+        // Explicitly type imageBuffer as Buffer
+        let imageBuffer: Buffer = Buffer.from(new Uint8Array(arrayBuffer)); 
 
         // --- Image Resizing Logic --- 
         try {
@@ -335,6 +337,24 @@ export async function POST(request: Request) {
       // --- Img2Img Path --- 
       console.log("API Route: Entering Img2Img Generation Path with processed image");
       imageResult = await generateImage(finalPrompt, 'img2img', { image: processedImageDataUri });
+
+      // --- Save successful img2img results to DB --- 
+      if (imageResult.success) {
+          try {
+              console.log(`API Route: Upserting image for ${normalizedUsername} (img2img)`);
+              await upsertImage({
+                  username: normalizedUsername,
+                  image_url: imageResult.imageUrl,
+                  created_at: new Date().toISOString()
+              });
+              console.log(`API Route: Upsert successful for ${normalizedUsername} (img2img)`);
+          } catch (dbError) {
+              console.error(`API Route: Failed to upsert image for ${normalizedUsername} (img2img):`, dbError);
+              // Log error but continue, as the image was generated successfully
+          }
+      }
+      // --- End DB Save --- 
+
     } else {
       // --- Txt2Img Path --- 
       console.log("API Route: Entering Txt2Img Generation Path");
