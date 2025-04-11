@@ -22,14 +22,13 @@ import { GeneratedImage } from "./github/GeneratedImage";
 // GitHub username validation regex
 const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
 
-// Function to generate prompt using our API
-const generatePrompt = async (username: string, emotion: string) => {
+// Function to generate prompt using our API - Modified to accept FormData
+const generatePrompt = async (payload: { username: string, emotion: string } | FormData) => {
+  const isFormData = payload instanceof FormData;
   const response = await fetch('/api/generate/prompt', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ username, emotion }),
+    headers: isFormData ? {} : { 'Content-Type': 'application/json' }, // Let browser set Content-Type for FormData
+    body: isFormData ? payload : JSON.stringify(payload),
   });
 
   if (!response.ok) {
@@ -47,6 +46,7 @@ export default function CodeBeastGenerator() {
   const [username, setUsername] = useState("");
   const [isUsernameValid, setIsUsernameValid] = useState(true); // State for input validity
   const [selectedEmotion, setSelectedEmotion] = useState<string>(EMOTIONS[0]); // Add state for emotion, default to first
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // <-- Add state for file
   const [loading, setLoading] = useState(false);
   const [generatedData, setGeneratedData] = useState<{
     languages: string;
@@ -54,8 +54,9 @@ export default function CodeBeastGenerator() {
     githubUrl: string;
     imageUrl: string;
     repoCount?: number;
-    animalSelection?: any[][];
-    source?: 'cache' | 'langflow'; // Include source if not already added
+    animalSelection?: any[][]; // Keeping existing type for now
+    source?: 'cache' | 'langflow';
+    isImg2Img?: boolean; // Flag to indicate if img2img was used
   } | null>(null);
 
   // Add state for toastId
@@ -70,6 +71,15 @@ export default function CodeBeastGenerator() {
       setIsUsernameValid(true); 
     } else {
       setIsUsernameValid(GITHUB_USERNAME_REGEX.test(newValue.trim()));
+    }
+  };
+
+  // <-- Add handler for file input
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    } else {
+      setSelectedFile(null);
     }
   };
 
@@ -104,7 +114,24 @@ export default function CodeBeastGenerator() {
     setToastId(currentToastId); 
 
     try {
-      const data = await generatePrompt(trimmedUsername, selectedEmotion);
+      let apiPayload: { username: string, emotion: string } | FormData;
+
+      if (selectedFile) {
+        // <-- Use FormData if file is selected
+        const formData = new FormData();
+        formData.append('username', trimmedUsername);
+        formData.append('emotion', selectedEmotion);
+        formData.append('imageFile', selectedFile);
+        apiPayload = formData;
+        console.log("Sending FormData with image");
+      } else {
+        // <-- Use JSON otherwise
+        apiPayload = { username: trimmedUsername, emotion: selectedEmotion };
+        console.log("Sending JSON");
+      }
+
+      // Call API with either FormData or JSON
+      const data = await generatePrompt(apiPayload);
       
       // Step 1: Update toast based on source
       if (data.source === 'cache') {
@@ -112,16 +139,20 @@ export default function CodeBeastGenerator() {
           description: "Using saved details...",
           id: currentToastId 
         });
-      } else { // source === 'langflow'
+      } else if (data.source === 'langflow') { // source === 'langflow'
         toast.message("Generating Prompt with Langflow AI", { 
           description: "Fetching repository data...", 
           id: currentToastId 
         });
+      } else {
+         // Handle case where source isn't provided (e.g., direct img2img flow)
+        toast.message("Preparing Generation Request", { description: "Processing inputs...", id: currentToastId });
       }
       
       // Step 2: Simulate brief delay and update toast for image generation
       await new Promise(resolve => setTimeout(resolve, 500)); // Short delay 
-      toast.message("Generating Image with EverArt AI", { 
+      const imageGenDescription = data.isImg2Img ? "Applying image style with EverArt AI" : "Generating Image with EverArt AI";
+      toast.message(imageGenDescription, { 
         description: "Conjuring pixels... please wait.", 
         id: currentToastId 
       });
@@ -131,7 +162,8 @@ export default function CodeBeastGenerator() {
 
       // Step 4: Final success toast update (after a slight delay to let image render)
       await new Promise(resolve => setTimeout(resolve, 100)); // Short delay
-      toast.message("CodeBeast Generated!", { 
+      const successTitle = data.isImg2Img ? "Image Style Applied!" : "CodeBeast Generated!";
+      toast.message(successTitle, { 
         description: "Your unique creature is ready.",
         id: currentToastId 
       });
@@ -166,7 +198,7 @@ export default function CodeBeastGenerator() {
         <CardContent className="p-6">
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 space-y-4">
-              <form className="space-y-1" onSubmit={handleGenerate}> {/* Reduced space for error message */} 
+              <form className="space-y-4" onSubmit={handleGenerate}> {/* Increased space for file input */} 
                 <div> {/* Wrap input and error message */} 
                   <Input
                     type="text"
@@ -208,6 +240,36 @@ export default function CodeBeastGenerator() {
                     ))}
                   </SelectContent>
                 </Select>
+
+                {/* <-- File Input Section --> */}
+                <div>
+                  <label className="text-sm font-medium text-gray-300 mb-1 block">Upload Your Image (Experimental)</label>
+                  {/* Hidden actual file input */}
+                  <Input
+                    id="imageUpload" // Needs ID for the label to point to
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    disabled={loading}
+                    className="hidden" // Hide the actual input
+                  />
+                  {/* Visible Button wrapped in Label */}
+                  <label htmlFor="imageUpload" className="w-full">
+                    <Button 
+                      asChild // Makes the Button render as its child (the label)
+                      variant="outline" 
+                      disabled={loading} 
+                      className="w-full bg-black/20 border-white/10 text-gray-300 hover:bg-black/40 hover:text-white cursor-pointer"
+                    >
+                       <span>Choose Image</span>
+                    </Button>
+                  </label>
+                  {/* Display selected file name */}
+                  {selectedFile && (
+                    <p className="text-xs text-gray-400 mt-1 truncate">Selected: {selectedFile.name}</p>
+                  )}
+                </div>
+
                 <Button 
                   type="submit"
                   // Disable button if loading OR username is invalid (and not empty)
@@ -221,14 +283,20 @@ export default function CodeBeastGenerator() {
 
               {generatedData && (
                 <div className="mt-6 animate-fade-in">
-                  <RepositoryInfo 
-                    repoCount={generatedData.repoCount ?? 0}
-                    languages={languageList}
-                    prompt={generatedData.prompt}
-                    githubUrl={generatedData.githubUrl}
-                    // Pass the raw data
-                    animalSelection={generatedData.animalSelection}
-                  />
+                  {/* Conditionally render RepositoryInfo only if it wasn't an img2img generation */}
+                  {!generatedData.isImg2Img && (
+                    <RepositoryInfo 
+                      repoCount={generatedData.repoCount ?? 0}
+                      languages={languageList}
+                      prompt={generatedData.prompt}
+                      githubUrl={generatedData.githubUrl}
+                      // Pass the raw data
+                      animalSelection={generatedData.animalSelection}
+                    />
+                  )}
+                  {generatedData.isImg2Img && (
+                    <p className="text-sm text-gray-400 italic">Generated using uploaded image and '{selectedEmotion}' style.</p>
+                  )}
                 </div>
               )}
             </div>
@@ -243,7 +311,7 @@ export default function CodeBeastGenerator() {
             )}
             {!generatedData && !loading && (
               <div className="flex-1 flex items-center justify-center text-gray-500">
-                Enter a GitHub handle to generate your beast!
+                Enter a GitHub handle and optionally upload an image to generate your beast!
               </div>
             )}
              {loading && (
