@@ -252,7 +252,7 @@ export default function CodeBeastGenerator() {
 
                 {/* <-- File Input Section --> */}
                 <div>
-                  <label className="text-sm font-medium text-gray-300 mb-1 block">Upload Your Image (Experimental)</label>
+                  <label className="text-sm font-medium text-gray-300 mb-1 block">Upload Your Headshot (Optional)</label>
                   {/* Hidden actual file input */}
                   <Input
                     id="imageUpload"
