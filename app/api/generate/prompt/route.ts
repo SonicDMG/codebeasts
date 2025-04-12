@@ -3,6 +3,7 @@ import EverArt from 'everart';
 import { getUserDetails, upsertImage } from "../../../lib/db/astra";
 import sharp from 'sharp';
 import { Buffer } from 'buffer';
+import OpenAI from 'openai';
 
 // Add the GITHUB_USERNAME_REGEX (from code-beast-generator.tsx)
 const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
@@ -29,9 +30,16 @@ type PromptDetails = {
   cleanedLanguages: string;
   cleanedGithubUrl: string;
   repoCount: number | undefined;
-  animalSelection: string | undefined;
+  animalSelection: string[] | undefined;
   source: 'cache' | 'langflow';
 };
+
+// Initialize OpenAI client
+const openaiApiKey = process.env.OPENAI_API_KEY;
+if (!openaiApiKey) {
+  console.warn("OPENAI_API_KEY environment variable is missing. Image analysis will be skipped.");
+}
+const openai = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null;
 
 // Initialize EverArt client
 const everartApiKey = process.env.EVERART_API_KEY;
@@ -55,24 +63,34 @@ const ACTION_FIGURE_PROMPT_TEMPLATE = "Full product shot displaying the entire, 
 // Helper function to build the Action Figure prompt
 function buildActionFigurePrompt(
   username: string,
-  basePrompt: string,
-  animalSelection: string | undefined,
-  languages: string
+  figureDescription: string,
+  animalSelection: string[] | undefined, // Keep for now, might be useful later
+  languages: string, // Keep languages for potential future use
+  baseConceptPrompt: string // Add the base prompt from DB/Langflow
 ): string {
-  const name = username.charAt(0).toUpperCase() + username.slice(1); // Capitalize username
-  const title = animalSelection || "Code Beast"; // Use animal selection or fallback
-  const characterDescription = basePrompt; // Use the generated creature prompt
-  // Extract first 2-3 languages as accessories
-  const languageList = languages.split(',').map(l => l.trim()).filter(l => l);
-  const keyItems = languageList.slice(0, 3).join(', ') || 'Code Snippets'; // Use languages or fallback
-  const ages = "All"; // Static value as requested
+  const name = username.charAt(0).toUpperCase() + username.slice(1);
 
+  // --- Set Title directly --- 
+  const title = "Code Beast"; // Always use "Code Beast" as the title
+  // --- Removed logic to extract from baseConceptPrompt --- 
+
+  // --- Use baseConceptPrompt for key items, removing prefix --- 
+  const keyItemsPrefixToRemove = "Create an illustration of a whimsical chimera featuring ";
+  let cleanedKeyItems = baseConceptPrompt;
+  if (cleanedKeyItems.toLowerCase().startsWith(keyItemsPrefixToRemove.toLowerCase())) {
+      cleanedKeyItems = cleanedKeyItems.substring(keyItemsPrefixToRemove.length);
+      console.log("buildActionFigurePrompt: Removed prefix from key items string.");
+  }
+  const keyItems = cleanedKeyItems.trim(); // Assign the cleaned string
+  // --- End Accessory Generation ---
+
+  const ages = "All";
   return ACTION_FIGURE_PROMPT_TEMPLATE
-    .replace('[character description]', characterDescription)
+    .replace('[character description]', figureDescription)
     .replace('[Name]', name)
-    .replace('[Title]', title)
+    .replace('[Title]', title) // Use the fixed "Code Beast" title
     .replace('[X]', ages)
-    .replace('[key items]', keyItems);
+    .replace('[key items]', keyItems); // Use the cleaned base prompt here
 }
 
 // Helper function to clean the language string
@@ -114,12 +132,50 @@ async function getUserPromptDetails(normalizedUsername: string): Promise<PromptD
 
   if (existingDetails) {
     console.log("API Route: Using existing user details from DB for prompt base");
+    // Log raw animalSelection data for debugging
+    console.log("API Route: Raw existingDetails.animalSelection:", JSON.stringify(existingDetails.animalSelection));
+    console.log("API Route: Type of existingDetails.animalSelection:", typeof existingDetails.animalSelection, Array.isArray(existingDetails.animalSelection));
+
+    // Clean the prompt string from the DB
+    let cleanedBasePrompt = existingDetails.prompt;
+    if (cleanedBasePrompt && cleanedBasePrompt.toLowerCase().startsWith('prompt:')) {
+        cleanedBasePrompt = cleanedBasePrompt.substring(7).trim();
+        console.log("API Route: Removed 'prompt:' prefix from cached prompt.");
+    }
+    // --- Process animalSelection from DB --- 
+    let animals: string[] | undefined = undefined;
+    const rawSelection = existingDetails.animalSelection;
+
+    if (Array.isArray(rawSelection)) {
+        const flattened: any[] = rawSelection.flat(); // Flatten first
+        const filteredStrings: string[] = [];
+        for (const item of flattened) {
+            if (typeof item === 'string') { // Check if it's a string first
+                const trimmedItem = item.trim();
+                if (trimmedItem !== '') { // Then check if non-empty after trimming
+                    filteredStrings.push(trimmedItem);
+                }
+            }
+        }
+        if (filteredStrings.length > 0) {
+            animals = filteredStrings;
+        }
+    } else if (typeof rawSelection === 'string') { // Explicitly check if it's a string
+        const typedSelection = rawSelection as string; // Assert type
+        const trimmedSelection = typedSelection.trim(); // Now trim the asserted string
+        if (trimmedSelection !== '') { // Check if non-empty after trimming
+            animals = [trimmedSelection]; // Assign if valid
+        }
+    } 
+    console.log("API Route: Processed animal selection array:", animals);
+    // --- End processing animalSelection ---
+
     return {
-      basePrompt: existingDetails.prompt,
+      basePrompt: cleanedBasePrompt, 
       cleanedLanguages: cleanLanguagesString(existingDetails.languages),
       cleanedGithubUrl: cleanGithubUrl(existingDetails.githubUrl, normalizedUsername),
       repoCount: existingDetails.repoCount,
-      animalSelection: typeof existingDetails.animalSelection === 'string' ? existingDetails.animalSelection : undefined,
+      animalSelection: animals, // Pass the processed string[] | undefined
       source: 'cache',
     };
   }
@@ -163,36 +219,80 @@ async function getUserPromptDetails(normalizedUsername: string): Promise<PromptD
     cleanedLanguages: cleanLanguagesString(rawLanguages),
     cleanedGithubUrl: cleanGithubUrl(rawGithubUrl, normalizedUsername),
     repoCount: !isNaN(count) ? count : undefined,
-    animalSelection: undefined, // Langflow doesn't provide this
+    animalSelection: undefined, // Langflow path doesn't provide this array
     source: 'langflow',
   };
 }
 
-// --- Refactored Image Generation --- 
+// --- NEW: OpenAI Image Analysis Helper --- 
+async function analyzeImageWithOpenAI(imageDataUri: string): Promise<string | null> {
+    if (!openai) {
+        console.log("OpenAI client not initialized. Skipping image analysis.");
+        return null; // Skip if key is missing
+    }
+    console.log("API Route: Analyzing image with OpenAI GPT-4 Vision...");
+    try {
+        const response = await openai.chat.completions.create({
+            model: "gpt-4-turbo", 
+            messages: [
+                {
+                    role: "user",
+                    content: [
+                        {
+                            type: "text",
+                            text: "Analyze the primary person in the image. Provide a concise paragraph describing only their key visual appearance features relevant for character creation. Focus on details like: Hair color/style, eye color, skin tone, dominant facial expression (e.g., smiling, neutral), glasses (if any), hat (if any), clothing colors/style, beard/mustache, and any other very prominent visual features. Do not describe the background or overall scene. If no clear person is visible, state 'No person detected'."
+                        },
+                        {
+                            type: "image_url",
+                            image_url: {
+                                url: imageDataUri,
+                            },
+                        },
+                    ],
+                },
+            ],
+            max_tokens: 150, // Allow slightly more tokens for a paragraph
+        });
+        const description = response.choices[0]?.message?.content;
+        console.log("API Route: OpenAI Vision analysis result (paragraph attempt):", description);
+        // Basic check
+        if (description && !description.toLowerCase().includes('no person detected')) {
+             // Clean up potential markdown or extra spacing, just in case
+             return description.replace(/[\*#]/g, '').replace(/\s+/g, ' ').trim(); 
+        } 
+        return null; // Return null if no person or empty response
+    } catch (error) {
+        console.error("API Route: Error calling OpenAI Vision API:", error);
+        // Decide how to handle - return null or throw? Returning null allows fallback.
+        return null; 
+    }
+}
 
+// --- Refactored Image Generation (Remove strength) --- 
 async function generateImage( 
   prompt: string, 
-  type: 'txt2img' | 'img2img', 
-  options: { image?: string; height?: number; width?: number; imageCount?: number } = {}
+  type: 'txt2img', // <-- Revert to only txt2img
+  // Remove img2img specific options
+  options: { height?: number; width?: number; imageCount?: number } = {}
 ): Promise<{ imageUrl: string; success: boolean }> {
   try {
     console.log(`API Route: Calling EverArt create (${type})...`);
     
-    // Explicitly define base params and add image only if needed
-    const baseParams: { imageCount?: number; height?: number; width?: number; image?: string } = {
+    // Simplify baseParams - no image or strength needed
+    const baseParams: { 
+        imageCount?: number; 
+        height?: number; 
+        width?: number; 
+    } = {
         imageCount: options.imageCount ?? 1,
         height: options.height ?? 512,
         width: options.width ?? 512,
     };
 
-    if (type === 'img2img') {
-        if (!options.image) {
-            throw new Error("Image data URI is required for img2img type.");
-        }
-        baseParams.image = options.image;
-    }
+    // Remove img2img conditional logic
+    // if (type === 'img2img') { ... }
 
-    // Log params being sent (excluding potentially large image data)
+    // Log params being sent
     console.log("API Route: Sending params to EverArt:", 
         JSON.stringify({ 
             model_id: '5000', 
@@ -200,16 +300,16 @@ async function generateImage(
             type, 
             imageCount: baseParams.imageCount, 
             height: baseParams.height, 
-            width: baseParams.width, 
-            image_present: !!baseParams.image 
+            width: baseParams.width 
+            // Remove image_present and strength from log
         })
     );
 
     const generations = await everart.v1.generations.create(
-      '5000', // Model ID
+      '5000', 
       prompt,
-      type,
-      baseParams // Pass the explicitly constructed params object
+      type, // Will always be txt2img now from calling context
+      baseParams
     ) as Generation[];
 
     if (!generations || generations.length === 0) {
@@ -234,7 +334,7 @@ export async function POST(request: Request) {
   let emotion: string | undefined;
   let processedImageDataUri: string | undefined;
   let originalImageMimeType: string | undefined;
-  let isImg2ImgRequest = false;
+  let imageProvided = false; // Flag if image was part of the request
 
   // 1. Parse Request
   try {
@@ -249,45 +349,30 @@ export async function POST(request: Request) {
       const file = formData.get('imageFile');
 
       if (file instanceof File && file.size > 0) {
+        imageProvided = true;
         console.log("API Route: Image file received:", file.name, file.type, file.size);
-        originalImageMimeType = file.type; // Store original mime type
-        // Convert ArrayBuffer to Uint8Array before passing to Buffer.from()
-        const arrayBuffer = await file.arrayBuffer();
-        // Explicitly type imageBuffer as Buffer
-        let imageBuffer: Buffer = Buffer.from(new Uint8Array(arrayBuffer)); 
-
-        // --- Image Resizing Logic --- 
+        originalImageMimeType = file.type;
+        let imageBuffer = Buffer.from(new Uint8Array(await file.arrayBuffer()));
         try {
           const metadata = await sharp(imageBuffer).metadata();
           console.log("API Route: Original image dimensions:", metadata.width, 'x', metadata.height);
-
-          if (metadata.width && metadata.height && (metadata.width > 512 || metadata.height > 512)) {
-            console.log("API Route: Resizing image to fit within 512x512...");
-            imageBuffer = await sharp(imageBuffer)
-              .resize(512, 512, {
-                fit: 'inside', // Maintain aspect ratio within bounds
-                withoutEnlargement: true // Don't upscale smaller images
-              })
-              .toBuffer();
-            const resizedMetadata = await sharp(imageBuffer).metadata(); // Get new dimensions
+          // Resize if needed (e.g., > 1024 for Vision API)
+          const MAX_DIM = 1024; 
+          if (metadata.width && metadata.height && (metadata.width > MAX_DIM || metadata.height > MAX_DIM)) {
+            console.log(`API Route: Resizing image to fit within ${MAX_DIM}x${MAX_DIM}...`);
+            // Fix: Create a new Buffer from the resized buffer result
+            const resizedBuffer = await sharp(imageBuffer).resize(MAX_DIM, MAX_DIM, { fit: 'inside', withoutEnlargement: true }).toBuffer();
+            imageBuffer = Buffer.from(resizedBuffer); 
+            // End Fix
+            const resizedMetadata = await sharp(imageBuffer).metadata();
             console.log("API Route: Resized image dimensions:", resizedMetadata.width, 'x', resizedMetadata.height);
-            // Mime type might change after processing (e.g., if input was webp, sharp might default to jpeg/png)
-            // It's safer to use the format from sharp metadata if available, otherwise stick to original.
             originalImageMimeType = `image/${resizedMetadata.format || originalImageMimeType.split('/')[1]}`;
-          } else {
-            console.log("API Route: Image dimensions are within limits, no resizing needed.");
           }
         } catch (resizeError) {
-            console.error("API Route: Error during image resizing:", resizeError);
-            // Decide how to handle: proceed with original, or throw error?
-            // Let's proceed with original for now, but log the error.
+          console.error("API Route: Error during image resizing:", resizeError);
         }
-        // --- End Resizing Logic --- 
-
         processedImageDataUri = bufferToDataURI(imageBuffer, originalImageMimeType);
-        isImg2ImgRequest = true;
-        console.log("API Route: Image processed. Data URI length:", processedImageDataUri?.length);
-
+        console.log("API Route: Image processed for analysis. Data URI length:", processedImageDataUri?.length);
       } else {
         console.log("API Route: No valid image file found in FormData.");
       }
@@ -316,92 +401,118 @@ export async function POST(request: Request) {
   }
   const normalizedUsername = username.trim().toLowerCase();
 
-  // 3. Process Request (Img2Img or Txt2Img)
+  // 3. Process Request (Analyze Image if provided, then Txt2Img)
   try {
-    let promptDetails: PromptDetails;
+    console.log("API Route: Starting generation processing...");
+    let promptDetails: PromptDetails | null = null;
     let finalPrompt: string;
     let imageResult: { imageUrl: string; success: boolean };
+    let imageAnalysisDescription: string | null = null;
+    let promptSourceType: 'cache' | 'langflow' | 'image_analysis' = 'langflow';
 
-    // Get prompt details (needed for both paths to build the final prompt)
-    promptDetails = await getUserPromptDetails(normalizedUsername);
-
-    // Build the final prompt (based on emotion)
-    if (emotion === "Action Figure") {
-        finalPrompt = buildActionFigurePrompt(normalizedUsername, promptDetails.basePrompt, promptDetails.animalSelection, promptDetails.cleanedLanguages);
-    } else {
-        finalPrompt = `A ${emotion} ${PROMPT_PREFIX}${promptDetails.basePrompt}`;
+    // --- Image Analysis Step (if image provided) ---
+    if (imageProvided && processedImageDataUri) {
+        console.log("API Route: Attempting image analysis...");
+        imageAnalysisDescription = await analyzeImageWithOpenAI(processedImageDataUri);
+        // Log analysis result but don't set promptSourceType here yet
+        console.log("API Route: Image analysis completed (result:", imageAnalysisDescription ? "Success" : "Failed/Skipped", ")"); 
+        if (!imageAnalysisDescription) {
+             console.warn("API Route: Analysis failed/skipped, proceeding without feature injection in prompt.");
+        }
     }
     
-    // Add specific instruction for img2img feature transfer
-    if (isImg2ImgRequest) {
-        // Revised instruction focusing on personal features and ignoring structure
-        finalPrompt += " Transfer specific personal appearance features (like hair color, eye color, skin tone, freckles, clothing color/style, glasses, hats) from the person in the input image onto the generated creature. Maintain the creature's form and pose based on the initial prompt description, not the input image's structure.";
-    }
+    // --- Get Base Prompt Details (Always needed) --- 
+    console.log("API Route: Attempting to get user prompt details...");
+    promptDetails = await getUserPromptDetails(normalizedUsername);
+    console.log("API Route: Got user prompt details. Source:", promptDetails.source);
+    promptSourceType = promptDetails.source; // Start with DB/Langflow source
 
-    console.log("API Route: Final prompt for EverArt:", finalPrompt);
-
-    if (isImg2ImgRequest && processedImageDataUri) {
-      // --- Img2Img Path --- 
-      console.log("API Route: Entering Img2Img Generation Path with processed image");
-      imageResult = await generateImage(finalPrompt, 'img2img', { image: processedImageDataUri });
-
-      // --- Save successful img2img results to DB --- 
-      if (imageResult.success) {
-          try {
-              console.log(`API Route: Upserting image for ${normalizedUsername} (img2img)`);
-              await upsertImage({
-                  username: normalizedUsername,
-                  image_url: imageResult.imageUrl,
-                  created_at: new Date().toISOString()
-              });
-              console.log(`API Route: Upsert successful for ${normalizedUsername} (img2img)`);
-          } catch (dbError) {
-              console.error(`API Route: Failed to upsert image for ${normalizedUsername} (img2img):`, dbError);
-              // Log error but continue, as the image was generated successfully
-          }
-      }
-      // --- End DB Save --- 
+    // --- Build Final Prompt & Determine Generation Type --- 
+    // No longer determining type, always txt2img after potential analysis
+    const baseCharacterPrompt = promptDetails.basePrompt;
+    
+    if (imageProvided && imageAnalysisDescription && !imageAnalysisDescription.toLowerCase().includes('no person detected')) {
+        // --- Build prompt using ONLY analysis keywords + style --- 
+        const features = imageAnalysisDescription; // Use the paragraph description
+        
+        if (emotion === "Action Figure") {
+            // --- Action Figure + Analysis: Pass features directly to template --- 
+            const features = imageAnalysisDescription; 
+            // Let the template handle saying "action figure"
+            const figureDescription = features; // Use the raw description
+            console.log("API Route: Building Action Figure prompt using analyzed features directly in template.");
+            finalPrompt = buildActionFigurePrompt(
+                normalizedUsername, 
+                figureDescription, // Pass only the features description
+                promptDetails?.animalSelection, 
+                promptDetails?.cleanedLanguages ?? "Code",
+                promptDetails.basePrompt
+            );
+        } else {
+            // Standard Emotion + Analysis: Combine concept + features
+            // (This logic might need further refinement if needed, but let's keep it for now)
+            const conceptDesc = promptDetails.basePrompt; // The chimera description IS the concept
+            const combinedDesc = `${conceptDesc}, with features resembling: ${features}`;
+            console.log("API Route: Building standard prompt combining concept and analyzed features.");
+            finalPrompt = `A ${emotion} ${PROMPT_PREFIX}${combinedDesc}.`;
+        }
+        promptSourceType = 'image_analysis'; 
 
     } else {
-      // --- Txt2Img Path --- 
-      console.log("API Route: Entering Txt2Img Generation Path");
-      imageResult = await generateImage(finalPrompt, 'txt2img');
-      
-      // Attempt DB upsert only for successful txt2img
-      if (imageResult.success) {
-          try {
-              console.log(`API Route: Upserting image for ${normalizedUsername} (txt2img)`);
-              await upsertImage({
-                  username: normalizedUsername,
-                  image_url: imageResult.imageUrl,
-                  created_at: new Date().toISOString()
-              });
-              console.log(`API Route: Upsert successful for ${normalizedUsername}`);
-          } catch (dbError) {
-              console.error(`API Route: Failed to upsert image for ${normalizedUsername}:`, dbError);
-              // Log error but continue
-          }
-      }
+        // --- Build prompt using ONLY DB/Langflow description (No image analysis) --- 
+        console.log("API Route: Building prompt from DB/Langflow base prompt (no analysis used).");
+        if (emotion === "Action Figure") {
+            // Use the original base prompt (chimera description) directly
+            finalPrompt = buildActionFigurePrompt(
+                normalizedUsername, 
+                promptDetails.basePrompt, // Pass the original chimera description
+                promptDetails.animalSelection, 
+                promptDetails.cleanedLanguages,
+                promptDetails.basePrompt
+            );
+        } else {
+            finalPrompt = `A ${emotion} ${PROMPT_PREFIX}${promptDetails.basePrompt}`;
+        }
+    }
+
+    console.log("API Route: Final prompt for EverArt Txt2Img:", finalPrompt);
+
+    // --- Generate Image (Always Txt2Img now) --- 
+    console.log("API Route: Attempting Txt2Img generation...");
+    imageResult = await generateImage(finalPrompt, 'txt2img');
+
+    // --- Save Generation Result to DB --- 
+    if (imageResult.success) {
+        try {
+            console.log(`API Route: Upserting image for ${normalizedUsername}`);
+            await upsertImage({
+                username: normalizedUsername,
+                image_url: imageResult.imageUrl,
+                created_at: new Date().toISOString()
+            });
+            console.log(`API Route: Upsert successful for ${normalizedUsername}`);
+        } catch (dbError) {
+            console.error(`API Route: Failed to upsert image for ${normalizedUsername}:`, dbError);
+        }
     }
 
     // 4. Format and Return Response
     return NextResponse.json({
-      // Core details from prompt fetching
-      languages: promptDetails.cleanedLanguages,
-      prompt: promptDetails.basePrompt,
+      languages: promptDetails.cleanedLanguages, 
+      prompt: promptDetails.basePrompt, 
+      imageAnalysis: imageAnalysisDescription, 
       githubUrl: promptDetails.cleanedGithubUrl,
       repoCount: promptDetails.repoCount,
       animalSelection: promptDetails.animalSelection,
-      // Image result
       imageUrl: imageResult.imageUrl,
-      // Metadata
       username: normalizedUsername,
-      isImg2Img: isImg2ImgRequest,
+      isImg2Img: false, // Explicitly false now
       status: {
-        promptSource: promptDetails.source,
-        everart: imageResult.success ? 'success' : 'error'
+        promptSource: promptSourceType,
+        everart: imageResult.success ? 'success' : 'error',
+        analysis: imageAnalysisDescription ? 'success' : (imageProvided ? 'failed_or_skipped' : 'not_applicable')
       },
-      source: promptDetails.source // Keep 'source' consistent with original 'langflow'/'cache' meaning
+      source: promptSourceType 
     });
 
   } catch (error) {
