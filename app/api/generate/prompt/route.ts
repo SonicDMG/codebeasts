@@ -58,7 +58,7 @@ const PROMPT_PREFIX = "Kawaii bizarre chimera hybrid creature, ultra low-resolut
 const FALLBACK_IMAGE_URL = "/images/codebeast-placeholder.png";
 
 // New prompt template for Action Figure
-const ACTION_FIGURE_PROMPT_TEMPLATE = "Full product shot displaying the entire, unobstructed detailed toy blister pack with [character description] action figure, facing forward. Centered on a white background. Red header band reads '[Name] the [Title]' in bold white text. Includes 'Ages [X]+' label, accessories in separate compartments ([key items]). Professional retail packaging with clear plastic bubble, detailed labeling, and product information. Sharp focus on packaging details. No cropping of the blister pack.";
+const ACTION_FIGURE_PROMPT_TEMPLATE = "Full product shot displaying the entire, unobstructed detailed toy blister pack with [character description] action figure, facing forward. Centered on a white background. Red header band reads '[Name] the [Title]' in bold white text. Includes 'Ages [X]+' label, accessories displayed inside separate compartments of the blister pack ([key items]). Professional retail packaging with clear plastic bubble, detailed labeling, and product information. Sharp focus on packaging details. No cropping of the blister pack.";
 
 // Helper function to build the Action Figure prompt
 function buildActionFigurePrompt(
@@ -295,7 +295,7 @@ async function generateImage(
     // Log params being sent
     console.log("API Route: Sending params to EverArt:", 
         JSON.stringify({ 
-            model_id: '5000', 
+            model_id: '5000',
             prompt_length: prompt.length, 
             type, 
             imageCount: baseParams.imageCount, 
@@ -306,7 +306,7 @@ async function generateImage(
     );
 
     const generations = await everart.v1.generations.create(
-      '5000', 
+      '5000',
       prompt,
       type, // Will always be txt2img now from calling context
       baseParams
