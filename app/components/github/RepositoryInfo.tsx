@@ -12,7 +12,7 @@ interface RepositoryInfoProps {
   languages: string[];
   prompt: string;
   githubUrl?: string;
-  animalSelection?: any[][];
+  animalSelection?: string[];
 }
 
 const isPlaceholder = (item: string | undefined | null): boolean => {
@@ -55,18 +55,24 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animal
           <h3 className="text-white/80 text-sm font-medium mb-2">Your CodeBeast Components</h3>
           <div className="space-y-2">
             {animalSelection
-              .filter(entry => Array.isArray(entry) && entry.length >= 1 && typeof entry[0] === 'string' && !isPlaceholder(entry[0]))
+              .filter(entry => typeof entry === 'string' && entry.trim() !== '')
               .map((entry, index) => {
-                const category = entry[0];
-                const trait = (entry.length > 1 && typeof entry[1] === 'string' && !isPlaceholder(entry[1])) ? entry[1] : "-";
-
+                let category = entry;
+                let trait = '';
+                if (entry.includes(' for ')) {
+                  [trait, category] = entry.split(' for ');
+                } else if (entry.includes(':')) {
+                  [category, trait] = entry.split(':');
+                }
                 return (
                   <div key={index} className="text-white/60 text-sm">
-                    <span>
-                      <span className="font-medium text-white/80">{category}</span>
-                      <span className="text-white/40"> — </span>
-                      <span className="italic">{trait}</span>
-                    </span>
+                    <span className="font-medium text-white/80">{category.trim()}</span>
+                    {trait && (
+                      <>
+                        <span className="text-white/40"> — </span>
+                        <span className="italic">{trait.trim()}</span>
+                      </>
+                    )}
                   </div>
                 );
               })}

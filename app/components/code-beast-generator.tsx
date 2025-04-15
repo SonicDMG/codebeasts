@@ -54,7 +54,7 @@ export default function CodeBeastGenerator() {
     githubUrl: string;
     imageUrl: string;
     repoCount?: number;
-    animalSelection?: any[][]; // Keeping existing type for now
+    animalSelection?: string[];
     source?: 'cache' | 'langflow';
     isImg2Img?: boolean; // Flag to indicate if img2img was used
   } | null>(null);

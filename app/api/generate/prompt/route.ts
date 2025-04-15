@@ -49,16 +49,30 @@ if (!everartApiKey) {
 const everart = new EverArt(everartApiKey);
 
 // Style prefix for consistent image generation
-const PROMPT_PREFIX = "Kawaii bizarre chimera hybrid creature, ultra low-resolution pixel 16-bit pixel art style. " +
-  "Extremely pixelated NES/SNES aesthetic, chunky dithering patterns, and high contrast. " +
-  "Strong directional lighting from the upper left, casting distinct pixelated shadows on the right side. " +
-  "Rainbow gradient background. Subject facing the camera, frontal view, medium shot, centered subject, shallow depth of field background.";
+const PROMPT_PREFIX = `Kawaii bizarre chimera hybrid creature, ultra low-resolution pixel 16-bit
+pixel art style. Extremely pixelated NES/SNES aesthetic, chunky dithering patterns,
+and high contrast. Strong directional lighting from the upper left, casting distinct
+pixelated shadows on the right side. Rainbow gradient background. Subject facing the
+camera, frontal view, medium shot, centered subject, shallow depth of field background.`;
 
 // Local fallback image that doesn't depend on external services
 const FALLBACK_IMAGE_URL = "/images/codebeast-placeholder.png";
 
 // New prompt template for Action Figure
-const ACTION_FIGURE_PROMPT_TEMPLATE = "Full product shot displaying the entire, unobstructed detailed toy blister pack with [character description] action figure, facing forward. Centered on a white background. Red header band reads '[Name] the [Title]' in bold white text. Includes 'Ages [X]+' label, accessories displayed inside separate compartments of the blister pack ([key items]). Professional retail packaging with clear plastic bubble, detailed labeling, and product information. Sharp focus on packaging details. No cropping of the blister pack.";
+const ACTION_FIGURE_PROMPT_TEMPLATE = `
+Full product shot of a highly detailed action figure of a person, fully encased in a
+clear plastic blister pack with a colorful cardboard backing. The main action figure
+is a realistic human based on [character description], with lifelike features and natural
+proportions. The action figure is shown in full body, including legs, standing upright
+inside the blister pack. The packaging is the main focus, with a clear plastic bubble covering
+the entire figure and all accessories. Inside the blister pack are compartments for
+each coding language and its animal ([key items]), as well as coding-related
+accessories such as a keyboard, laptop, or code book. Each item is in its own
+separate compartment. The packaging is centered on a white background, with a red
+header band reading '[Name] the [Title]' in bold white text, and an 'Ages [X]+' label.
+Professional retail packaging with detailed labeling and product information. Sharp
+focus on packaging details. No cropping of the blister pack.
+`;
 
 // Helper function to build the Action Figure prompt
 function buildActionFigurePrompt(
@@ -74,14 +88,16 @@ function buildActionFigurePrompt(
   const title = "Code Beast"; // Always use "Code Beast" as the title
   // --- Removed logic to extract from baseConceptPrompt --- 
 
-  // --- Use baseConceptPrompt for key items, removing prefix --- 
+  // --- Use animalSelection for key items if present --- 
   const keyItemsPrefixToRemove = "Create an illustration of a whimsical chimera featuring ";
   let cleanedKeyItems = baseConceptPrompt;
   if (cleanedKeyItems.toLowerCase().startsWith(keyItemsPrefixToRemove.toLowerCase())) {
       cleanedKeyItems = cleanedKeyItems.substring(keyItemsPrefixToRemove.length);
       console.log("buildActionFigurePrompt: Removed prefix from key items string.");
   }
-  const keyItems = cleanedKeyItems.trim(); // Assign the cleaned string
+  const keyItems = (animalSelection && animalSelection.length > 0)
+    ? animalSelection.join(', ')
+    : '';
   // --- End Accessory Generation ---
 
   const ages = "All";
@@ -90,7 +106,7 @@ function buildActionFigurePrompt(
     .replace('[Name]', name)
     .replace('[Title]', title) // Use the fixed "Code Beast" title
     .replace('[X]', ages)
-    .replace('[key items]', keyItems); // Use the cleaned base prompt here
+    .replace('[key items]', keyItems); // Use animalSelection or cleaned base prompt here
 }
 
 // Helper function to clean the language string
@@ -126,6 +142,36 @@ function bufferToDataURI(buffer: Buffer, mimeType: string): string {
   return `data:${mimeType};base64,${buffer.toString('base64')}`;
 }
 
+// Helper function to process animalSelection from any source
+function processAnimalSelection(rawSelection: any): string[] | undefined {
+  if (Array.isArray(rawSelection)) {
+    const flattened: any[] = rawSelection.flat();
+    const filteredStrings: string[] = [];
+    for (const item of flattened) {
+      if (typeof item === 'string') {
+        const trimmedItem = item.trim();
+        if (trimmedItem !== '') {
+          filteredStrings.push(trimmedItem);
+        }
+      } else if (typeof item === 'object' && item !== null) {
+        const entries = Object.entries(item);
+        for (const [key, value] of entries) {
+          filteredStrings.push(`${key}: ${value}`);
+        }
+      }
+    }
+    if (filteredStrings.length > 0) {
+      return filteredStrings;
+    }
+  } else if (typeof rawSelection === 'string') {
+    const trimmedSelection = rawSelection.trim();
+    if (trimmedSelection !== '') {
+      return [trimmedSelection];
+    }
+  }
+  return undefined;
+}
+
 // --- Refactored Data Fetching --- 
 async function getUserPromptDetails(normalizedUsername: string): Promise<PromptDetails> {
   const existingDetails = await getUserDetails(normalizedUsername);
@@ -143,30 +189,7 @@ async function getUserPromptDetails(normalizedUsername: string): Promise<PromptD
         console.log("API Route: Removed 'prompt:' prefix from cached prompt.");
     }
     // --- Process animalSelection from DB --- 
-    let animals: string[] | undefined = undefined;
-    const rawSelection = existingDetails.animalSelection;
-
-    if (Array.isArray(rawSelection)) {
-        const flattened: any[] = rawSelection.flat(); // Flatten first
-        const filteredStrings: string[] = [];
-        for (const item of flattened) {
-            if (typeof item === 'string') { // Check if it's a string first
-                const trimmedItem = item.trim();
-                if (trimmedItem !== '') { // Then check if non-empty after trimming
-                    filteredStrings.push(trimmedItem);
-                }
-            }
-        }
-        if (filteredStrings.length > 0) {
-            animals = filteredStrings;
-        }
-    } else if (typeof rawSelection === 'string') { // Explicitly check if it's a string
-        const typedSelection = rawSelection as string; // Assert type
-        const trimmedSelection = typedSelection.trim(); // Now trim the asserted string
-        if (trimmedSelection !== '') { // Check if non-empty after trimming
-            animals = [trimmedSelection]; // Assign if valid
-        }
-    } 
+    const animals = processAnimalSelection(existingDetails.animalSelection);
     console.log("API Route: Processed animal selection array:", animals);
     // --- End processing animalSelection ---
 
@@ -189,7 +212,12 @@ async function getUserPromptDetails(normalizedUsername: string): Promise<PromptD
   const langflowResponse = await fetch(langflowUrl, { 
       method: "POST", 
       headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({ session_id: normalizedUsername }) 
+      body: JSON.stringify({
+        input_value: normalizedUsername,
+        output_type: "chat",
+        input_type: "chat",
+        session_id: normalizedUsername
+      }) 
   });
 
   if (!langflowResponse.ok) {
@@ -211,15 +239,39 @@ async function getUserPromptDetails(normalizedUsername: string): Promise<PromptD
       throw new Error("Unexpected format from Langflow");
   }
 
-  const [rawLanguages, promptText, rawGithubUrl, rawRepoCount] = messageParts;
-  const count = parseInt(rawRepoCount, 10);
+  const [rawLanguages, promptText, rawGithubUrl] = messageParts;
+
+  // Extract num_repositories from messageParts
+  const numReposPart = messageParts.find(part => part.startsWith('num_repositories:'));
+  let count = undefined;
+  if (numReposPart) {
+    const value = numReposPart.replace('num_repositories:', '').trim();
+    count = parseInt(value, 10);
+  }
+
+  // Extract animal_selection from messageParts
+  const animalSelectionPart = messageParts.find(part => part.startsWith('animal_selection:'));
+  let langflowAnimalSelection = undefined;
+  if (animalSelectionPart) {
+    let value = animalSelectionPart.replace('animal_selection:', '').trim();
+    // Try to parse as JSON array (replace single quotes with double quotes)
+    if (value.startsWith('[')) {
+      try {
+        langflowAnimalSelection = JSON.parse(value.replace(/'/g, '"'));
+      } catch (e) {
+        console.warn('Could not parse animal_selection from Langflow:', value);
+      }
+    }
+  }
+  const animals = processAnimalSelection(langflowAnimalSelection);
+  console.log("Langflow: Processed animal selection array:", animals);
 
   return {
     basePrompt: promptText,
     cleanedLanguages: cleanLanguagesString(rawLanguages),
     cleanedGithubUrl: cleanGithubUrl(rawGithubUrl, normalizedUsername),
-    repoCount: !isNaN(count) ? count : undefined,
-    animalSelection: undefined, // Langflow path doesn't provide this array
+    repoCount: (typeof count === 'number' && !isNaN(count)) ? count : undefined,
+    animalSelection: animals,
     source: 'langflow',
   };
 }
@@ -295,7 +347,7 @@ async function generateImage(
     // Log params being sent
     console.log("API Route: Sending params to EverArt:", 
         JSON.stringify({ 
-            model_id: '5000',
+            model_id: '5000', 
             prompt_length: prompt.length, 
             type, 
             imageCount: baseParams.imageCount, 
@@ -306,7 +358,7 @@ async function generateImage(
     );
 
     const generations = await everart.v1.generations.create(
-      '5000',
+      '5000', 
       prompt,
       type, // Will always be txt2img now from calling context
       baseParams
