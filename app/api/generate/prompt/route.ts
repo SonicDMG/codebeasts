@@ -60,6 +60,7 @@ const FALLBACK_IMAGE_URL = "/images/codebeast-placeholder.png";
 
 // New prompt template for Action Figure
 const ACTION_FIGURE_PROMPT_TEMPLATE = `
+At the very top of the packaging, a bold red header band displays the text: '[Name] the [Title]' in large, clear, white letters.
 Full product shot of a highly detailed action figure of a person, fully encased in a
 clear plastic blister pack with a colorful cardboard backing. The main action figure
 is a realistic human based on [character description], with lifelike features and natural
@@ -72,6 +73,11 @@ separate compartment. The packaging is centered on a white background, with a re
 header band reading '[Name] the [Title]' in bold white text, and an 'Ages [X]+' label.
 Professional retail packaging with detailed labeling and product information. Sharp
 focus on packaging details. No cropping of the blister pack.
+`;
+
+const ACTION_FIGURE_PROMPT_WITH_IMAGE_TEMPLATE = `
+At the very top of the packaging, a bold red header band displays the text: '[Name] the [Title]' in large, clear, white letters.
+Full product shot of a highly detailed action figure of a person, inspired by the following features: [person_features]. The figure is fully encased in a clear plastic blister pack with a colorful cardboard backing. The action figure is shown in full body, including legs, standing upright inside the blister pack. The packaging is the main focus, with a clear plastic bubble covering the entire figure and all accessories. Inside the blister pack are compartments for each coding language and its animal ([key items]), as well as coding-related accessories such as a keyboard, laptop, or code book. Each item is in its own separate compartment. The packaging is centered on a white background, with an 'Ages [X]+' label. Professional retail packaging with detailed labeling and product information. Sharp focus on packaging details. No cropping of the blister pack.
 `;
 
 // Helper function to build the Action Figure prompt
@@ -484,32 +490,23 @@ export async function POST(request: Request) {
     const baseCharacterPrompt = promptDetails.basePrompt;
     
     if (imageProvided && imageAnalysisDescription && !imageAnalysisDescription.toLowerCase().includes('no person detected')) {
-        // --- Build prompt using ONLY analysis keywords + style --- 
+        // --- Build prompt using person features as style reference, not main subject --- 
         const features = imageAnalysisDescription; // Use the paragraph description
-        
         if (emotion === "Action Figure") {
-            // --- Action Figure + Analysis: Pass features directly to template --- 
-            const features = imageAnalysisDescription; 
-            // Let the template handle saying "action figure"
-            const figureDescription = features; // Use the raw description
-            console.log("API Route: Building Action Figure prompt using analyzed features directly in template.");
-            finalPrompt = buildActionFigurePrompt(
-                normalizedUsername, 
-                figureDescription, // Pass only the features description
-                promptDetails?.animalSelection, 
-                promptDetails?.cleanedLanguages ?? "Code",
-                promptDetails.basePrompt
-            );
+            // Use the new image-specific template
+            finalPrompt = ACTION_FIGURE_PROMPT_WITH_IMAGE_TEMPLATE
+                .replace('[person_features]', features)
+                .replace('[Name]', normalizedUsername.charAt(0).toUpperCase() + normalizedUsername.slice(1))
+                .replace('[Title]', 'Code Beast')
+                .replace('[X]', 'All')
+                .replace('[key items]', promptDetails?.animalSelection && promptDetails.animalSelection.length > 0 ? promptDetails.animalSelection.join(', ') : '');
         } else {
             // Standard Emotion + Analysis: Combine concept + features
-            // (This logic might need further refinement if needed, but let's keep it for now)
-            const conceptDesc = promptDetails.basePrompt; // The chimera description IS the concept
+            const conceptDesc = promptDetails.basePrompt;
             const combinedDesc = `${conceptDesc}, with features resembling: ${features}`;
-            console.log("API Route: Building standard prompt combining concept and analyzed features.");
             finalPrompt = `A ${emotion} ${PROMPT_PREFIX}${combinedDesc}.`;
         }
         promptSourceType = 'image_analysis'; 
-
     } else {
         // --- Build prompt using ONLY DB/Langflow description (No image analysis) --- 
         console.log("API Route: Building prompt from DB/Langflow base prompt (no analysis used).");
