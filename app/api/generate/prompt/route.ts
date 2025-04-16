@@ -231,12 +231,15 @@ export async function POST(request: Request) {
         const features = imageAnalysisDescription; // Use the paragraph description
         if (emotion === "Action Figure") {
             // Use the new image-specific template
-            finalPrompt = ACTION_FIGURE_PROMPT_WITH_IMAGE_TEMPLATE
-                .replace('[person_features]', features)
-                .replace('[Name]', normalizedUsername.charAt(0).toUpperCase() + normalizedUsername.slice(1))
-                .replace('[Title]', 'Code Beast')
-                .replace('[X]', 'All')
-                .replace('[key items]', promptDetails?.animalSelection && promptDetails.animalSelection.length > 0 ? promptDetails.animalSelection.join(', ') : '');
+            finalPrompt = buildActionFigurePrompt(
+                ACTION_FIGURE_PROMPT_WITH_IMAGE_TEMPLATE,
+                normalizedUsername,
+                promptDetails.basePrompt,
+                promptDetails.animalSelection,
+                promptDetails.cleanedLanguages,
+                promptDetails.basePrompt,
+                features // personFeatures
+            );
         } else {
             // Standard Emotion + Analysis: Combine concept + features
             const conceptDesc = promptDetails.basePrompt;
