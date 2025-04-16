@@ -6,6 +6,7 @@
 
 import { FileCode2, GitFork } from 'lucide-react';
 import { Card } from "@/app/components/ui/card";
+import { normalizeAnimalSelection } from "@/app/api/generate/prompt/promptUtils";
 
 interface RepositoryInfoProps {
   repoCount: number;
@@ -54,28 +55,11 @@ export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animal
         <Card className="p-4 bg-black/20 border-white/10">
           <h3 className="text-white/80 text-sm font-medium mb-2">Your CodeBeast Components</h3>
           <div className="space-y-2">
-            {animalSelection
-              .filter(entry => typeof entry === 'string' && entry.trim() !== '')
-              .map((entry, index) => {
-                let category = entry;
-                let trait = '';
-                if (entry.includes(' for ')) {
-                  [trait, category] = entry.split(' for ');
-                } else if (entry.includes(':')) {
-                  [category, trait] = entry.split(':');
-                }
-                return (
-                  <div key={index} className="text-white/60 text-sm">
-                    <span className="font-medium text-white/80">{category.trim()}</span>
-                    {trait && (
-                      <>
-                        <span className="text-white/40"> — </span>
-                        <span className="italic">{trait.trim()}</span>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
+            {normalizeAnimalSelection(animalSelection).map((pair, idx) => (
+              <div key={idx} className="text-white/60 text-sm">
+                {pair.filter(Boolean).join(' ')}
+              </div>
+            ))}
           </div>
         </Card>
       )}

@@ -6,15 +6,23 @@
  */
 
 /**
- * Processes the animal selection input from various sources (array, string, or object) and returns a string array of selected animals.
+ * Processes the animal selection input from various sources (array, string, or object) and returns an array of arrays or strings for correct display and prompt generation.
  * @param rawSelection - The raw animal selection data (array, string, or object)
- * @returns An array of animal strings, or undefined if none found
+ * @returns An array of arrays or strings, or undefined if none found
  */
-export function processAnimalSelection(rawSelection: any): string[] | undefined {
+export function processAnimalSelection(rawSelection: any): (string | string[])[] | undefined {
   if (Array.isArray(rawSelection)) {
-    const flattened: any[] = rawSelection.flat();
+    // If it's an array of arrays, return as-is
+    if (rawSelection.every(item => Array.isArray(item))) {
+      return rawSelection;
+    }
+    // If it's a flat array of strings, return as-is
+    if (rawSelection.every(item => typeof item === 'string')) {
+      return rawSelection;
+    }
+    // Otherwise, fallback to previous logic for edge cases
     const filteredStrings: string[] = [];
-    for (const item of flattened) {
+    for (const item of rawSelection) {
       if (typeof item === 'string') {
         const trimmedItem = item.trim();
         if (trimmedItem !== '') {
@@ -70,6 +78,37 @@ export function cleanGithubUrl(rawUrl: string | undefined, username: string): st
 }
 
 /**
+ * Normalizes animal selection to always be an array of arrays (animal, trait).
+ * Handles legacy flat arrays and new array-of-arrays formats.
+ * @param animalSelection - The raw or processed animal selection data
+ * @returns An array of [animal, trait] pairs
+ */
+export function normalizeAnimalSelection(
+  animalSelection: (string | string[])[] | undefined
+): string[][] {
+  if (!animalSelection) return [];
+  // If already array of arrays, return as-is
+  if (animalSelection.every(item => Array.isArray(item))) {
+    return animalSelection as string[][];
+  }
+  // If flat array of strings, and every string contains ' for ', treat each as a single component
+  if (animalSelection.every(item => typeof item === 'string' && item.includes(' for '))) {
+    return (animalSelection as string[]).map(str => [str]);
+  }
+  // If flat array of strings, group into pairs
+  if (animalSelection.every(item => typeof item === 'string')) {
+    const arr = animalSelection as string[];
+    const pairs: string[][] = [];
+    for (let i = 0; i < arr.length; i += 2) {
+      pairs.push([arr[i], arr[i + 1] || '']);
+    }
+    return pairs;
+  }
+  // Fallback: wrap single string or unknown structure
+  return [[animalSelection.join(' ')]];
+}
+
+/**
  * Builds the action figure prompt string by filling in the template with user and selection data.
  * @param promptTemplate - The prompt template string with placeholders
  * @param username - The GitHub username
@@ -84,7 +123,7 @@ export function buildActionFigurePrompt(
   promptTemplate: string,
   username: string,
   figureDescription: string,
-  animalSelection: string[] | undefined,
+  animalSelection: (string | string[])[] | undefined,
   languages: string,
   baseConceptPrompt: string,
   personFeatures?: string
@@ -92,9 +131,10 @@ export function buildActionFigurePrompt(
   const name = username.charAt(0).toUpperCase() + username.slice(1);
   const title = "Code Beast";
   const ages = "All";
-  const keyItems = (animalSelection && animalSelection.length > 0)
-    ? animalSelection.join(', ')
-    : '';
+  // Use normalized animal selection for prompt
+  const keyItems = normalizeAnimalSelection(animalSelection)
+    .map(pair => pair.filter(Boolean).join(' '))
+    .join(', ');
   let prompt = promptTemplate
     .replace('[character description]', figureDescription)
     .replace('[Name]', name)
