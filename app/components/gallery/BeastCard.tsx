@@ -114,18 +114,23 @@ export function BeastCard({ beast, showActions = false }: BeastCardProps) {
             aria-hidden="true"
           />
           <div ref={scanLineRef} className="scan-line-overlay" />
-          <div 
-            className="absolute bottom-4 right-4 text-white text-sm font-semibold"
-            style={{ 
-              textShadow: '1px 1px 2px black', 
+          <a
+            href="https://langflow.new/ui/f/codebeasts"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute bottom-4 right-4 text-white text-sm font-semibold hover:underline focus:underline"
+            style={{
+              textShadow: '1px 1px 2px black',
               backgroundColor: 'rgba(0,0,0,0.3)',
               padding: '4px 8px',
               borderRadius: '4px',
-              pointerEvents: 'none'
+              pointerEvents: 'auto',
+              zIndex: 10
             }}
+            aria-label="Learn more about Langflow"
           >
             Generated with Langflow
-          </div>
+          </a>
         </div>
 
         {showActions && (
