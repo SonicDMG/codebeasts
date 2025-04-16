@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import EverArt from 'everart';
 import { getUserDetails, upsertImage } from "../../../lib/db/astra";
 import sharp from 'sharp';
 import { Buffer } from 'buffer';
-import OpenAI from 'openai';
+import { ACTION_FIGURE_PROMPT_TEMPLATE, ACTION_FIGURE_PROMPT_WITH_IMAGE_TEMPLATE, PROMPT_PREFIX } from './promptTemplates';
+import { processAnimalSelection, cleanLanguagesString, cleanGithubUrl, buildActionFigurePrompt } from './promptUtils';
+import { bufferToDataURI, analyzeImageWithOpenAI, generateImage } from './imageUtils';
+import { PromptDetails } from './types';
 
 // Add the GITHUB_USERNAME_REGEX (from code-beast-generator.tsx)
 const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
@@ -14,179 +16,8 @@ const ALLOWED_EMOTIONS = [
   "Exploding Head", "Crying", "Zombie", "Ghibli Scene in rolling meadows", "Caped Crusader"
 ];
 
-// Define types from the EverArt SDK
-type Generation = {
-  id: string;
-  model_id: string;
-  status: 'STARTING' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED' | 'CANCELED';
-  image_url: string | null;
-  type: 'txt2img' | 'img2img';
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-type PromptDetails = {
-  basePrompt: string;
-  cleanedLanguages: string;
-  cleanedGithubUrl: string;
-  repoCount: number | undefined;
-  animalSelection: string[] | undefined;
-  source: 'cache' | 'langflow';
-};
-
-// Initialize OpenAI client
-const openaiApiKey = process.env.OPENAI_API_KEY;
-if (!openaiApiKey) {
-  console.warn("OPENAI_API_KEY environment variable is missing. Image analysis will be skipped.");
-}
-const openai = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null;
-
-// Initialize EverArt client
-const everartApiKey = process.env.EVERART_API_KEY;
-if (!everartApiKey) {
-  throw new Error('EVERART_API_KEY environment variable is required');
-}
-const everart = new EverArt(everartApiKey);
-
-// Style prefix for consistent image generation
-const PROMPT_PREFIX = `Kawaii bizarre chimera hybrid creature, ultra low-resolution pixel 16-bit
-pixel art style. Extremely pixelated NES/SNES aesthetic, chunky dithering patterns,
-and high contrast. Strong directional lighting from the upper left, casting distinct
-pixelated shadows on the right side. Rainbow gradient background. Subject facing the
-camera, frontal view, medium shot, centered subject, shallow depth of field background.`;
-
 // Local fallback image that doesn't depend on external services
 const FALLBACK_IMAGE_URL = "/images/codebeast-placeholder.png";
-
-// New prompt template for Action Figure
-const ACTION_FIGURE_PROMPT_TEMPLATE = `
-At the very top of the packaging, a bold red header band displays the text: '[Name] the [Title]' in large, clear, white letters.
-Full product shot of a highly detailed action figure of a person, fully encased in a
-clear plastic blister pack with a colorful cardboard backing. The main action figure
-is a realistic human based on [character description], with lifelike features and natural
-proportions. The action figure is shown in full body, including legs, standing upright
-inside the blister pack. The packaging is the main focus, with a clear plastic bubble covering
-the entire figure and all accessories. Inside the blister pack are compartments for
-each coding language and its animal ([key items]), as well as coding-related
-accessories such as a keyboard, laptop, or code book. Each item is in its own
-separate compartment. The packaging is centered on a white background, with a red
-header band reading '[Name] the [Title]' in bold white text, and an 'Ages [X]+' label.
-Professional retail packaging with detailed labeling and product information. Sharp
-focus on packaging details. No cropping of the blister pack.
-`;
-
-const ACTION_FIGURE_PROMPT_WITH_IMAGE_TEMPLATE = `
-At the very top of the packaging, a bold red header band displays the text:
-'[Name] the [Title]' in large, clear, white letters.
-Full product shot of a highly detailed action figure, fully encased in a clear plastic
-blister pack with a colorful cardboard backing. The packaging, accessories, and
-compartments are the main focus. The action figure is shown in full body, including
-legs, standing upright inside the blister pack. Inside the blister pack are
-compartments for each coding language and its animal ([key items]), as well as
-coding-related accessories such as a keyboard, laptop, or code book. Each item is in
-its own separate compartment. The figure's facial features are subtly inspired by:
-[person_features]. The packaging is centered on a white background, with an 'Ages [X]+'
-label. Professional retail packaging with detailed labeling and product information.
-Sharp focus on packaging details. No cropping of the blister pack.
-`;
-
-// Helper function to build the Action Figure prompt
-function buildActionFigurePrompt(
-  username: string,
-  figureDescription: string,
-  animalSelection: string[] | undefined, // Keep for now, might be useful later
-  languages: string, // Keep languages for potential future use
-  baseConceptPrompt: string // Add the base prompt from DB/Langflow
-): string {
-  const name = username.charAt(0).toUpperCase() + username.slice(1);
-
-  // --- Set Title directly --- 
-  const title = "Code Beast"; // Always use "Code Beast" as the title
-  // --- Removed logic to extract from baseConceptPrompt --- 
-
-  // --- Use animalSelection for key items if present --- 
-  const keyItemsPrefixToRemove = "Create an illustration of a whimsical chimera featuring ";
-  let cleanedKeyItems = baseConceptPrompt;
-  if (cleanedKeyItems.toLowerCase().startsWith(keyItemsPrefixToRemove.toLowerCase())) {
-      cleanedKeyItems = cleanedKeyItems.substring(keyItemsPrefixToRemove.length);
-      console.log("buildActionFigurePrompt: Removed prefix from key items string.");
-  }
-  const keyItems = (animalSelection && animalSelection.length > 0)
-    ? animalSelection.join(', ')
-    : '';
-  // --- End Accessory Generation ---
-
-  const ages = "All";
-  return ACTION_FIGURE_PROMPT_TEMPLATE
-    .replace('[character description]', figureDescription)
-    .replace('[Name]', name)
-    .replace('[Title]', title) // Use the fixed "Code Beast" title
-    .replace('[X]', ages)
-    .replace('[key items]', keyItems); // Use animalSelection or cleaned base prompt here
-}
-
-// Helper function to clean the language string
-function cleanLanguagesString(rawLangString: string | undefined): string {
-  if (!rawLangString) return '';
-  // Remove prefix like "languages:", brackets [], and single quotes '
-  return rawLangString.replace(/^languages:\s*\[|\]|'/g, '').trim();
-}
-
-// Helper function to clean the GitHub URL
-function cleanGithubUrl(rawUrl: string | undefined, username: string): string {
-  const fallbackUrl = `https://github.com/${username.toLowerCase()}`;
-  if (!rawUrl) {
-    console.warn(`cleanGithubUrl: Raw URL missing. Returning fallback: ${fallbackUrl}`);
-    return fallbackUrl;
-  } 
-  
-  const githubPrefix = 'https://github.com/';
-  const index = rawUrl.indexOf(githubPrefix);
-  
-  if (index !== -1) {
-    const extractedUrl = rawUrl.substring(index);
-    console.log(`cleanGithubUrl: Extracted "${extractedUrl}" from "${rawUrl}"`);
-    return extractedUrl;
-  } 
-  
-  console.warn(`cleanGithubUrl: Unexpected format for rawUrl: "${rawUrl}". Returning fallback: ${fallbackUrl}`);
-  return fallbackUrl;
-}
-
-// Adjust helper to take Buffer
-function bufferToDataURI(buffer: Buffer, mimeType: string): string {
-  return `data:${mimeType};base64,${buffer.toString('base64')}`;
-}
-
-// Helper function to process animalSelection from any source
-function processAnimalSelection(rawSelection: any): string[] | undefined {
-  if (Array.isArray(rawSelection)) {
-    const flattened: any[] = rawSelection.flat();
-    const filteredStrings: string[] = [];
-    for (const item of flattened) {
-      if (typeof item === 'string') {
-        const trimmedItem = item.trim();
-        if (trimmedItem !== '') {
-          filteredStrings.push(trimmedItem);
-        }
-      } else if (typeof item === 'object' && item !== null) {
-        const entries = Object.entries(item);
-        for (const [key, value] of entries) {
-          filteredStrings.push(`${key}: ${value}`);
-        }
-      }
-    }
-    if (filteredStrings.length > 0) {
-      return filteredStrings;
-    }
-  } else if (typeof rawSelection === 'string') {
-    const trimmedSelection = rawSelection.trim();
-    if (trimmedSelection !== '') {
-      return [trimmedSelection];
-    }
-  }
-  return undefined;
-}
 
 // --- Refactored Data Fetching --- 
 async function getUserPromptDetails(normalizedUsername: string): Promise<PromptDetails> {
@@ -290,110 +121,6 @@ async function getUserPromptDetails(normalizedUsername: string): Promise<PromptD
     animalSelection: animals,
     source: 'langflow',
   };
-}
-
-// --- NEW: OpenAI Image Analysis Helper --- 
-async function analyzeImageWithOpenAI(imageDataUri: string): Promise<string | null> {
-    if (!openai) {
-        console.log("OpenAI client not initialized. Skipping image analysis.");
-        return null; // Skip if key is missing
-    }
-    console.log("API Route: Analyzing image with OpenAI GPT-4 Vision...");
-    try {
-        const response = await openai.chat.completions.create({
-            model: "gpt-4-turbo", 
-            messages: [
-                {
-                    role: "user",
-                    content: [
-                        {
-                            type: "text",
-                            text: "Analyze the primary person in the image. Provide a concise paragraph describing only their key visual appearance features relevant for character creation. Focus on details like: Hair color/style, eye color, skin tone, dominant facial expression (e.g., smiling, neutral), glasses (if any), hat (if any), clothing colors/style, beard/mustache, and any other very prominent visual features. Do not describe the background or overall scene. If no clear person is visible, state 'No person detected'."
-                        },
-                        {
-                            type: "image_url",
-                            image_url: {
-                                url: imageDataUri,
-                            },
-                        },
-                    ],
-                },
-            ],
-            max_tokens: 150, // Allow slightly more tokens for a paragraph
-        });
-        const description = response.choices[0]?.message?.content;
-        console.log("API Route: OpenAI Vision analysis result (paragraph attempt):", description);
-        // Basic check
-        if (description && !description.toLowerCase().includes('no person detected')) {
-             // Clean up potential markdown or extra spacing, just in case
-             return description.replace(/[\*#]/g, '').replace(/\s+/g, ' ').trim(); 
-        } 
-        return null; // Return null if no person or empty response
-    } catch (error) {
-        console.error("API Route: Error calling OpenAI Vision API:", error);
-        // Decide how to handle - return null or throw? Returning null allows fallback.
-        return null; 
-    }
-}
-
-// --- Refactored Image Generation (Remove strength) --- 
-async function generateImage( 
-  prompt: string, 
-  type: 'txt2img', // <-- Revert to only txt2img
-  // Remove img2img specific options
-  options: { height?: number; width?: number; imageCount?: number } = {}
-): Promise<{ imageUrl: string; success: boolean }> {
-  try {
-    console.log(`API Route: Calling EverArt create (${type})...`);
-    
-    // Simplify baseParams - no image or strength needed
-    const baseParams: { 
-        imageCount?: number; 
-        height?: number; 
-        width?: number; 
-    } = {
-        imageCount: options.imageCount ?? 1,
-        height: options.height ?? 512,
-        width: options.width ?? 512,
-    };
-
-    // Remove img2img conditional logic
-    // if (type === 'img2img') { ... }
-
-    // Log params being sent
-    console.log("API Route: Sending params to EverArt:", 
-        JSON.stringify({ 
-            model_id: '5000', 
-            prompt_length: prompt.length, 
-            type, 
-            imageCount: baseParams.imageCount, 
-            height: baseParams.height, 
-            width: baseParams.width 
-            // Remove image_present and strength from log
-        })
-    );
-
-    const generations = await everart.v1.generations.create(
-      '5000', 
-      prompt,
-      type, // Will always be txt2img now from calling context
-      baseParams
-    ) as Generation[];
-
-    if (!generations || generations.length === 0) {
-      throw new Error(`No generations returned from EverArt (${type})`);
-    }
-
-    const result = await everart.v1.generations.fetchWithPolling(generations[0].id) as Generation;
-    console.log(`EverArt generation result (${type} path):`, result);
-    const finalImageUrl = result.image_url || FALLBACK_IMAGE_URL;
-    
-    return { imageUrl: finalImageUrl, success: !!result.image_url };
-
-  } catch (error) {
-    console.error(`Error calling EverArt API (${type}):`, error);
-    return { imageUrl: FALLBACK_IMAGE_URL, success: false };
-  }
 }
 
 export async function POST(request: Request) {
@@ -523,11 +250,13 @@ export async function POST(request: Request) {
         if (emotion === "Action Figure") {
             // Use the original base prompt (chimera description) directly
             finalPrompt = buildActionFigurePrompt(
+                ACTION_FIGURE_PROMPT_TEMPLATE,
                 normalizedUsername, 
                 promptDetails.basePrompt, // Pass the original chimera description
                 promptDetails.animalSelection, 
                 promptDetails.cleanedLanguages,
-                promptDetails.basePrompt
+                promptDetails.basePrompt,
+                undefined // personFeatures
             );
         } else {
             finalPrompt = `A ${emotion} ${PROMPT_PREFIX}${promptDetails.basePrompt}`;
@@ -538,7 +267,7 @@ export async function POST(request: Request) {
 
     // --- Generate Image (Always Txt2Img now) --- 
     console.log("API Route: Attempting Txt2Img generation...");
-    imageResult = await generateImage(finalPrompt, 'txt2img');
+    imageResult = await generateImage(finalPrompt, 'txt2img', {}, FALLBACK_IMAGE_URL);
 
     // --- Save Generation Result to DB --- 
     if (imageResult.success) {
