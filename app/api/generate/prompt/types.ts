@@ -12,6 +12,6 @@ export type PromptDetails = {
   cleanedLanguages: string;
   cleanedGithubUrl: string;
   repoCount: number | undefined;
-  animalSelection: string[] | undefined;
+  animalSelection: (string | string[])[] | undefined;
   source: 'cache' | 'langflow';
 }; 
