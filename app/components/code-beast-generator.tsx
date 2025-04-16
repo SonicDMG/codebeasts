@@ -258,7 +258,7 @@ export default function CodeBeastGenerator() {
                     id="imageUpload"
                     ref={fileInputRef} // <-- Assign ref
                     type="file"
-                    accept="image/*"
+                    accept="image/png, image/jpeg, image/jpg, image/webp"
                     onChange={handleFileChange}
                     disabled={loading}
                     className="hidden"
