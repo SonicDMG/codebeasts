@@ -24,16 +24,29 @@ async function fetchGalleryImages() {
 
 export function Gallery() {
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [searchQuery, setSearchQuery] = React.useState("");
   const { data: images = [], isLoading, error } = useQuery<ImageRecord[]>({
     queryKey: ["gallery"],
     queryFn: fetchGalleryImages,
   });
   const router = useRouter();
 
-  const totalPages = Math.ceil(images.length / ITEMS_PER_PAGE);
+  // Sort images by username (case-insensitive)
+  const sortedImages = React.useMemo(() =>
+    [...images].sort((a, b) => a.username.localeCompare(b.username, undefined, { sensitivity: 'base' })),
+    [images]
+  );
+
+  // Filter images by search query (case-insensitive)
+  const filteredImages = React.useMemo(() =>
+    sortedImages.filter(img => img.username.toLowerCase().includes(searchQuery.toLowerCase())),
+    [sortedImages, searchQuery]
+  );
+
+  const totalPages = Math.ceil(filteredImages.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentImages = images.slice(startIndex, endIndex);
+  const currentImages = filteredImages.slice(startIndex, endIndex);
 
   const handleNextPage = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
@@ -42,6 +55,11 @@ export function Gallery() {
   const handlePrevPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
+
+  // Reset to first page when search query changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   if (isLoading) {
     return (
@@ -78,6 +96,15 @@ export function Gallery() {
 
   return (
     <>
+      <div className="flex justify-center mb-6">
+        <input
+          type="text"
+          className="w-full max-w-xs px-3 py-2 border border-gray-600 rounded-md bg-[#161B22] text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Search by username..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+        />
+      </div>
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 mb-8">
         {currentImages.map((image: ImageRecord) => (
           <div
