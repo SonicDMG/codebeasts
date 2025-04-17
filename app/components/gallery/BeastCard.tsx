@@ -2,10 +2,7 @@
 
 import React, { useRef } from 'react';
 import { Card, CardContent } from "@/app/components/ui/card";
-import { Button } from "@/app/components/ui/button";
-import { Download, Share2 } from "lucide-react";
 import Image from "next/image";
-import { toast } from "sonner";
 import { BeastActions } from "./BeastActions";
 
 interface BeastCardProps {

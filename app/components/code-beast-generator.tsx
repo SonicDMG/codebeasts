@@ -12,11 +12,9 @@ import {
   SelectValue,
 } from "@/app/components/ui/select";
 import { toast } from "sonner";
-import Image from "next/image";
-import { Sparkles, Share2, X } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import { RepositoryInfo } from "./github/RepositoryInfo";
 import NProgress from 'nprogress';
-import { BeastActions } from "./gallery/BeastActions";
 import { GeneratedImage } from "./github/GeneratedImage";
 
 // GitHub username validation regex
@@ -59,8 +57,6 @@ export default function CodeBeastGenerator() {
     isImg2Img?: boolean; // Flag to indicate if img2img was used
   } | null>(null);
 
-  // Add state for toastId
-  const [toastId, setToastId] = useState<string | number | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null); // <-- Add ref for file input
 
   // Updated onChange handler for username input
@@ -120,7 +116,6 @@ export default function CodeBeastGenerator() {
     const currentToastId = toast.message("Starting Generation...", { 
       description: "Please wait while we fetch data..."
     }); 
-    setToastId(currentToastId); 
 
     try {
       let apiPayload: { username: string, emotion: string } | FormData;
