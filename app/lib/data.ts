@@ -1,3 +1,4 @@
+/* eslint-env node */
 import { ImageRecord } from "@/app/api/db/astra";
 
 // Moved from app/direct/[username]/page.tsx

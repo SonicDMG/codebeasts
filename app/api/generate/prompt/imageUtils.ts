@@ -1,3 +1,4 @@
+/* eslint-env node */
 /**
  * imageUtils.ts
  *
@@ -5,7 +6,6 @@
  * Includes helpers for buffer conversion, OpenAI Vision analysis, and EverArt image generation.
  */
 
-import sharp from 'sharp';
 import { Buffer } from 'buffer';
 import OpenAI from 'openai';
 import EverArt from 'everart';

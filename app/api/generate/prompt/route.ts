@@ -1,3 +1,4 @@
+/* eslint-env node */
 import { NextResponse } from "next/server";
 import { getUserDetails, upsertImage } from "../../../lib/db/astra";
 import sharp from 'sharp';
@@ -224,7 +225,6 @@ export async function POST(request: Request) {
 
     // --- Build Final Prompt & Determine Generation Type --- 
     // No longer determining type, always txt2img after potential analysis
-    const baseCharacterPrompt = promptDetails.basePrompt;
     
     if (imageProvided && imageAnalysisDescription && !imageAnalysisDescription.toLowerCase().includes('no person detected')) {
         // --- Build prompt using person features as style reference, not main subject --- 

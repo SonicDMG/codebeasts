@@ -1,3 +1,4 @@
+/* eslint-env jest */
 import { buildActionFigurePrompt } from './promptUtils';
 import { ACTION_FIGURE_PROMPT_TEMPLATE, ACTION_FIGURE_PROMPT_WITH_IMAGE_TEMPLATE } from './promptTemplates';
 import {
