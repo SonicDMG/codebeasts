@@ -136,13 +136,13 @@ export function buildActionFigurePrompt(
     .map(pair => pair.filter(Boolean).join(' '))
     .join(', ');
   let prompt = promptTemplate
-    .replace('[character description]', figureDescription)
-    .replace('[Name]', name)
-    .replace('[Title]', title)
-    .replace('[X]', ages)
-    .replace('[key items]', keyItems);
+    .replace(/\[character description\]/g, figureDescription)
+    .replace(/\[Name\]/g, name)
+    .replace(/\[Title\]/g, title)
+    .replace(/\[X\]/g, ages)
+    .replace(/\[key items\]/g, keyItems);
   if (personFeatures) {
-    prompt = prompt.replace('[person_features]', personFeatures);
+    prompt = prompt.replace(/\[person_features\]/g, personFeatures);
   }
   return prompt;
 } 

@@ -21,6 +21,7 @@ separate compartment. The packaging is centered on a white background, with a re
 header band reading '[Name] the [Title]' in bold white text, and an 'Ages [X]+' label.
 Professional retail packaging with detailed labeling and product information. Sharp
 focus on packaging details. No cropping of the blister pack.
+No revealing clothing, no sexualization, no swimsuits, no lingerie.
 `;
 
 export const ACTION_FIGURE_PROMPT_WITH_IMAGE_TEMPLATE = `
@@ -33,7 +34,7 @@ legs, standing upright inside the blister pack. Inside the blister pack are
 compartments for each coding language and its animal ([key items]), as well as
 coding-related accessories such as a keyboard, laptop, or code book. Each item is in
 its own separate compartment. The figure's facial features are subtly inspired by:
-[person_features]. The packaging is centered on a white background, with an 'Ages [X]+'
-label. Professional retail packaging with detailed labeling and product information.
+[person_features]. The packaging is centered on a white background, with a red header band reading '[Name] the [Title]' in bold white text, and an 'Ages [X]+' label. Professional retail packaging with detailed labeling and product information.
 Sharp focus on packaging details. No cropping of the blister pack.
+No revealing clothing, no sexualization, no swimsuits, no lingerie.
 `; 
