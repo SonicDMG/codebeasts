@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@datastax/astra-db-ts": "^1.5.0",
+    "@eslint/js": "^9.24.0",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-aspect-ratio": "^1.1.2",
@@ -43,10 +44,12 @@
     "clsx": "^2.1.0",
     "cmdk": "^1.1.1",
     "embla-carousel-react": "^8.6.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "everart": "^1.2.2",
-    "formidable": "^3.5.2",
+    "globals": "^16.0.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.358.0",
+    "nanoid": "^5.1.5",
     "next": "^15.2.4",
     "next-themes": "^0.3.0",
     "nprogress": "^0.2.0",
@@ -65,7 +68,6 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/formidable": "^3.4.5",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.11.25",
     "@types/nprogress": "^0.2.3",
