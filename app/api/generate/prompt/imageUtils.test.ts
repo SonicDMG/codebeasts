@@ -1,6 +1,5 @@
 /* eslint-env jest */
-/* global process */
-/* global Buffer */
+/* global jest, describe, it, expect, Buffer, process */
 process.env.EVERART_API_KEY = 'test-key';
 
 // Default mocks for OpenAI and EverArt

@@ -191,7 +191,7 @@ export default function CodeBeastGenerator() {
   const languageList = generatedData?.languages
     ?.split(",")
     // Trim whitespace AND remove leading/trailing brackets
-    .map(lang => lang.trim().replace(/\s*[\[\]]|[\[\]]\s*/g, '').trim())
+    .map(lang => lang.trim().replace(/\s*[\[\]]|[\[\]]\s*/g, '').trim()) // This is correct for matching literal brackets
     .filter(Boolean) // Remove empty strings resulting from cleaning
     // Keep filter for [None... placeholders (filtering single/double brackets is now less critical here)
     .filter(lang => !lang.startsWith('[None')) 

@@ -1,7 +1,6 @@
 import { BeastCard } from "@/app/components/gallery/BeastCard";
 import { Card } from "@/app/components/ui/card";
 import Link from "next/link";
-import { ImageRecord } from "@/app/api/db/astra";
 import { getImageForUser } from "@/app/lib/data";
 
 // Applying 'any' workaround for props due to Next.js 15 build issue

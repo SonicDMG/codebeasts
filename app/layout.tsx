@@ -1,3 +1,4 @@
+import React from 'react';
 import "@/app/globals.css";
 import "nprogress/nprogress.css";
 import { Inter } from "next/font/google";

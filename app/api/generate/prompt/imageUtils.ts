@@ -60,7 +60,7 @@ export async function analyzeImageWithOpenAI(imageDataUri: string): Promise<stri
   });
   const description = response.choices[0]?.message?.content;
   if (description && !description.toLowerCase().includes('no person detected')) {
-    return description.replace(/[\*#]/g, '').replace(/\s+/g, ' ').trim();
+    return description.replace(/\*/g, '').replace(/\s+/g, ' ').trim();
   }
   return null;
 }
