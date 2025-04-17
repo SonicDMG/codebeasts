@@ -13,7 +13,6 @@ export const useGalleryData = (itemsPerPage = 20) => {
   const [currentPage, setCurrentPage] = useState(1);
   const previousDataRef = useRef<CodeBeast[]>([]);
   const isInitialLoadRef = useRef(true);
-  const autoRefreshCountRef = useRef(0);
   
   // Track new beasts with their timestamps - using a composite key to handle multiple beasts per username
   const [newBeasts, setNewBeasts] = useState<{[key: string]: number}>({});

@@ -21,7 +21,6 @@ import {
 } from "@/app/components/ui/select";
 import { Textarea } from "@/app/components/ui/textarea";
 import { useToast } from "@/app/components/ui/use-toast";
-import { Input } from "@/app/components/ui/input";
 
 const models = [
   { id: "5000", name: "FLUX1.1", description: "Standard quality" },

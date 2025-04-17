@@ -4,7 +4,7 @@
  * selected for the CodeBeast generation.
  */
 
-import { FileCode2, GitFork } from 'lucide-react';
+import { GitFork } from 'lucide-react';
 import { Card } from "@/app/components/ui/card";
 import { normalizeAnimalSelection } from "@/app/api/generate/prompt/promptUtils";
 
@@ -15,11 +15,6 @@ interface RepositoryInfoProps {
   githubUrl?: string;
   animalSelection?: string[];
 }
-
-const isPlaceholder = (item: string | undefined | null): boolean => {
-  if (typeof item !== 'string') return true;
-  return item === '[]' || item.startsWith('[None');
-};
 
 export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animalSelection }: RepositoryInfoProps) => {
   console.log("RepositoryInfo Component received languages:", languages);

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { BeastCard } from '../gallery/BeastCard';
 
 interface GeneratedImageProps {

@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for image-related actions such as downloading and social sharing.
  * Provides functionality for downloading CodeBeast images and sharing them on Twitter
