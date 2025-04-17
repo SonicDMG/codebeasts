@@ -36,10 +36,6 @@ export const shareOnTwitter = (imageUrl: string, handle: string) => {
   
   // Update the meta tags for Twitter card
   const metaImage = document.querySelector('meta[property="og:image"]');
-  const metaTitle = document.querySelector('meta[property="og:title"]');
-  const metaDescription = document.querySelector('meta[property="og:description"]');
-  
-  // Always update the image URL to the app logo
   if (metaImage) {
     metaImage.setAttribute('content', appLogoUrl);
   } else {

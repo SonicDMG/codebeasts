@@ -1,4 +1,5 @@
 /* eslint-env node */
+/* global process */
 import { NextResponse } from "next/server";
 import { getUserDetails, upsertImage } from "../../../lib/db/astra";
 import sharp from 'sharp';

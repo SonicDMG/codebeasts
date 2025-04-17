@@ -1,4 +1,5 @@
 /* eslint-env node */
+/* global process */
 import { NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 

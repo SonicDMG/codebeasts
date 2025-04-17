@@ -1,4 +1,5 @@
 /* eslint-env node */
+/* global process */
 /**
  * imageUtils.ts
  *

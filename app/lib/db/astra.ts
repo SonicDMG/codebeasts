@@ -1,4 +1,5 @@
 /* eslint-env node */
+/* global process */
 import { DataAPIClient } from "@datastax/astra-db-ts";
 
 // Types

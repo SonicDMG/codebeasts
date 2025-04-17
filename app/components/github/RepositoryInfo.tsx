@@ -9,14 +9,13 @@ import { Card } from "@/app/components/ui/card";
 import { normalizeAnimalSelection } from "@/app/api/generate/prompt/promptUtils";
 
 interface RepositoryInfoProps {
-  repoCount: number;
-  languages: string[];
-  prompt: string;
+  repoCount?: number;
+  languages?: string[];
   githubUrl?: string;
   animalSelection?: string[];
 }
 
-export const RepositoryInfo = ({ repoCount, languages, prompt, githubUrl, animalSelection }: RepositoryInfoProps) => {
+export const RepositoryInfo = ({ repoCount = 0, languages = [], githubUrl, animalSelection }: RepositoryInfoProps) => {
   console.log("RepositoryInfo Component received languages:", languages);
   return (
     <div className="space-y-4">

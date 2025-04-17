@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useState, useRef } from "react";
 import { Card, CardContent } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
@@ -190,7 +191,7 @@ export default function CodeBeastGenerator() {
   const languageList = generatedData?.languages
     ?.split(",")
     // Trim whitespace AND remove leading/trailing brackets
-    .map(lang => lang.trim().replace(/^\s*[\[\]]|[\[\]]\s*$/g, '').trim())
+    .map(lang => lang.trim().replace(/\s*[\[\]]|[\[\]]\s*/g, '').trim())
     .filter(Boolean) // Remove empty strings resulting from cleaning
     // Keep filter for [None... placeholders (filtering single/double brackets is now less critical here)
     .filter(lang => !lang.startsWith('[None')) 
@@ -306,9 +307,7 @@ export default function CodeBeastGenerator() {
                     <RepositoryInfo 
                       repoCount={generatedData.repoCount ?? 0}
                       languages={languageList}
-                      prompt={generatedData.prompt}
                       githubUrl={generatedData.githubUrl}
-                      // Pass the raw data
                       animalSelection={generatedData.animalSelection}
                     />
                   )}

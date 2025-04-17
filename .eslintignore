@@ -1,0 +1,11 @@
+# Ignore Next.js build output
+.next/
+
+# Ignore all declaration files
+types/*.d.ts
+*.d.ts
+
+# Ignore other common build artifacts
+dist/
+build/
+coverage/ 

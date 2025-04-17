@@ -1,3 +1,4 @@
+/* global global */
 // Import types for the tools
 type EverArtGenerateImageParams = {
   prompt: string;

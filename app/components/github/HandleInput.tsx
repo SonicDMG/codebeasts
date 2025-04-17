@@ -3,6 +3,7 @@
  * Includes loading state handling and keyboard event support for submission.
  */
 
+import React from 'react';
 import { Input } from '@/app/components/ui/input';
 import { Button } from '@/app/components/ui/button';
 import { Loader2 } from 'lucide-react';
