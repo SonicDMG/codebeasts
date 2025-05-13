@@ -57,8 +57,8 @@ export const downloadImage = async (imageUrl: string, handle: string, toast: any
     ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.textBaseline = 'bottom';
     ctx.textAlign = 'right';
-    const textPaddingX = Math.round(width * 0.015);
-    const textPaddingY = Math.round(width * 0.012);
+    const textPaddingX = 8;
+    const textPaddingY = 8;
     const textMetrics = ctx.measureText(labelText);
     const labelWidth = textMetrics.width + textPaddingX * 2;
     const labelHeight = fontSize + textPaddingY * 2;
@@ -229,9 +229,9 @@ export const printImage = async (imageUrl: string, handle: string, toast: any) =
     );
 
     // Step 3: Composite overlays (QR code and label) within the 5x7 area
-    // Draw QR code in the bottom left with 8px margin
+    // Draw QR code in the bottom left with 16px margin
     const qrSize = Math.round(printWidth * 0.15);
-    const qrMargin = 8;
+    const qrMargin = 24;
     imgCtx.drawImage(qrImg, qrMargin, printHeight - qrSize - qrMargin, qrSize, qrSize);
 
     // Draw the 'Generated with Langflow' label in the bottom right (within print bounds)
@@ -240,8 +240,8 @@ export const printImage = async (imageUrl: string, handle: string, toast: any) =
     imgCtx.font = `bold ${fontSize}px sans-serif`;
     imgCtx.textBaseline = 'bottom';
     imgCtx.textAlign = 'right';
-    const textPaddingX = Math.round(printWidth * 0.015);
-    const textPaddingY = Math.round(printWidth * 0.012);
+    const textPaddingX = 24;
+    const textPaddingY = 24;
     const textMetrics = imgCtx.measureText(labelText);
     const labelWidth = textMetrics.width + textPaddingX * 2;
     const labelHeight = fontSize + textPaddingY * 2;

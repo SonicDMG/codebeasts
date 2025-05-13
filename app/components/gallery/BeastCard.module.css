@@ -1,13 +1,13 @@
 .qrOverlay {
   position: absolute;
-  bottom: 8px;
-  left: 8px;
+  bottom: 4px;
+  left: 4px;
   width: 15%;
   height: auto;
-  min-width: 40px;
-  min-height: 40px;
-  max-width: 80px;
-  max-height: 80px;
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 64px;
+  max-height: 64px;
   z-index: 20;
   background: white;
   border-radius: 8px 0 8px 0;
@@ -18,14 +18,14 @@
 
 .labelOverlay {
   position: absolute;
-  right: 0.8vw;
-  bottom: 0.8vw;
+  right: 0.5vw;
+  bottom: 0.5vw;
   background: rgba(0,0,0,0.6);
   color: #fff;
   font-size: 1.1vw;
   font-weight: bold;
   border-radius: 12px;
-  padding: 0.5em 1.2em;
+  padding: 0.25em 0.7em;
   text-shadow: 1px 1px 2px black;
   pointer-events: auto;
   z-index: 21;
@@ -36,19 +36,31 @@
 @media (max-width: 600px) {
   .labelOverlay {
     font-size: 12px;
-    padding: 0.3em 0.7em;
+    padding: 0.2em 0.5em;
     border-radius: 8px;
   }
   .qrOverlay {
-    min-width: 32px;
-    min-height: 32px;
-    max-width: 48px;
-    max-height: 48px;
+    min-width: 24px;
+    min-height: 24px;
+    max-width: 40px;
+    max-height: 40px;
   }
 }
 
 @media print {
-  .qrOverlay, .labelOverlay {
-    display: block;
+  .qrOverlay {
+    bottom: 16px !important;
+    left: 16px !important;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 80px;
+    max-height: 80px;
+  }
+  .labelOverlay {
+    right: 16px !important;
+    bottom: 16px !important;
+    padding: 0.5em 1.2em !important;
+    border-radius: 16px !important;
+    font-size: 18px !important;
   }
 } 
