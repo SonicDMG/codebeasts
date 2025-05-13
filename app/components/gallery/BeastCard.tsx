@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import { Card, CardContent } from "@/app/components/ui/card";
 import Image from "next/image";
 import { BeastActions } from "./BeastActions";
+import styles from './BeastCard.module.css';
 
 interface BeastCardProps {
   beast: {
@@ -105,9 +106,16 @@ export function BeastCard({ beast, showActions = false }: BeastCardProps) {
               maskImage: 'radial-gradient(ellipse 50% 60% at center, black 20%, transparent 50%)',
               WebkitMaskImage: 'radial-gradient(ellipse 50% 60% at center, black 20%, transparent 50%)',
               filter: 'brightness(1.0) drop-shadow(0 0 0px transparent)',
-              transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-out, filter 0.3s ease-out' // Keep transitions
+              transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-out, filter 0.3s ease-out'
             }} 
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            aria-hidden="true"
+          />
+          {/* QR Code Overlay */}
+          <img
+            src="/images/to_langflow.png"
+            alt="QR Code to Langflow"
+            className={styles.qrOverlay}
             aria-hidden="true"
           />
           <div ref={scanLineRef} className="scan-line-overlay" />
@@ -115,15 +123,7 @@ export function BeastCard({ beast, showActions = false }: BeastCardProps) {
             href="https://langflow.new/ui/f/codebeasts"
             target="_blank"
             rel="noopener noreferrer"
-            className="absolute bottom-4 right-4 text-white text-sm font-semibold hover:underline focus:underline"
-            style={{
-              textShadow: '1px 1px 2px black',
-              backgroundColor: 'rgba(0,0,0,0.3)',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              pointerEvents: 'auto',
-              zIndex: 10
-            }}
+            className={styles.labelOverlay + ' hover:underline focus:underline'}
             aria-label="Learn more about Langflow"
           >
             Generated with Langflow

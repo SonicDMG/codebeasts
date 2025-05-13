@@ -6,27 +6,98 @@
 
 export const downloadImage = async (imageUrl: string, handle: string, toast: any) => {
   try {
-    const response = await fetch(imageUrl);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
+    // Use proxy for Google Cloud Storage images
+    let proxiedUrl = imageUrl;
+    if (imageUrl.startsWith('https://storage.googleapis.com/')) {
+      proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+    }
+
+    // Load the main CodeBeast image
+    const codebeastImg = new window.Image();
+    codebeastImg.crossOrigin = 'anonymous';
+    codebeastImg.src = proxiedUrl;
+
+    // Load the QR code image
+    const qrImg = new window.Image();
+    qrImg.crossOrigin = 'anonymous';
+    qrImg.src = '/images/to_langflow.png';
+
+    // Wait for both images to load
+    await Promise.all([
+      new Promise((resolve, reject) => {
+        codebeastImg.onload = () => { resolve(undefined); };
+        codebeastImg.onerror = (e) => { reject(e); };
+      }),
+      new Promise((resolve, reject) => {
+        qrImg.onload = () => { resolve(undefined); };
+        qrImg.onerror = (e) => { reject(e); };
+      })
+    ]);
+
+    // Create a canvas with the same size as the CodeBeast image
+    const width = codebeastImg.width;
+    const height = codebeastImg.height;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Could not get canvas context');
+
+    // Draw the CodeBeast image
+    ctx.drawImage(codebeastImg, 0, 0, width, height);
+
+    // Draw QR code in the absolute upper left (no padding)
+    const qrSize = Math.round(width * 0.15);
+    ctx.drawImage(qrImg, 0, 0, qrSize, qrSize);
+
+    // Draw the 'Generated with Langflow' label in the bottom right
+    const labelText = 'Generated with Langflow';
+    const fontSize = Math.round(width * 0.035); // Responsive font size
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.textBaseline = 'bottom';
+    ctx.textAlign = 'right';
+    const textPaddingX = Math.round(width * 0.015);
+    const textPaddingY = Math.round(width * 0.012);
+    const textMetrics = ctx.measureText(labelText);
+    const labelWidth = textMetrics.width + textPaddingX * 2;
+    const labelHeight = fontSize + textPaddingY * 2;
+    const labelX = width - textPaddingX;
+    const labelY = height - textPaddingY;
+
+    // Draw background (dark translucent, rounded corners)
+    ctx.save();
+    ctx.beginPath();
+    const radius = Math.round(fontSize * 0.6);
+    ctx.moveTo(labelX - labelWidth + radius, labelY - labelHeight);
+    ctx.lineTo(labelX - radius, labelY - labelHeight);
+    ctx.quadraticCurveTo(labelX, labelY - labelHeight, labelX, labelY - labelHeight + radius);
+    ctx.lineTo(labelX, labelY - radius);
+    ctx.quadraticCurveTo(labelX, labelY, labelX - radius, labelY);
+    ctx.lineTo(labelX - labelWidth + radius, labelY);
+    ctx.quadraticCurveTo(labelX - labelWidth, labelY, labelX - labelWidth, labelY - radius);
+    ctx.lineTo(labelX - labelWidth, labelY - labelHeight + radius);
+    ctx.quadraticCurveTo(labelX - labelWidth, labelY - labelHeight, labelX - labelWidth + radius, labelY - labelHeight);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fill();
+    ctx.restore();
+
+    // Draw text
+    ctx.fillStyle = '#fff';
+    ctx.fillText(labelText, labelX - textPaddingX, labelY - textPaddingY);
+
+    // Download the composited image
+    const url = canvas.toDataURL('image/png');
     const a = document.createElement('a');
     a.href = url;
     a.download = `codebeast-${handle}.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
 
-    toast({
-      title: "Download started",
-      description: "Your CodeBeast image is being downloaded.",
-    });
+    toast('Your CodeBeast image (with QR code) is being downloaded.');
   } catch (error) {
-    toast({
-      title: "Download failed",
-      description: "There was an error downloading your image.",
-      variant: "destructive",
-    });
+    toast.error('There was an error downloading your image.');
   }
 };
 

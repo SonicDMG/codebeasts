@@ -1,0 +1,55 @@
+.qrOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 15%;
+  height: auto;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 80px;
+  max-height: 80px;
+  z-index: 20;
+  background: white;
+  border-radius: 8px 0 8px 0;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  /* Print-friendly: always visible */
+  print-color-adjust: exact;
+}
+
+.labelOverlay {
+  position: absolute;
+  right: 0.8vw;
+  bottom: 0.8vw;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-size: 1.1vw;
+  font-weight: bold;
+  border-radius: 12px;
+  padding: 0.5em 1.2em;
+  text-shadow: 1px 1px 2px black;
+  pointer-events: auto;
+  z-index: 21;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+@media (max-width: 600px) {
+  .labelOverlay {
+    font-size: 12px;
+    padding: 0.3em 0.7em;
+    border-radius: 8px;
+  }
+  .qrOverlay {
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 48px;
+    max-height: 48px;
+  }
+}
+
+@media print {
+  .qrOverlay, .labelOverlay {
+    display: block;
+  }
+} 

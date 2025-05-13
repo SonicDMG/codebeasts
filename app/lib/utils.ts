@@ -6,22 +6,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function downloadImageClientSide(imageUrl: string, username: string) {
-  if (typeof window === "undefined") return;
-
-  try {
-    const apiUrl = `/api/download?url=${encodeURIComponent(imageUrl)}&username=${encodeURIComponent(username)}`;
-    
-    window.location.href = apiUrl;
-
-    toast.success("CodeBeast download initiated...");
-
-  } catch (error) {
-    console.error("Download initiation error:", error);
-    toast.error("Failed to initiate download.");
-  }
-}
-
 // Moved from app/components/code-beast-generator.tsx
 // Note: This relies on window object, so it's client-side only.
 export function shareOnTwitterClientSide(username: string) {

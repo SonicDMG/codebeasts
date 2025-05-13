@@ -21,6 +21,7 @@ import {
 } from "@/app/components/ui/select";
 import { Textarea } from "@/app/components/ui/textarea";
 import { useToast } from "@/app/components/ui/use-toast";
+import { downloadImage } from "@/app/utils/imageActions";
 
 const models = [
   { id: "5000", name: "FLUX1.1", description: "Standard quality" },
@@ -142,14 +143,7 @@ export function ImageGeneration() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => {
-                const link = document.createElement("a");
-                link.href = generatedImage;
-                link.download = "generated-image.png";
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              }}
+              onClick={() => downloadImage(generatedImage, prompt || "image", toast)}
             >
               Download
             </Button>

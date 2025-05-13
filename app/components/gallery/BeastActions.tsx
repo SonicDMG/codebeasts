@@ -3,7 +3,8 @@
 import { Button } from "@/app/components/ui/button";
 import { Download, Share2 } from "lucide-react";
 import { toast } from "sonner";
-import { downloadImageClientSide, shareOnTwitterClientSide } from "@/app/lib/utils";
+import { downloadImage } from "@/app/utils/imageActions";
+import { shareOnTwitterClientSide } from "@/app/lib/utils";
 
 interface BeastActionsProps {
   imageUrl: string;
@@ -11,7 +12,7 @@ interface BeastActionsProps {
 }
 
 export function BeastActions({ imageUrl, username }: BeastActionsProps) {
-  const handleDownload = () => downloadImageClientSide(imageUrl, username);
+  const handleDownload = () => downloadImage(imageUrl, username, toast);
   
   const handleShare = () => {
     shareOnTwitterClientSide(username);
