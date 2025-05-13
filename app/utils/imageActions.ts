@@ -46,9 +46,10 @@ export const downloadImage = async (imageUrl: string, handle: string, toast: any
     // Draw the CodeBeast image
     ctx.drawImage(codebeastImg, 0, 0, width, height);
 
-    // Draw QR code in the absolute bottom left (no margin)
+    // Draw QR code in the bottom left with 8px margin
     const qrSize = Math.round(width * 0.15);
-    ctx.drawImage(qrImg, 0, height - qrSize, qrSize, qrSize);
+    const qrMargin = 8;
+    ctx.drawImage(qrImg, qrMargin, height - qrSize - qrMargin, qrSize, qrSize);
 
     // Draw the 'Generated with Langflow' label in the bottom right
     const labelText = 'Generated with Langflow';
@@ -228,9 +229,10 @@ export const printImage = async (imageUrl: string, handle: string, toast: any) =
     );
 
     // Step 3: Composite overlays (QR code and label) within the 5x7 area
-    // Draw QR code in the absolute bottom left (no margin)
+    // Draw QR code in the bottom left with 8px margin
     const qrSize = Math.round(printWidth * 0.15);
-    imgCtx.drawImage(qrImg, 0, printHeight - qrSize, qrSize, qrSize);
+    const qrMargin = 8;
+    imgCtx.drawImage(qrImg, qrMargin, printHeight - qrSize - qrMargin, qrSize, qrSize);
 
     // Draw the 'Generated with Langflow' label in the bottom right (within print bounds)
     const labelText = 'Generated with Langflow';

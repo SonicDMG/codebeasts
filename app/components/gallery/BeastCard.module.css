@@ -1,7 +1,7 @@
 .qrOverlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
+  bottom: 8px;
+  left: 8px;
   width: 15%;
   height: auto;
   min-width: 40px;
@@ -11,7 +11,6 @@
   z-index: 20;
   background: white;
   border-radius: 8px 0 8px 0;
-  padding: 0;
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
   /* Print-friendly: always visible */
   print-color-adjust: exact;

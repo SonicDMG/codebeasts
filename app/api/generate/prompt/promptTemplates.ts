@@ -17,8 +17,7 @@ inside the blister pack. The packaging is the main focus, with a clear plastic b
 the entire figure and all accessories. Inside the blister pack are compartments for
 each coding language and its animal ([key items]), as well as coding-related
 accessories such as a keyboard, laptop, or code book. Each item is in its own
-separate compartment. The packaging is centered on a white background, with a red
-header band reading '[Name] the [Title]' in bold white text, and an 'Ages [X]+' label.
+separate compartment. The action figure package is placed on a shelf with a realistic, photographic bokeh-filtered background behind it (not plain or solid color). The shelf and background should look like a real room or store display. The packaging is centered, with a red header band reading '[Name] the [Title]' in bold white text, and an 'Ages [X]+' label.
 Professional retail packaging with detailed labeling and product information. Sharp
 focus on packaging details. No cropping of the blister pack.
 No revealing clothing, no sexualization, no swimsuits, no lingerie.
@@ -34,7 +33,7 @@ legs, standing upright inside the blister pack. Inside the blister pack are
 compartments for each coding language and its animal ([key items]), as well as
 coding-related accessories such as a keyboard, laptop, or code book. Each item is in
 its own separate compartment. The figure's facial features are subtly inspired by:
-[person_features]. The packaging is centered on a white background, with a red header band reading '[Name] the [Title]' in bold white text, and an 'Ages [X]+' label. Professional retail packaging with detailed labeling and product information.
+[person_features]. The action figure package is placed on a shelf with a realistic, photographic bokeh-filtered background behind it (not plain or solid color). The shelf and background should look like a real room or store display. The packaging is centered, with a red header band reading '[Name] the [Title]' in bold white text, and an 'Ages [X]+' label. Professional retail packaging with detailed labeling and product information.
 Sharp focus on packaging details. No cropping of the blister pack.
 No revealing clothing, no sexualization, no swimsuits, no lingerie.
 `; 
