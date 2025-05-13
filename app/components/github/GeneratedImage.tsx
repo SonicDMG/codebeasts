@@ -1,5 +1,6 @@
 import React from 'react';
 import { BeastCard } from '../gallery/BeastCard';
+import { CodeBeastImage } from "../gallery/CodeBeastImage";
 
 interface GeneratedImageProps {
   imageUrl: string;
@@ -10,9 +11,11 @@ interface GeneratedImageProps {
 export const GeneratedImage = ({ imageUrl, handle, className = '' }: GeneratedImageProps) => {
   return (
     <div className={`w-full pb-6 ${className}`}>
-      <BeastCard 
+      <BeastCard
         beast={{ username: handle, image_url: imageUrl }}
-        showActions={true} 
+        showQR={true}
+        showLabel={true}
+        showActions={true}
       />
     </div>
   );

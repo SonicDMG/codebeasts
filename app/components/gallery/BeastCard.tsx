@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/app/components/ui/card";
 import Image from "next/image";
 import { BeastActions } from "./BeastActions";
 import styles from './BeastCard.module.css';
+import { CodeBeastImage } from "./CodeBeastImage";
 
 interface BeastCardProps {
   beast: {
@@ -12,9 +13,11 @@ interface BeastCardProps {
     image_url: string;
   };
   showActions?: boolean;
+  showQR?: boolean;
+  showLabel?: boolean;
 }
 
-export function BeastCard({ beast, showActions = false }: BeastCardProps) {
+export function BeastCard({ beast, showActions = false, showQR = false, showLabel = false }: BeastCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const topImageRef = useRef<HTMLImageElement>(null);
@@ -78,56 +81,12 @@ export function BeastCard({ beast, showActions = false }: BeastCardProps) {
         onMouseLeave={handleMouseLeave}
       >
         <div className="aspect-square relative overflow-hidden">
-          <Image
-            ref={imageRef}
-            src={beast.image_url}
+          <CodeBeastImage
+            imageUrl={beast.image_url}
             alt={`CodeBeast for ${beast.username}`}
-            fill
-            className="object-cover"
-            style={{ 
-              pointerEvents: 'none', 
-              transform: 'perspective(1000px) rotateY(0deg) scale(1.1)' // Full initial state
-            }} 
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority
+            showQR={showQR}
+            showLabel={showLabel}
           />
-          <Image
-            ref={topImageRef}
-            src={beast.image_url}
-            alt=""
-            fill
-            className="object-cover"
-            style={{ 
-              position: 'absolute', 
-              inset: 0,
-              pointerEvents: 'none', 
-              transform: 'perspective(1000px) rotateY(0deg) scale(1.1)', // Full initial state
-              opacity: 0,
-              maskImage: 'radial-gradient(ellipse 50% 60% at center, black 20%, transparent 50%)',
-              WebkitMaskImage: 'radial-gradient(ellipse 50% 60% at center, black 20%, transparent 50%)',
-              filter: 'brightness(1.0) drop-shadow(0 0 0px transparent)',
-              transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-out, filter 0.3s ease-out'
-            }} 
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            aria-hidden="true"
-          />
-          {/* QR Code Overlay */}
-          <img
-            src="/images/to_langflow.png"
-            alt="QR Code to Langflow"
-            className={styles.qrOverlay}
-            aria-hidden="true"
-          />
-          <div ref={scanLineRef} className="scan-line-overlay" />
-          <a
-            href="https://langflow.new/ui/f/codebeasts"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.labelOverlay + ' hover:underline focus:underline'}
-            aria-label="Learn more about Langflow"
-          >
-            Generated with Langflow
-          </a>
         </div>
 
         {showActions && (

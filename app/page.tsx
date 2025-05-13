@@ -4,6 +4,7 @@ import { BeastCard } from "@/app/components/gallery/BeastCard"; // Import BeastC
 import { Card } from "@/app/components/ui/card"; // Need Card for layout
 import Link from "next/link"; // Need Link
 import type { Metadata, ResolvingMetadata } from 'next'; // Import Metadata types
+import { CodeBeastImage } from "@/app/components/gallery/CodeBeastImage";
 
 // Applying 'any' workaround for props due to Next.js 15 build issue
 // interface HomePageProps { ... }
@@ -87,11 +88,10 @@ export default async function Home(props: any) { // Use 'any' temporarily
                   CodeBeast for @{username}
                 </h1>
                 <BeastCard
-                  beast={{
-                    username: image.username,
-                    image_url: image.image_url,
-                  }}
-                  showActions // Keep actions consistent with direct page?
+                  beast={{ username: image.username, image_url: image.image_url }}
+                  showQR={true}
+                  showLabel={true}
+                  showActions={true}
                 />
               </>
             ) : (
