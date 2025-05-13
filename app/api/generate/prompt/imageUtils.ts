@@ -47,7 +47,7 @@ export async function analyzeImageWithOpenAI(imageDataUri: string): Promise<stri
         content: [
           {
             type: "text",
-            text: "Analyze the primary person in the image. Provide a concise paragraph describing only their key visual appearance features relevant for character creation. Focus on details like: Hair color/style, eye color, skin tone, dominant facial expression (e.g., smiling, neutral), glasses (if any), hat (if any), clothing colors/style, beard/mustache, and any other very prominent visual features. Do not describe the background or overall scene. If no clear person is visible, state 'No person detected'."
+            text: "Analyze the primary person in the image. Return a short, comma-separated list starting with the person's sex (male, female, or ambiguous), followed by the most visually dominant features. Always include skin tone and, if visually determinable, ethnicity or region of origin (e.g., South Asian, African, East Asian, Caucasian, etc.). Be accurate and do not confuse ethnicities (for example, do not describe a South Asian person as African American, and vice versa). Focus on sex, skin tone, ethnicity/region, hair color/style, eye color, and one or two unique features. Do not describe the background or overall scene. If no clear person is visible, state 'No person detected'. Example: 'female, medium brown skin, South Asian, black hair, brown eyes, glasses'."
           },
           {
             type: "image_url",
@@ -56,11 +56,14 @@ export async function analyzeImageWithOpenAI(imageDataUri: string): Promise<stri
         ],
       },
     ],
-    max_tokens: 150,
+    max_tokens: 80,
   });
-  const description = response.choices[0]?.message?.content;
+  let description = response.choices[0]?.message?.content;
   if (description && !description.toLowerCase().includes('no person detected')) {
-    return description.replace(/\*/g, '').replace(/\s+/g, ' ').trim();
+    // Remove asterisks, trim whitespace, and limit to first 6 features
+    description = description.replace(/\*/g, '').replace(/\s+/g, ' ').trim();
+    const features = description.split(',').map(f => f.trim()).filter(Boolean).slice(0, 6);
+    return features.join(', ');
   }
   return null;
 }
