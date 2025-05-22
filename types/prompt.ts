@@ -1,12 +1,9 @@
 /**
- * types.ts
+ * types/prompt.ts
  *
- * Shared TypeScript types for prompt generation and API logic in Code Beasts.
+ * Shared TypeScript types for prompt generation and Langflow integration in Code Beasts.
  */
 
-/**
- * Type for user prompt details used in prompt generation.
- */
 export type PromptDetails = {
   basePrompt: string;
   cleanedLanguages: string;

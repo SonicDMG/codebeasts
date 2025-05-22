@@ -1,7 +1,6 @@
 // types/api.ts
 
 import type { ImageRecord } from "@/lib/db/astra";
-import type { PromptDetails } from "@/app/api/generate/prompt/types";
 
 // Gallery API
 export type GalleryGetResponse = ImageRecord[];

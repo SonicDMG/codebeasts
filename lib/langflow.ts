@@ -1,4 +1,4 @@
-import type { PromptDetails } from "@/app/api/generate/prompt/types";
+import type { PromptDetails } from "@/types/prompt";
 
 /**
  * Calls the Langflow API to fetch prompt details for a user.

@@ -7,7 +7,7 @@ import { Buffer } from 'buffer';
 import { ACTION_FIGURE_PROMPT_TEMPLATE, ACTION_FIGURE_PROMPT_WITH_IMAGE_TEMPLATE, PROMPT_PREFIX } from './promptTemplates';
 import { processAnimalSelection, cleanLanguagesString, cleanGithubUrl, buildActionFigurePrompt } from './promptUtils';
 import { bufferToDataURI, analyzeImageWithOpenAI, generateImage } from './imageUtils';
-import { PromptDetails } from './types';
+import type { PromptDetails } from "@/types/prompt";
 import type { GeneratePromptResponse, GeneratePromptErrorResponse } from "@/types/api";
 import { fetchLangflowPrompt } from "@/lib/langflow";
 
