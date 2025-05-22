@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllImages, upsertImage } from "../../lib/db/astra";
-import type { ImageRecord } from "../../lib/db/astra";
+import { getAllImages, upsertImage } from "@/lib/db/astra";
+import type { ImageRecord } from "@/lib/db/astra";
+import type { GalleryGetResponse, GalleryPostResponse } from "@/types/api";
 
 export async function GET() {
   try {
     console.log("GET /api/gallery - Starting request");
     const records = await getAllImages();
-    return NextResponse.json(records);
+    return NextResponse.json<GalleryGetResponse>(records);
   } catch (error) {
     console.error("GET /api/gallery - Error:", error);
     if (error instanceof Error) {
@@ -16,7 +17,7 @@ export async function GET() {
         name: error.name
       });
     }
-    return NextResponse.json({ error: "Failed to fetch gallery" }, { status: 500 });
+    return NextResponse.json<{ error: string }>({ error: "Failed to fetch gallery" }, { status: 500 });
   }
 }
 
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
     };
 
     const result = await upsertImage(imageRecord);
-    return NextResponse.json(result);
+    return NextResponse.json<GalleryPostResponse>(result);
   } catch (error) {
     console.error("POST /api/gallery - Error:", error);
     if (error instanceof Error) {
@@ -51,9 +52,6 @@ export async function POST(request: NextRequest) {
         name: error.name
       });
     }
-    return NextResponse.json(
-      { error: "Failed to create/update image record" },
-      { status: 500 }
-    );
+    return NextResponse.json<{ error: string }>({ error: "Failed to create/update image record" }, { status: 500 });
   }
 } 

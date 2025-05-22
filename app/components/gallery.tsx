@@ -10,7 +10,7 @@ import {
   CardHeader,
 } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { ImageRecord } from "@/app/lib/db/astra";
+import { ImageRecord } from "@/lib/db/astra";
 
 const ITEMS_PER_PAGE = 20;
 

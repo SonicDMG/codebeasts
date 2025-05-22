@@ -6,6 +6,8 @@
 
 Turn your GitHub profile into a unique AI-generated creature! This project analyzes your GitHub activity and programming languages to create a personalized pixel art mascot using AI image generation.
 
+![CodeBeasts Screenshot](public/images/og-image.png)
+
 ## Technical Overview
 
 CodeBeasts is a full-stack application built with modern technologies:
@@ -33,15 +35,32 @@ CodeBeasts is a full-stack application built with modern technologies:
 
 Visit <a href="https://codebeasts.onrender.com/" target="_blank">CodeBeasts</a> to try it out!
 
+1. Enter your GitHub handle (if you don't have one, just use your name separated by -'s)
+2. Choose a type (Action Figure, Ghibli, etc...)
+3. Upload an image of yourself (optional)
+4. Generate!
+5. You can download, print, or share your unique creation on Twitter
+
 ## Langflow Workflow
 
-This project utilizes a workflow built and hosted with [Langflow](https://langflow.new), orchestrated via DataStax Cloud. The core logic involves:
+![Langflow Screenshot](public/images/codebeasts_langflow_flow.png)
 
-1.  Receiving a GitHub username.
-2.  Analyzing the user's profile and repository languages (via custom tools/logic within the flow).
-3.  Generating a descriptive prompt for an AI image model based on the analysis.
-4.  Calling the EverArt image generation tool with the prompt.
-5.  Returning the generated image URL.
+This project utilizes a workflow built and hosted with [Langflow](https://langflow.new). The core logic involves:
+
+1.  Enter your GitHub handle
+2. Upload and image of yourself (optional)
+3. A Langflow based AI agent scans your GitHub repositories
+4. The agent identifies your most-used programming languages
+5. Each language is associated with an animal (based on O'Reilly animal references)
+- Python = Snake 🐍
+- TypeScript = Blue Jay 🐦
+- JavaScript = Rhino 🦏
+- A bunch of others...
+6. An AI agent generates a prompt for a "CodeBeast" combining all the animals together
+7. Finally, it passes GitHub details and the prompt to the app for image generation and displays the result
+
+
+![CodeBeasts Architecture Diagram](public/images/codebeasts_diagram.png)
 
 You can view the specific flow structure used for this project here:
 [https://langflow.new/ui/f/codebeasts](https://langflow.new/ui/f/codebeasts)
@@ -55,10 +74,7 @@ You can view the specific flow structure used for this project here:
 - AI-powered image generation using EverArt.
 - Persistent storage of generated images using Astra DB.
 - Gallery view for browsing generated beasts.
-- Dynamic Open Graph and Twitter Card image generation for link previews.
-- Downloadable and shareable mascot images.
-- Built with Next.js App Router for optimal performance.
-- Styled with Tailwind CSS and Shadcn UI components.
+- Downloadable, shareable, and printable mascot images.
 
 ## Project Structure
 
@@ -66,22 +82,25 @@ You can view the specific flow structure used for this project here:
 codebeasts/
 ├── app/                # Next.js App Router directory
 │   ├── api/            # API route handlers
-│   ├── components/     # React components (UI, specific features)
-│   ├── gallery/        # Gallery page components
+│   ├── components/     # React components (feature, UI, layout)
+│   ├── gallery/        # Gallery page
 │   ├── hooks/          # Custom React hooks
-│   ├── lib/            # Shared utilities and data fetching logic
-│   ├── types/          # TypeScript type definitions
+│   ├── utils/          # App-specific utilities
+│   ├── direct/         # Dynamic user routes
 │   └── page.tsx        # Main index page component
 │   └── layout.tsx      # Root layout component
-├── public/             # Static assets (images, fonts)
-├── .env.local          # Local environment variables (GITIGNORED!)
-├── .env.example        # Example environment variables
-├── next.config.js      # Next.js configuration
-├── tailwind.config.ts  # Tailwind CSS configuration
-├── tsconfig.json       # TypeScript configuration
-├── package.json        # Project dependencies and scripts
-├── render.yaml         # Render deployment configuration
-└── README.md           # This file
+├── lib/                # Shared utilities, data fetching, and database logic
+│   └── db/             # Database-specific utilities
+├── types/              # TypeScript type definitions
+├── public/             # Static assets
+├── .env.local
+├── .env.example
+├── next.config.js
+├── tailwind.config.ts
+├── tsconfig.json
+├── package.json
+├── render.yaml
+└── README.md
 ```
 
 ## Getting Started & Setup Instructions

@@ -1,5 +1,5 @@
 import CodeBeastGenerator from "@/app/components/code-beast-generator";
-import { getImageForUser, getBaseUrl } from "@/app/lib/data"; // Import data fetching function AND getBaseUrl
+import { fetchUserImageRecord, getBaseUrl } from "@/lib/imageRecords"; // Import data fetching function AND getBaseUrl
 import { BeastCard } from "@/app/components/gallery/BeastCard"; // Import BeastCard
 import { Card } from "@/app/components/ui/card"; // Need Card for layout
 import Link from "next/link"; // Need Link
@@ -18,10 +18,10 @@ export async function generateMetadata(
   const uParam = searchParams.u;
   const username = typeof uParam === 'string' ? uParam : null;
   const baseUrl = getBaseUrl(); // Get base URL once
-  const DEFAULT_IMAGE_URL = `${baseUrl}/images/codebeast-placeholder.png`; // Corrected filename
+  const DEFAULT_IMAGE_URL = `${baseUrl}/images/og-image.png`; // Corrected filename
 
   if (username) {
-    const image = await getImageForUser(username);
+    const image = await fetchUserImageRecord(username);
     if (image) {
       // Found user - generate specific metadata
       const title = `CodeBeast for @${username}`;
@@ -73,7 +73,7 @@ export default async function Home(props: any) { // Use 'any' temporarily
   const uParam = searchParams.u;
   const username = typeof uParam === 'string' ? uParam : null;
   
-  const image = username ? await getImageForUser(username) : null;
+  const image = username ? await fetchUserImageRecord(username) : null;
 
   // Conditional Rendering
   if (username) {
