@@ -33,7 +33,7 @@ CodeBeasts is a full-stack application built with modern technologies:
 
 ## Live Demo
 
-Visit <a href="https://codebeasts.onrender.com/" target="_blank">CodeBeasts</a> to try it out!
+Visit <a href="https://codebeasts.ai/" target="_blank">CodeBeasts</a> to try it out!
 
 1. Enter your GitHub handle (if you don't have one, just use your name separated by -'s)
 2. Choose a type (Action Figure, Ghibli, etc...)
@@ -138,7 +138,7 @@ Create a `.env.local` file in the project root (copy from `.env.example`) and co
 
 ```dotenv
 # Langflow Configuration (Replace with your actual Langflow instance details)
-LANGFLOW_BASE_URL=https://your-langflow-instance.onrender.com
+LANGFLOW_BASE_URL=https://your-langflow-instance.com
 LANGFLOW_FLOW_ID=your_langflow_flow_id_or_endpoint
 
 # EverArt API Key (Store securely, especially in production)
