@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllImages, upsertImage } from "../../lib/db/astra";
-import type { ImageRecord } from "../../lib/db/astra";
+import { getAllImages, upsertImage } from "@/lib/db/astra";
+import type { ImageRecord } from "@/lib/db/astra";
 
 export async function GET() {
   try {

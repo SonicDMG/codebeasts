@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getImageByUsername } from "../../../lib/db/astra";
+import { getImageByUsername } from "@/lib/db/astra";
 
 // Add the GITHUB_USERNAME_REGEX
 const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;

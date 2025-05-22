@@ -1,7 +1,7 @@
 /* eslint-env node */
 /* global process */
 import { NextResponse } from "next/server";
-import { getUserDetails, upsertImage } from "../../../lib/db/astra";
+import { getUserDetails, upsertImage } from "@/lib/db/astra";
 import sharp from 'sharp';
 import { Buffer } from 'buffer';
 import { ACTION_FIGURE_PROMPT_TEMPLATE, ACTION_FIGURE_PROMPT_WITH_IMAGE_TEMPLATE, PROMPT_PREFIX } from './promptTemplates';

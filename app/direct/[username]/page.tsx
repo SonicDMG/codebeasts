@@ -1,7 +1,7 @@
 import { BeastCard } from "@/app/components/gallery/BeastCard";
 import { Card } from "@/app/components/ui/card";
 import Link from "next/link";
-import { getImageForUser } from "@/app/lib/data";
+import { getImageForUser } from "@/lib/data";
 
 // Applying 'any' workaround for props due to Next.js 15 build issue
 export default async function DirectPage(props: any) {

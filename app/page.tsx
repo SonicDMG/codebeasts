@@ -1,5 +1,5 @@
 import CodeBeastGenerator from "@/app/components/code-beast-generator";
-import { getImageForUser, getBaseUrl } from "@/app/lib/data"; // Import data fetching function AND getBaseUrl
+import { getImageForUser, getBaseUrl } from "@/lib/data"; // Import data fetching function AND getBaseUrl
 import { BeastCard } from "@/app/components/gallery/BeastCard"; // Import BeastCard
 import { Card } from "@/app/components/ui/card"; // Need Card for layout
 import Link from "next/link"; // Need Link
