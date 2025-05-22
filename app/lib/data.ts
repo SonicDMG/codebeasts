@@ -1,6 +1,6 @@
 /* eslint-env node */
 /* global process */
-import { ImageRecord } from "@/app/api/db/astra";
+import { ImageRecord } from "@/app/lib/db/astra";
 
 // Moved from app/direct/[username]/page.tsx
 export function getBaseUrl(): string {
