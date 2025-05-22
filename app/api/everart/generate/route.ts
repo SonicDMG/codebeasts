@@ -2,6 +2,7 @@
 /* global process */
 import { NextResponse } from "next/server";
 import type { GenerateImageResponse, GenerateImageErrorResponse } from "@/types/api";
+import { generateEverArtImage } from "@/lib/everart";
 
 export async function POST(request: Request) {
   try {
@@ -22,26 +23,16 @@ export async function POST(request: Request) {
     }
 
     // Call the EverArt API to generate the image
-    const response = await fetch("https://api.everart.ai/v1/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.EVERART_API_KEY}`,
-      },
-      body: JSON.stringify({
-        prompt,
-        model,
-        image_count: 1,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to generate image");
+    try {
+      const data = await generateEverArtImage(prompt, model);
+      return NextResponse.json<GenerateImageResponse>(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to generate image";
+      return NextResponse.json<GenerateImageErrorResponse>(
+        { error: message },
+        { status: 500 }
+      );
     }
-
-    const data = await response.json();
-
-    return NextResponse.json<GenerateImageResponse>({ url: data.url });
   } catch (error) {
     console.error("Error generating image:", error);
     return NextResponse.json<GenerateImageErrorResponse>(
