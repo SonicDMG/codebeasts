@@ -9,6 +9,7 @@ import { processAnimalSelection, cleanLanguagesString, cleanGithubUrl, buildActi
 import { bufferToDataURI, analyzeImageWithOpenAI, generateImage } from './imageUtils';
 import { PromptDetails } from './types';
 import type { GeneratePromptResponse, GeneratePromptErrorResponse } from "@/types/api";
+import { fetchLangflowPrompt } from "@/lib/langflow";
 
 // Add the GITHUB_USERNAME_REGEX (from code-beast-generator.tsx)
 const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
@@ -53,76 +54,15 @@ async function getUserPromptDetails(normalizedUsername: string): Promise<PromptD
     };
   }
 
+  // Use shared Langflow integration
   console.log("API Route: Calling Langflow for prompt base");
-  if (!process.env.LANGFLOW_BASE_URL || !process.env.LANGFLOW_FLOW_ID) {
-      console.error("Missing Langflow environment variables");
-      throw new Error("Server configuration error for Langflow");
-  }
-  const langflowUrl = `${process.env.LANGFLOW_BASE_URL}/api/v1/run/${process.env.LANGFLOW_FLOW_ID}`;
-  const langflowResponse = await fetch(langflowUrl, { 
-      method: "POST", 
-      headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({
-        input_value: normalizedUsername,
-        output_type: "chat",
-        input_type: "chat",
-        session_id: normalizedUsername
-      }) 
-  });
-
-  if (!langflowResponse.ok) {
-      const errorText = await langflowResponse.text();
-      console.error("Langflow API error:", { status: langflowResponse.status, error: errorText });
-      throw new Error(`Langflow call failed: ${langflowResponse.statusText}`);
-  }
-
-  const langflowResponseData = await langflowResponse.json();
-  const rawMessage = langflowResponseData?.outputs?.[0]?.outputs?.[0]?.messages?.[0]?.message;
-  if (!rawMessage || typeof rawMessage !== 'string') {
-      console.error("Could not extract message from Langflow response:", langflowResponseData);
-      throw new Error("Could not parse Langflow response");
-  }
-
-  const messageParts = rawMessage.split('|').map((field: string) => field.trim());
-  if (messageParts.length < 4) {
-      console.error("Unexpected message format from Langflow:", rawMessage);
-      throw new Error("Unexpected format from Langflow");
-  }
-
-  const [rawLanguages, promptText, rawGithubUrl] = messageParts;
-
-  // Extract num_repositories from messageParts
-  const numReposPart = messageParts.find(part => part.startsWith('num_repositories:'));
-  let count = undefined;
-  if (numReposPart) {
-    const value = numReposPart.replace('num_repositories:', '').trim();
-    count = parseInt(value, 10);
-  }
-
-  // Extract animal_selection from messageParts
-  const animalSelectionPart = messageParts.find(part => part.startsWith('animal_selection:'));
-  let langflowAnimalSelection = undefined;
-  if (animalSelectionPart) {
-    let value = animalSelectionPart.replace('animal_selection:', '').trim();
-    // Try to parse as JSON array (replace single quotes with double quotes)
-    if (value.startsWith('[')) {
-      try {
-        langflowAnimalSelection = JSON.parse(value.replace(/'/g, '"'));
-      } catch (e) {
-        console.warn('Could not parse animal_selection from Langflow:', value);
-      }
-    }
-  }
-  const animals = processAnimalSelection(langflowAnimalSelection);
-  console.log("Langflow: Processed animal selection array:", animals);
-
+  const langflowDetails = await fetchLangflowPrompt(normalizedUsername);
+  // Clean the languages and githubUrl using existing utils
   return {
-    basePrompt: promptText,
-    cleanedLanguages: cleanLanguagesString(rawLanguages),
-    cleanedGithubUrl: cleanGithubUrl(rawGithubUrl, normalizedUsername),
-    repoCount: (typeof count === 'number' && !isNaN(count)) ? count : undefined,
-    animalSelection: animals,
-    source: 'langflow',
+    ...langflowDetails,
+    cleanedLanguages: cleanLanguagesString(langflowDetails.cleanedLanguages),
+    cleanedGithubUrl: cleanGithubUrl(langflowDetails.cleanedGithubUrl, normalizedUsername),
+    animalSelection: processAnimalSelection(langflowDetails.animalSelection),
   };
 }
 
