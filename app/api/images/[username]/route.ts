@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getImageByUsername } from "@/lib/db/astra";
+import type { UserImageGetResponse } from "@/types/api";
 
 // Add the GITHUB_USERNAME_REGEX
 const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
@@ -18,7 +19,7 @@ export async function GET(
   // 1. Validate Username Presence and Format
   if (!username || typeof username !== 'string' || !GITHUB_USERNAME_REGEX.test(username)) {
     console.error("Invalid or missing username format in URL:", username);
-    return NextResponse.json(
+    return NextResponse.json<UserImageGetResponse>(
       { error: "Valid GitHub username required in URL path" },
       { status: 400 }
     );
@@ -33,14 +34,14 @@ export async function GET(
 
     if (!image) {
       console.log(`GET /api/images/${normalizedUsername} - No image found`); // Use normalized
-      return NextResponse.json(
+      return NextResponse.json<UserImageGetResponse>(
         { error: "Image not found" },
         { status: 404 }
       );
     }
 
     console.log(`GET /api/images/${normalizedUsername} - Returning image:`, image); // Use normalized
-    return NextResponse.json(image);
+    return NextResponse.json<UserImageGetResponse>(image);
   } catch (error) {
     console.error(`GET /api/images/${normalizedUsername} - Error:`, error); // Use normalized
     if (error instanceof Error) {
@@ -50,7 +51,7 @@ export async function GET(
         name: error.name
       });
     }
-    return NextResponse.json(
+    return NextResponse.json<UserImageGetResponse>(
       { error: "Failed to fetch image" },
       { status: 500 }
     );

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { GenerateImageResponse, GenerateImageErrorResponse } from "@/types/api";
 
 export async function POST(request: Request) {
   try {
@@ -35,10 +36,10 @@ export async function POST(request: Request) {
     }
 
     const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json<GenerateImageResponse>(data);
   } catch (error) {
     console.error("Error generating image:", error);
-    return NextResponse.json(
+    return NextResponse.json<GenerateImageErrorResponse>(
       { error: "Failed to generate image" },
       { status: 500 }
     );

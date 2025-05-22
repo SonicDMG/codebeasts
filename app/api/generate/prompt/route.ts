@@ -8,6 +8,7 @@ import { ACTION_FIGURE_PROMPT_TEMPLATE, ACTION_FIGURE_PROMPT_WITH_IMAGE_TEMPLATE
 import { processAnimalSelection, cleanLanguagesString, cleanGithubUrl, buildActionFigurePrompt } from './promptUtils';
 import { bufferToDataURI, analyzeImageWithOpenAI, generateImage } from './imageUtils';
 import { PromptDetails } from './types';
+import type { GeneratePromptResponse, GeneratePromptErrorResponse } from "@/types/api";
 
 // Add the GITHUB_USERNAME_REGEX (from code-beast-generator.tsx)
 const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
@@ -289,7 +290,7 @@ export async function POST(request: Request) {
     }
 
     // 4. Format and Return Response
-    return NextResponse.json({
+    return NextResponse.json<GeneratePromptResponse>({
       languages: promptDetails.cleanedLanguages, 
       prompt: promptDetails.basePrompt, 
       imageAnalysis: imageAnalysisDescription, 
@@ -311,7 +312,7 @@ export async function POST(request: Request) {
     // Catch errors from getUserPromptDetails or unexpected issues
     console.error("Error processing generation request:", error);
     const errorMessage = error instanceof Error ? error.message : "Failed to generate image";
-    return NextResponse.json(
+    return NextResponse.json<GeneratePromptErrorResponse>(
       { 
         error: errorMessage,
         username: normalizedUsername,
