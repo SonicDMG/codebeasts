@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { CodeBeast } from '@/app/types/gallery';
+import type { CodeBeast } from '@/types/gallery';
 import { toast } from '@/app/hooks/use-toast';
 import { Sparkles } from 'lucide-react';
 
@@ -56,15 +56,15 @@ export const useGalleryData = (itemsPerPage = 20) => {
       return;
     }
 
-    // Create unique identifiers for each beast in previous data using imageUrl
+    // Create unique identifiers for each beast in previous data using image_url
     // This allows detecting new beasts from the same user
     const prevBeastKeys = new Set(
-      previousDataRef.current.map(beast => beast.imageUrl)
+      previousDataRef.current.map(beast => beast.image_url)
     );
     
     // Find beasts in current data that weren't in the previous data
     const newlyAddedBeasts = allCodeBeasts.filter(beast => 
-      !prevBeastKeys.has(beast.imageUrl)
+      !prevBeastKeys.has(beast.image_url)
     );
     
     if (newlyAddedBeasts.length > 0) {
@@ -77,10 +77,10 @@ export const useGalleryData = (itemsPerPage = 20) => {
       const updatedNewBeasts = { ...newBeasts };
       
       // Add all new beasts to the tracking object with current timestamp
-      // Use imageUrl as part of the key to allow multiple beasts per username
+      // Use image_url as part of the key to allow multiple beasts per username
       newlyAddedBeasts.forEach(beast => {
-        // Create a unique key for each beast using username and a hash of the imageUrl
-        const beastKey = beast.username + ":" + beast.imageUrl.substring(beast.imageUrl.lastIndexOf('/') + 1);
+        // Create a unique key for each beast using username and a hash of the image_url
+        const beastKey = beast.username + ":" + beast.image_url.substring(beast.image_url.lastIndexOf('/') + 1);
         updatedNewBeasts[beastKey] = now;
         
         // Show toast notification for each new beast
