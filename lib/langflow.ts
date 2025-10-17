@@ -9,13 +9,16 @@ import type { PromptDetails } from "@/types/prompt";
 export async function fetchLangflowPrompt(normalizedUsername: string): Promise<PromptDetails> {
   const baseUrl = process.env.LANGFLOW_BASE_URL;
   const flowId = process.env.LANGFLOW_FLOW_ID;
+  const apiKey = process.env.LANGFLOW_API_KEY;
+
   if (!baseUrl || !flowId) {
     throw new Error("Missing Langflow environment variables");
   }
+
   const langflowUrl = `${baseUrl}/api/v1/run/${flowId}`;
   const langflowResponse = await fetch(langflowUrl, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey ?? '' },
     body: JSON.stringify({
       input_value: normalizedUsername,
       output_type: "chat",
@@ -23,6 +26,7 @@ export async function fetchLangflowPrompt(normalizedUsername: string): Promise<P
       session_id: normalizedUsername
     })
   });
+
   if (!langflowResponse.ok) {
     const errorText = await langflowResponse.text().catch(() => "");
     throw new Error(`Langflow call failed: ${langflowResponse.statusText} ${errorText}`);

@@ -25,12 +25,19 @@ export function bufferToDataURI(buffer: Buffer, mimeType: string): string {
 const openaiApiKey = process.env.OPENAI_API_KEY;
 const openai = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null;
 
-// Initialize EverArt client (throws if key is missing)
-const everartApiKey = process.env.EVERART_API_KEY;
-if (!everartApiKey) {
-  throw new Error('EVERART_API_KEY environment variable is required');
+// Initialize EverArt client (lazy initialization)
+let everart: EverArt | null = null;
+
+function getEverArt(): EverArt {
+  if (!everart) {
+    const everartApiKey = process.env.EVERART_API_KEY;
+    if (!everartApiKey) {
+      throw new Error('EVERART_API_KEY environment variable is required');
+    }
+    everart = new EverArt(everartApiKey);
+  }
+  return everart;
 }
-const everart = new EverArt(everartApiKey);
 
 /**
  * Analyzes an image using OpenAI Vision and returns a paragraph describing the primary person's features.
@@ -92,7 +99,8 @@ export async function generateImage(
     width: options.width ?? 512,
   };
 
-  const generations = await everart.v1.generations.create(
+  const everartClient = getEverArt();
+  const generations = await everartClient.v1.generations.create(
     '5000',
     prompt,
     type,
@@ -103,7 +111,7 @@ export async function generateImage(
     return { imageUrl: fallbackImageUrl, success: false };
   }
 
-  const result = await everart.v1.generations.fetchWithPolling(generations[0].id);
+  const result = await everartClient.v1.generations.fetchWithPolling(generations[0].id);
   const finalImageUrl = result.image_url || fallbackImageUrl;
   return { imageUrl: finalImageUrl, success: !!result.image_url };
 } 
