@@ -7,4 +7,7 @@ module.exports = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
   },
+  transformIgnorePatterns: [
+    "node_modules/(?!(file-type|strtok3|peek-readable|token-types)/)",
+  ],
 };
