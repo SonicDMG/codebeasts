@@ -10,6 +10,9 @@ import { bufferToDataURI, analyzeImageWithOpenAI, generateImage } from './imageU
 import type { PromptDetails } from "@/types/prompt";
 import type { GeneratePromptResponse, GeneratePromptErrorResponse } from "@/types/api";
 import { fetchLangflowPrompt } from "@/lib/langflow";
+import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
+import { validateUploadedFile, sanitizeImage, logFileUpload } from "@/lib/fileValidation";
+import { securityLog, debugLog } from "@/lib/logger";
 
 // Add the GITHUB_USERNAME_REGEX (from code-beast-generator.tsx)
 const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
@@ -68,6 +71,34 @@ async function getUserPromptDetails(normalizedUsername: string): Promise<PromptD
 
 export async function POST(request: Request) {
   console.log("API Route: POST function entered.");
+  
+  // 0. Rate Limiting Check
+  const clientIp = getClientIp(request);
+  securityLog.info(`[SECURITY:RATE_LIMIT] Checking IP: ${clientIp}`);
+  
+  const rateLimitResult = await checkRateLimit(clientIp);
+  
+  if (!rateLimitResult.success) {
+    securityLog.warn(`[SECURITY:RATE_LIMIT] BLOCKED - IP: ${clientIp}, Limit: ${rateLimitResult.limit}, Reset: ${new Date(rateLimitResult.reset).toISOString()}`);
+    return NextResponse.json(
+      {
+        error: "Rate limit exceeded. Please try again later.",
+        retryAfter: Math.ceil((rateLimitResult.reset - Date.now()) / 1000),
+      },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+          'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+          'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          'Retry-After': Math.ceil((rateLimitResult.reset - Date.now()) / 1000).toString(),
+        }
+      }
+    );
+  }
+  
+  securityLog.info(`[SECURITY:RATE_LIMIT] ALLOWED - IP: ${clientIp}, Remaining: ${rateLimitResult.remaining}/${rateLimitResult.limit}`);
+  
   let username: string | undefined;
   let emotion: string | undefined;
   let processedImageDataUri: string | undefined;
@@ -88,29 +119,42 @@ export async function POST(request: Request) {
 
       if (file instanceof File && file.size > 0) {
         imageProvided = true;
-        console.log("API Route: Image file received:", file.name, file.type, file.size);
-        originalImageMimeType = file.type;
+        securityLog.info(`[SECURITY:FILE_UPLOAD] Received file - Name: ${file.name}, Type: ${file.type}, Size: ${file.size} bytes, IP: ${clientIp}`);
+        
+        // Validate file upload
+        const validationResult = await validateUploadedFile(file);
+        logFileUpload(clientIp, file.name, file.size, validationResult.valid, validationResult.error);
+        
+        if (!validationResult.valid) {
+          securityLog.error(`[SECURITY:FILE_UPLOAD] VALIDATION FAILED - IP: ${clientIp}, File: ${file.name}, Reason: ${validationResult.error}`);
+          return NextResponse.json(
+            { error: validationResult.error || "Invalid file upload" },
+            { status: 400 }
+          );
+        }
+        
+        securityLog.info(`[SECURITY:FILE_UPLOAD] VALIDATION PASSED - IP: ${clientIp}, File: ${file.name}`);
+        originalImageMimeType = validationResult.mimeType || file.type;
+        
+        // Sanitize and process the image
         let imageBuffer = Buffer.from(new Uint8Array(await file.arrayBuffer()));
         try {
+          const sanitized = await sanitizeImage(imageBuffer);
+          imageBuffer = Buffer.from(sanitized.buffer);
+          originalImageMimeType = sanitized.mimeType;
+          
           const metadata = await sharp(imageBuffer).metadata();
-          console.log("API Route: Original image dimensions:", metadata.width, 'x', metadata.height);
-          // Resize if needed (e.g., > 1024 for Vision API)
-          const MAX_DIM = 1024; 
-          if (metadata.width && metadata.height && (metadata.width > MAX_DIM || metadata.height > MAX_DIM)) {
-            console.log(`API Route: Resizing image to fit within ${MAX_DIM}x${MAX_DIM}...`);
-            // Fix: Create a new Buffer from the resized buffer result
-            const resizedBuffer = await sharp(imageBuffer).resize(MAX_DIM, MAX_DIM, { fit: 'inside', withoutEnlargement: true }).toBuffer();
-            imageBuffer = Buffer.from(resizedBuffer); 
-            // End Fix
-            const resizedMetadata = await sharp(imageBuffer).metadata();
-            console.log("API Route: Resized image dimensions:", resizedMetadata.width, 'x', resizedMetadata.height);
-            originalImageMimeType = `image/${resizedMetadata.format || originalImageMimeType.split('/')[1]}`;
-          }
-        } catch (resizeError) {
-          console.error("API Route: Error during image resizing:", resizeError);
+          securityLog.info(`[SECURITY:FILE_UPLOAD] SANITIZED - IP: ${clientIp}, Dimensions: ${metadata.width}x${metadata.height}, Format: ${sanitized.mimeType}`);
+        } catch (sanitizeError) {
+          securityLog.error(`[SECURITY:FILE_UPLOAD] SANITIZATION FAILED - IP: ${clientIp}, File: ${file.name}, Error: ${sanitizeError}`);
+          return NextResponse.json(
+            { error: "Failed to process image" },
+            { status: 400 }
+          );
         }
+        
         processedImageDataUri = bufferToDataURI(imageBuffer, originalImageMimeType);
-        console.log("API Route: Image processed for analysis. Data URI length:", processedImageDataUri?.length);
+        securityLog.info(`[SECURITY:FILE_UPLOAD] PROCESSING COMPLETE - IP: ${clientIp}, Data URI length: ${processedImageDataUri?.length}`);
       } else {
         console.log("API Route: No valid image file found in FormData.");
       }
@@ -208,7 +252,7 @@ export async function POST(request: Request) {
         }
     }
 
-    console.log("API Route: Final prompt for EverArt Txt2Img:", finalPrompt);
+    debugLog.info("API Route: Final prompt for EverArt Txt2Img:", finalPrompt);
 
     // --- Generate Image (Always Txt2Img now) --- 
     console.log("API Route: Attempting Txt2Img generation...");
