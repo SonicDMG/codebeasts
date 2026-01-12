@@ -13,15 +13,7 @@ import { fetchLangflowPrompt } from "@/lib/langflow";
 import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import { validateUploadedFile, sanitizeImage, logFileUpload } from "@/lib/fileValidation";
 import { securityLog, debugLog } from "@/lib/logger";
-
-// Add the GITHUB_USERNAME_REGEX (from code-beast-generator.tsx)
-const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
-
-// Define the allowed emotions (same as client-side)
-const ALLOWED_EMOTIONS = [
-  "Action Figure", "Zen/Godlike", "Ecstatic", "Angry", "Surprised", "Legendary",
-  "Exploding Head", "Crying", "Zombie", "Ghibli Scene in rolling meadows", "Caped Crusader"
-];
+import { safeValidate, generatePromptSchema, validateAndSanitizeUsername } from "@/lib/validation";
 
 // Local fallback image that doesn't depend on external services
 const FALLBACK_IMAGE_URL = "/images/codebeast-placeholder.png";
@@ -172,16 +164,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to parse request" }, { status: 400 });
   }
 
-  // 2. Validate Inputs
-  if (!username || typeof username !== 'string' || !GITHUB_USERNAME_REGEX.test(username.trim())) {
-    console.error("Invalid or missing username:", username);
-    return NextResponse.json({ error: "Valid GitHub username is required" }, { status: 400 });
+  // 2. Validate Inputs with Zod
+  const validation = safeValidate(generatePromptSchema, { username, emotion });
+  
+  if (!validation.success) {
+    securityLog.warn(`[SECURITY:VALIDATION] Generate prompt validation failed - IP: ${clientIp}, Error: ${validation.error}`);
+    return NextResponse.json({ error: validation.error }, { status: 400 });
   }
-  if (!emotion || typeof emotion !== 'string' || !ALLOWED_EMOTIONS.includes(emotion)) {
-    console.error("Invalid or missing emotion:", emotion);
-    return NextResponse.json({ error: `Invalid emotion selected. Must be one of: ${ALLOWED_EMOTIONS.join(', ')}` }, { status: 400 });
+  
+  // Extract validated and normalized data
+  const validatedUsername = validation.data.username; // Already lowercase
+  const validatedEmotion = validation.data.emotion;
+  
+  // Additional check for emotion (defense in depth)
+  if (!validatedEmotion) {
+    console.error("Invalid or missing emotion after validation:", validatedEmotion);
+    return NextResponse.json({ error: "Valid emotion is required" }, { status: 400 });
   }
-  const normalizedUsername = username.trim().toLowerCase();
+
+  // Sanitize username for database operations (defense in depth)
+  const normalizedUsername = validateAndSanitizeUsername(validatedUsername);
+  console.log("API Route: Validated and sanitized username:", normalizedUsername);
+  securityLog.info(`[SECURITY:VALIDATION] Input validation passed - Username: ${normalizedUsername}, Emotion: ${validatedEmotion}, IP: ${clientIp}`);
 
   // 3. Process Request (Analyze Image if provided, then Txt2Img)
   try {

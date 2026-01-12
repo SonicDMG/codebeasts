@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAllImages, upsertImage } from "@/lib/db/astra";
 import type { ImageRecord } from "@/lib/db/astra";
 import type { GalleryGetResponse, GalleryPostResponse } from "@/types/api";
+import { validateRequestBody, galleryPostSchema } from "@/lib/validation";
+import { securityLog } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -24,24 +26,29 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     console.log("POST /api/gallery - Starting request");
-    const body = await request.json();
-    console.log("POST /api/gallery - Request body:", body);
-
-    if (!body.username || !body.image_url) {
-      console.error("POST /api/gallery - Missing required fields");
+    
+    // Validate request body with Zod
+    const validation = await validateRequestBody(request, galleryPostSchema);
+    
+    if (!validation.success) {
+      securityLog.warn(`[SECURITY:VALIDATION] Gallery POST validation failed: ${validation.error}`);
       return NextResponse.json(
-        { error: "Missing required fields: username and image_url" },
-        { status: 400 }
+        { error: validation.error },
+        { status: validation.status }
       );
     }
 
+    const { username, image_url } = validation.data;
+    console.log("POST /api/gallery - Validated data:", { username, image_url });
+
     const imageRecord: Omit<ImageRecord, '_id'> = {
-      username: body.username,
-      image_url: body.image_url,
+      username,
+      image_url,
       created_at: new Date().toISOString()
     };
 
     const result = await upsertImage(imageRecord);
+    securityLog.info(`[SECURITY:GALLERY] Image record created/updated for user: ${username}`);
     return NextResponse.json<GalleryPostResponse>(result);
   } catch (error) {
     console.error("POST /api/gallery - Error:", error);
@@ -54,4 +61,4 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json<{ error: string }>({ error: "Failed to create/update image record" }, { status: 500 });
   }
-} 
+}

@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getImageByUsername } from "@/lib/db/astra";
 import type { UserImageGetResponse } from "@/types/api";
-
-// Add the GITHUB_USERNAME_REGEX
-const GITHUB_USERNAME_REGEX = /^([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})$/;
+import { safeValidate, usernameParamSchema, validateAndSanitizeUsername } from "@/lib/validation";
+import { securityLog } from "@/lib/logger";
 
 // Applying 'any' workaround for build issue in Next.js 15 RC
 export async function GET(
@@ -16,34 +15,39 @@ export async function GET(
   // Access username
   const username = context?.params?.username as string;
   
-  // 1. Validate Username Presence and Format
-  if (!username || typeof username !== 'string' || !GITHUB_USERNAME_REGEX.test(username)) {
-    console.error("Invalid or missing username format in URL:", username);
+  // Validate username with Zod
+  const validation = safeValidate(usernameParamSchema, { username });
+  
+  if (!validation.success) {
+    securityLog.warn(`[SECURITY:VALIDATION] Invalid username in URL: ${username} - ${validation.error}`);
     return NextResponse.json<UserImageGetResponse>(
-      { error: "Valid GitHub username required in URL path" },
+      { error: validation.error },
       { status: 400 }
     );
   }
 
-  // --- Username is now validated ---
-  const normalizedUsername = username.toLowerCase(); // Normalize after validation
+  // Username is validated and normalized (lowercase)
+  const normalizedUsername = validation.data.username;
 
   try {
-    console.log(`GET /api/images/${normalizedUsername} - Starting request`); // Use normalized
-    const image = await getImageByUsername(normalizedUsername); // Use normalized
+    console.log(`GET /api/images/${normalizedUsername} - Starting request`);
+    
+    // Sanitize username for database query (defense in depth)
+    const sanitizedUsername = validateAndSanitizeUsername(normalizedUsername);
+    const image = await getImageByUsername(sanitizedUsername);
 
     if (!image) {
-      console.log(`GET /api/images/${normalizedUsername} - No image found`); // Use normalized
+      console.log(`GET /api/images/${normalizedUsername} - No image found`);
       return NextResponse.json<UserImageGetResponse>(
         { error: "Image not found" },
         { status: 404 }
       );
     }
 
-    console.log(`GET /api/images/${normalizedUsername} - Returning image:`, image); // Use normalized
+    console.log(`GET /api/images/${normalizedUsername} - Returning image:`, image);
     return NextResponse.json<UserImageGetResponse>(image);
   } catch (error) {
-    console.error(`GET /api/images/${normalizedUsername} - Error:`, error); // Use normalized
+    console.error(`GET /api/images/${normalizedUsername} - Error:`, error);
     if (error instanceof Error) {
       console.error("Error details:", {
         message: error.message,
@@ -56,4 +60,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}
