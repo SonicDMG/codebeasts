@@ -1,6 +1,7 @@
 /* eslint-env node */
 /* global process */
 import { DataAPIClient } from "@datastax/astra-db-ts";
+import { debugLog } from "../logger";
 
 // Types
 export type ImageRecord = {
@@ -34,10 +35,10 @@ async function getAstraClient() {
     }
 
     try {
-      console.log("Connecting to Astra DB with endpoint:", endpoint);
+      debugLog.info("Connecting to Astra DB with endpoint:", endpoint);
       const client = new DataAPIClient(token);
       astraClient = client.db(endpoint);
-      console.log("Successfully connected to Astra DB");
+      debugLog.info("Successfully connected to Astra DB");
     } catch (error) {
       console.error("Failed to connect to Astra DB:", error);
       throw error;
@@ -60,12 +61,12 @@ async function getUserDetailsCollection() {
 // Image operations
 export async function getAllImages() {
   try {
-    console.log("getAllImages - Fetching images collection");
+    debugLog.info("getAllImages - Fetching images collection");
     const collection = await getImagesCollection();
     
-    console.log("getAllImages - Finding all records");
+    debugLog.info("getAllImages - Finding all records");
     const records = await collection.find().toArray();
-    console.log(`getAllImages - Found ${records.length} records`);
+    debugLog.info(`getAllImages - Found ${records.length} records`);
     
     return records;
   } catch (error) {
@@ -77,11 +78,11 @@ export async function getAllImages() {
 export async function getImageByUsername(username: string) {
   try {
     const normalizedUsername = username.toLowerCase();
-    console.log(`getImageByUsername - Finding image for ${normalizedUsername}`);
-    
+    debugLog.info(`getImageByUsername - Finding image for ${normalizedUsername}`);
+
     const collection = await getImagesCollection();
     const records = await collection.find({ username: normalizedUsername }).toArray();
-    console.log(`getImageByUsername - Found ${records.length} records`);
+    debugLog.info(`getImageByUsername - Found ${records.length} records`);
 
     if (!records.length) {
       return null;
@@ -98,7 +99,7 @@ export async function getImageByUsername(username: string) {
 export async function upsertImage(imageData: Omit<ImageRecord, '_id'>) {
   try {
     const normalizedUsername = imageData.username.toLowerCase();
-    console.log(`upsertImage - Processing image for ${normalizedUsername}`);
+    debugLog.info(`upsertImage - Processing image for ${normalizedUsername}`);
 
     const collection = await getImagesCollection();
     
@@ -113,18 +114,18 @@ export async function upsertImage(imageData: Omit<ImageRecord, '_id'>) {
     let result;
     if (existingRecord) {
       // Update existing record
-      console.log(`upsertImage - Updating existing record: ${existingRecord._id}`);
+      debugLog.info(`upsertImage - Updating existing record: ${existingRecord._id}`);
       result = await collection.updateOne(
         { _id: existingRecord._id },
         { $set: imageRecord }
       );
     } else {
       // Insert new record
-      console.log("upsertImage - Creating new record");
+      debugLog.info("upsertImage - Creating new record");
       result = await collection.insertOne(imageRecord);
     }
 
-    console.log("upsertImage - Operation result:", result);
+    debugLog.info("upsertImage - Operation result:", result);
     return result;
   } catch (error) {
     console.error("upsertImage - Error:", error);
@@ -134,7 +135,7 @@ export async function upsertImage(imageData: Omit<ImageRecord, '_id'>) {
 
 // User details operations - Reverted to parse body_blob
 export async function getUserDetails(username: string): Promise<UserDetailsRecord | null> {
-  console.log(`DB Service: Fetching user details for username: ${username}`);
+  debugLog.info(`DB Service: Fetching user details for username: ${username}`);
   const normalizedUsername = username.toLowerCase();
   try {
     const userDetailsCollection = await getUserDetailsCollection();
@@ -145,17 +146,17 @@ export async function getUserDetails(username: string): Promise<UserDetailsRecor
       { projection: { _id: 1, session_id: 1, body_blob: 1 } } // Fetch blob and ids
     );
 
-    console.log(`DB Service: Found record (using session_id):`, record);
+    debugLog.info(`DB Service: Found record (using session_id):`, record);
 
     if (record?.body_blob) {
       try {
         const bodyBlob = JSON.parse(record.body_blob);
-        console.log(`DB Service: Parsed body_blob:`, bodyBlob);
+        debugLog.info(`DB Service: Parsed body_blob:`, bodyBlob);
 
-        // Assuming structure is { type: 'ai', data: { content: 'lang|prompt|url|repoCount|animalSelectionJson' } } 
+        // Assuming structure is { type: 'ai', data: { content: 'lang|prompt|url|repoCount|animalSelectionJson' } }
         if (bodyBlob.type === 'ai' && bodyBlob.data?.content) {
           const content = bodyBlob.data.content;
-          console.log(`DB Service: Full content string from blob: [${content}]`);
+          debugLog.info(`DB Service: Full content string from blob: [${content}]`);
 
           // Split, ensuring we get at least 5 empty strings if parts are missing
           const parts = content.split('|').map((field: string) => field.trim());
@@ -165,10 +166,10 @@ export async function getUserDetails(username: string): Promise<UserDetailsRecor
           const rawRepoCount = parts[3] || ''; 
           const rawAnimalSelection = parts[4] || '';
           
-          // --- ADD LOGS --- 
-          console.log(`DB Service: Raw repoCount string from split: [${rawRepoCount}]`);
-          console.log(`DB Service: Raw animalSelection string from split: [${rawAnimalSelection}]`);
-          // --- END LOGS --- 
+          // --- ADD LOGS ---
+          debugLog.info(`DB Service: Raw repoCount string from split: [${rawRepoCount}]`);
+          debugLog.info(`DB Service: Raw animalSelection string from split: [${rawAnimalSelection}]`);
+          // --- END LOGS ---
           
           // Parse repoCount - Strip label first
           const repoCountString = rawRepoCount.replace(/^num_repositories:\s*/, ''); // Remove label
@@ -211,7 +212,7 @@ export async function getUserDetails(username: string): Promise<UserDetailsRecor
             repoCount, 
             animalSelection,
           };
-          console.log(`DB Service: FINAL userDetails object being returned:`, userDetails);
+          debugLog.info(`DB Service: FINAL userDetails object being returned:`, userDetails);
           return userDetails;
         } else {
           console.warn(`DB Service: body_blob found but content format unexpected for ${normalizedUsername}`);
@@ -221,7 +222,7 @@ export async function getUserDetails(username: string): Promise<UserDetailsRecor
       }
     }
     
-    console.log(`DB Service: No valid user details found or parsed for ${normalizedUsername}`);
+    debugLog.info(`DB Service: No valid user details found or parsed for ${normalizedUsername}`);
     return null;
   } catch (error) {
     console.error("DB Service: Error fetching user details:", error);

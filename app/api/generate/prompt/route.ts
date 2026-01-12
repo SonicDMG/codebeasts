@@ -23,20 +23,20 @@ async function getUserPromptDetails(normalizedUsername: string): Promise<PromptD
   const existingDetails = await getUserDetails(normalizedUsername);
 
   if (existingDetails) {
-    console.log("API Route: Using existing user details from DB for prompt base");
+    debugLog.info("API Route: Using existing user details from DB for prompt base");
     // Log raw animalSelection data for debugging
-    console.log("API Route: Raw existingDetails.animalSelection:", JSON.stringify(existingDetails.animalSelection));
-    console.log("API Route: Type of existingDetails.animalSelection:", typeof existingDetails.animalSelection, Array.isArray(existingDetails.animalSelection));
+    debugLog.info("API Route: Raw existingDetails.animalSelection:", JSON.stringify(existingDetails.animalSelection));
+    debugLog.info("API Route: Type of existingDetails.animalSelection:", typeof existingDetails.animalSelection, Array.isArray(existingDetails.animalSelection));
 
     // Clean the prompt string from the DB
     let cleanedBasePrompt = existingDetails.prompt;
     if (cleanedBasePrompt && cleanedBasePrompt.toLowerCase().startsWith('prompt:')) {
         cleanedBasePrompt = cleanedBasePrompt.substring(7).trim();
-        console.log("API Route: Removed 'prompt:' prefix from cached prompt.");
+        debugLog.info("API Route: Removed 'prompt:' prefix from cached prompt.");
     }
-    // --- Process animalSelection from DB --- 
+    // --- Process animalSelection from DB ---
     const animals = processAnimalSelection(existingDetails.animalSelection);
-    console.log("API Route: Processed animal selection array:", animals);
+    debugLog.info("API Route: Processed animal selection array:", animals);
     // --- End processing animalSelection ---
 
     return {
@@ -50,7 +50,7 @@ async function getUserPromptDetails(normalizedUsername: string): Promise<PromptD
   }
 
   // Use shared Langflow integration
-  console.log("API Route: Calling Langflow for prompt base");
+  debugLog.info("API Route: Calling Langflow for prompt base");
   const langflowDetails = await fetchLangflowPrompt(normalizedUsername);
   // Clean the languages and githubUrl using existing utils
   return {
@@ -62,7 +62,7 @@ async function getUserPromptDetails(normalizedUsername: string): Promise<PromptD
 }
 
 export async function POST(request: Request) {
-  console.log("API Route: POST function entered.");
+  debugLog.info("API Route: POST function entered.");
   
   // 0. Rate Limiting Check
   const clientIp = getClientIp(request);
@@ -100,10 +100,10 @@ export async function POST(request: Request) {
   // 1. Parse Request
   try {
     const contentType = request.headers.get('content-type');
-    console.log("API Route: Content-Type:", contentType);
+    debugLog.info("API Route: Content-Type:", contentType);
 
     if (contentType?.includes('multipart/form-data')) {
-      console.log("API Route: Processing FormData...");
+      debugLog.info("API Route: Processing FormData...");
       const formData = await request.formData();
       username = formData.get('username') as string | undefined;
       emotion = formData.get('emotion') as string | undefined;
@@ -148,10 +148,10 @@ export async function POST(request: Request) {
         processedImageDataUri = bufferToDataURI(imageBuffer, originalImageMimeType);
         securityLog.info(`[SECURITY:FILE_UPLOAD] PROCESSING COMPLETE - IP: ${clientIp}, Data URI length: ${processedImageDataUri?.length}`);
       } else {
-        console.log("API Route: No valid image file found in FormData.");
+        debugLog.info("API Route: No valid image file found in FormData.");
       }
     } else if (contentType?.includes('application/json')) {
-      console.log("API Route: Processing JSON...");
+      debugLog.info("API Route: Processing JSON...");
       const body = await request.json();
       username = body.username;
       emotion = body.emotion;
@@ -184,12 +184,12 @@ export async function POST(request: Request) {
 
   // Sanitize username for database operations (defense in depth)
   const normalizedUsername = validateAndSanitizeUsername(validatedUsername);
-  console.log("API Route: Validated and sanitized username:", normalizedUsername);
+  debugLog.info("API Route: Validated and sanitized username:", normalizedUsername);
   securityLog.info(`[SECURITY:VALIDATION] Input validation passed - Username: ${normalizedUsername}, Emotion: ${validatedEmotion}, IP: ${clientIp}`);
 
   // 3. Process Request (Analyze Image if provided, then Txt2Img)
   try {
-    console.log("API Route: Starting generation processing...");
+    debugLog.info("API Route: Starting generation processing...");
     let promptDetails: PromptDetails | null = null;
     let finalPrompt: string;
     let imageResult: { imageUrl: string; success: boolean };
@@ -198,19 +198,19 @@ export async function POST(request: Request) {
 
     // --- Image Analysis Step (if image provided) ---
     if (imageProvided && processedImageDataUri) {
-        console.log("API Route: Attempting image analysis...");
+        debugLog.info("API Route: Attempting image analysis...");
         imageAnalysisDescription = await analyzeImageWithOpenAI(processedImageDataUri);
         // Log analysis result but don't set promptSourceType here yet
-        console.log("API Route: Image analysis completed (result:", imageAnalysisDescription ? "Success" : "Failed/Skipped", ")"); 
+        debugLog.info("API Route: Image analysis completed (result:", imageAnalysisDescription ? "Success" : "Failed/Skipped", ")");
         if (!imageAnalysisDescription) {
-             console.warn("API Route: Analysis failed/skipped, proceeding without feature injection in prompt.");
+             debugLog.warn("API Route: Analysis failed/skipped, proceeding without feature injection in prompt.");
         }
     }
     
-    // --- Get Base Prompt Details (Always needed) --- 
-    console.log("API Route: Attempting to get user prompt details...");
+    // --- Get Base Prompt Details (Always needed) ---
+    debugLog.info("API Route: Attempting to get user prompt details...");
     promptDetails = await getUserPromptDetails(normalizedUsername);
-    console.log("API Route: Got user prompt details. Source:", promptDetails.source);
+    debugLog.info("API Route: Got user prompt details. Source:", promptDetails.source);
     promptSourceType = promptDetails.source; // Start with DB/Langflow source
 
     // --- Build Final Prompt & Determine Generation Type --- 
@@ -238,8 +238,8 @@ export async function POST(request: Request) {
         }
         promptSourceType = 'image_analysis'; 
     } else {
-        // --- Build prompt using ONLY DB/Langflow description (No image analysis) --- 
-        console.log("API Route: Building prompt from DB/Langflow base prompt (no analysis used).");
+        // --- Build prompt using ONLY DB/Langflow description (No image analysis) ---
+        debugLog.info("API Route: Building prompt from DB/Langflow base prompt (no analysis used).");
         if (emotion === "Action Figure") {
             // Use the original base prompt (chimera description) directly
             finalPrompt = buildActionFigurePrompt(
@@ -258,20 +258,20 @@ export async function POST(request: Request) {
 
     debugLog.info("API Route: Final prompt for EverArt Txt2Img:", finalPrompt);
 
-    // --- Generate Image (Always Txt2Img now) --- 
-    console.log("API Route: Attempting Txt2Img generation...");
+    // --- Generate Image (Always Txt2Img now) ---
+    debugLog.info("API Route: Attempting Txt2Img generation...");
     imageResult = await generateImage(finalPrompt, 'txt2img', {}, FALLBACK_IMAGE_URL);
 
     // --- Save Generation Result to DB --- 
     if (imageResult.success) {
         try {
-            console.log(`API Route: Upserting image for ${normalizedUsername}`);
+            debugLog.info(`API Route: Upserting image for ${normalizedUsername}`);
             await upsertImage({
                 username: normalizedUsername,
                 image_url: imageResult.imageUrl,
                 created_at: new Date().toISOString()
             });
-            console.log(`API Route: Upsert successful for ${normalizedUsername}`);
+            debugLog.info(`API Route: Upsert successful for ${normalizedUsername}`);
         } catch (dbError) {
             console.error(`API Route: Failed to upsert image for ${normalizedUsername}:`, dbError);
         }
